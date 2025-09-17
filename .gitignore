@@ -42,5 +42,7 @@ next-env.d.ts
 
 
 # my Branch
-auth
+socialAuth
+LoginForm.tsx
+SignupForm.tsx
 lottie
