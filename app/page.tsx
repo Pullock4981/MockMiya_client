@@ -1,12 +1,12 @@
-import PricingSection from "./components/PricingSection";
-import TestimonialSection from "./components/TestimonialSection";
+import Subscription from "./components/Subscription";
+import Testimonials from "./components/Testimonials";
 
 
 export default function Home() {
   return (
     <>
-      <TestimonialSection />
-      {/* <PricingSection /> */}
+      <Subscription />
+      <Testimonials />
     </>
   );
 }
