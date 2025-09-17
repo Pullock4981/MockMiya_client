@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   --background: #ffffff;
@@ -24,3 +24,23 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+
+/* Auth background with smooth multi-layer gradient */
+.auth-bg {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+
+  background:
+    radial-gradient(circle at top left, #161A19 0%, #1A2722 50%, #263732 100%),
+    radial-gradient(circle at top right, #161A19 0%, #1A2722 50%, #263732 100%),
+    radial-gradient(circle at bottom left, #161A19 0%, #1A2722 50%, #263732 100%),
+    radial-gradient(circle at bottom right, #161A19 0%, #1A2722 50%, #263732 100%);
+    
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: top left, top right, bottom left, bottom right;
+}
+
