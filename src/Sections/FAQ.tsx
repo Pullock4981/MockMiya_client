@@ -18,8 +18,7 @@ const faqs = [
       "Our resume builder is designed for multiple developer roles and ensures ATS compatibility.",
   },
   {
-    question:
-      "How accurate is the AI feedback compared to human reviewers?",
+    question: "How accurate is the AI feedback compared to human reviewers?",
     answer:
       "The AI feedback is benchmarked against expert reviewers to maintain high accuracy and relevance.",
   },
@@ -32,21 +31,19 @@ const faqs = [
 
 const FAQ = () => {
   return (
-    <section style={{
-        background: "radial-gradient(125% 125% at 50% 100%, #000000 40%, #010133 100%)",
-      }}>
-        <div className="px-4 sm:px-6 lg:px-8 py-16 max-w-3xl mx-auto text-center">
+    <div className="px-4 sm:px-6 lg:px-8 py-16 max-w-3xl mx-auto text-center">
+
       {/* Header */}
       <div className="flex flex-col items-center">
-        <div className="w-10 h-10 flex items-center justify-center rounded-full bg-green-600 text-white mb-4">
-          ?
-        </div>
-        <h2 className="text-3xl sm:text-4xl font-bold text-white">
-          Frequently Asked
-          <span className="text-green-500"> Questions</span>
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
+          Frequently Asked{" "}
+          <span className="bg-gradient-to-r from-green-400 to-green-600 dark:from-green-400 dark:to-green-600 bg-clip-text text-transparent">
+            Questions
+          </span>
         </h2>
         <p className="mt-4 text-gray-400 max-w-xl">
-          Everything you need to know about MockMiya and how it can accelerate your tech career
+          Everything you need to know about MockMiya and how it can accelerate
+          your tech career
         </p>
       </div>
 
@@ -55,15 +52,17 @@ const FAQ = () => {
         {faqs.map((faq, index) => (
           <details
             key={index}
-            className="group rounded-lg p-4 bg-gray-900 transition"
+            className="group rounded-lg p-4 bg-[#161c1f] border border-gray-800 transition hover:bg-gradient-to-r hover:from-green-500 hover:to-green-500 hover:text-white"
           >
-            <summary className="flex justify-between items-center cursor-pointer font-medium text-gray-200">
+            <summary className="flex justify-between items-center cursor-pointer font-medium text-gray-200 group-hover:text-black">
               {faq.question}
               <span className="ml-2 transition-transform group-open:rotate-180">
                 ▼
               </span>
             </summary>
-            <p className="mt-3 text-gray-400">{faq.answer}</p>
+            <p className="mt-3 text-gray-400 font-medium group-hover:text-black">
+              {faq.answer}
+            </p>
           </details>
         ))}
       </div>
@@ -71,12 +70,11 @@ const FAQ = () => {
       {/* Support Section */}
       <div className="mt-12 text-center">
         <p className="text-gray-400">Still have questions?</p>
-        <button className="mt-3 px-6 py-2 rounded-full bg-green-600 text-white font-medium hover:bg-green-700 transition">
+        <button className="mt-3 px-6 py-2 bg-gradient-to-r from-green-400 to-green-600 dark:from-green-400 dark:to-green-400 rounded-lg font-semibold text-black transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95">
           Contact our support team
         </button>
       </div>
     </div>
-    </section>
   );
 };
 

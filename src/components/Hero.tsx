@@ -2,10 +2,12 @@
 import React from "react";
 import heroImage from "../../public/hero.jpg";
 import Image from "next/image";
+import { FaArrowRight } from "react-icons/fa";
+import { BsCaretRight } from "react-icons/bs";
 
 // Dot icon
 const DotIcon = () => (
-  <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg className="text-green-500" width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="4" cy="4" r="4" fill="currentColor" />
   </svg>
 );
@@ -14,10 +16,11 @@ const DotIcon = () => (
 const CoderProfileCard = () => (
   <div className="w-full mx-auto shadow-lg rounded-2xl overflow-hidden">
     <Image className="rounded-2xl w-full h-auto object-cover" src={heroImage} alt="Coder" />
+
     {/* Top gradient border */}
     <div className="flex flex-row">
-      <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-pink-500 to-violet-600"></div>
-      <div className="h-[2px] w-full bg-gradient-to-r from-violet-600 to-transparent"></div>
+      <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-green-500 to-green-700"></div>
+      <div className="h-[2px] w-full bg-gradient-to-r from-green-700 to-transparent"></div>
     </div>
   </div>
 );
@@ -25,19 +28,6 @@ const CoderProfileCard = () => (
 // Hero Component
 const Hero = () => (
   <div className="relative min-h-screen w-full flex items-center justify-center font-sans px-4 sm:px-6 lg:px-8 py-8">
-    {/* Backgrounds */}
-    <div
-      className="absolute inset-0 z-0 dark:hidden"
-      style={{
-        background: "radial-gradient(125% 125% at 50% 100%, #ffffff 40%, #3b82f6 100%)",
-      }}
-    />
-    <div
-      className="absolute inset-0 z-0 hidden dark:block"
-      style={{
-        background: "radial-gradient(125% 125% at 50% 100%, #000000 40%, #010133 100%)",
-      }}
-    />
 
     {/* Content */}
     <div className="container mx-auto max-w-7xl relative z-10">
@@ -52,7 +42,7 @@ const Hero = () => (
 
           <h1 className="text-5xl md:text-6xl lg:text-6xl font-bold leading-tight text-gray-900 dark:text-white">
             Master Your <br />
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-green-300 to-green-600 dark:from-green-300 dark:to-green-600 bg-clip-text text-transparent">
               Tech Interviews
             </span>
             <br />
@@ -64,49 +54,39 @@ const Hero = () => (
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-4 sm:mt-6 w-full sm:w-auto">
-            <button className="px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95">
-              Get Started Free
+            <button className="flex gap-3 justify-center items-center px-6 py-3 bg-gradient-to-r from-green-400 to-green-600 dark:from-green-400 dark:to-green-400 rounded-lg font-semibold text-black transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95">
+              Get Started Free <FaArrowRight />
             </button>
-            <button className="px-6 py-3 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95">
-              Watch Demo
+            <button className="flex gap-3 justify-center items-center px-6 py-3 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95">
+              <BsCaretRight className="w-5 h-5" />  Watch Demo
             </button>
           </div>
 
-          <div className="stats stats-horizontal gap-10 shadow">
-  <div className="">
-    <div className="stat-value">50K+</div>
-    <div className="stat-desc text-lg">Developers</div>
-  </div>
+          {/* stat */}
+          <div className="stats stats-horizontal gap-10 shadow text-white">
+            <div className="">
+              <div className="stat-value">50K+</div>
+              <div className="stat-desc text-lg">Developers</div>
+            </div>
 
-  <div className="">
-    <div className="stat-value">95%</div>
-    <div className="stat-desc text-lg">Success Rate</div>
-  </div>
+            <div className="">
+              <div className="stat-value">95%</div>
+              <div className="stat-desc text-lg">Success Rate</div>
+            </div>
 
-  <div className="">
-    <div className="stat-value">24/7</div>
-    <div className="stat-desc text-lg">AI Support</div>
-  </div>
-</div>
+            <div className="">
+              <div className="stat-value">24/7</div>
+              <div className="stat-desc text-lg">AI Support</div>
+            </div>
+          </div>
         </div>
-
-
-
-
-
-
-
-
 
         {/* Image Column */}
         <div className="order-2 lg:order-2 animate-fade-in-up mt-6 lg:mt-0">
           <CoderProfileCard />
         </div>
-
       </div>
     </div>
-
-    
   </div>
 );
 
