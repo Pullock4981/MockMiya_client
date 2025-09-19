@@ -1,7 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 
-// BlogPost type
 interface BlogPost {
   id: number;
   category: string;
@@ -12,7 +12,6 @@ interface BlogPost {
   imageAlt: string;
 }
 
-// Blog posts array
 const blogPosts: BlogPost[] = [
   {
     id: 1,
@@ -70,17 +69,31 @@ const blogPosts: BlogPost[] = [
   },
 ];
 
-
 export default function BlogDetails({ params }: { params: { id: string } }) {
   const post = blogPosts.find((p) => p.id === Number(params.id));
+  if (!post) return notFound();
 
-  if (!post) return notFound(); // 404 if invalid id
+  // Pick 3 recommended posts (excluding current one)
+  const recommended = blogPosts
+    .filter((p) => p.id !== post.id)
+    .slice(0, 3);
 
   return (
     <div className="bg-[#0b0c0f] text-gray-200 min-h-screen font-[Poppins]">
       <main className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto">
-          <article className="bg-[#121417] p-6 rounded-3xl shadow-lg border border-[#1f2129] md:p-10 lg:p-12">
+        {/* Hero Section */}
+        <div className="flex flex-row items-center gap-10 bg-[#121417] p-6 md:p-12 rounded-3xl shadow-lg border border-[#1f2129]">
+          {/* Image Left */}
+          <div className="w-1/2">
+            <img
+              src={post.imageUrl}
+              alt={post.imageAlt}
+              className="w-full h-[400px] object-cover rounded-2xl"
+            />
+          </div>
+
+          {/* Info Right */}
+          <div className="w-1/2">
             <span className="text-xs font-semibold uppercase text-gray-500 tracking-widest">
               {post.category}
             </span>
@@ -88,27 +101,57 @@ export default function BlogDetails({ params }: { params: { id: string } }) {
               {post.title}
             </h1>
             <p className="text-gray-400 text-sm mt-2">{post.date}</p>
-
-            <img
-              src={post.imageUrl}
-              alt={post.imageAlt}
-              className="w-full h-auto rounded-2xl my-8 object-cover"
-            />
-
-            <p className="text-gray-300 text-base leading-relaxed whitespace-pre-wrap">
+            <p className="text-gray-300 text-base leading-relaxed mt-6 whitespace-pre-wrap">
               {post.summary}
             </p>
-          </article>
-
-          {/* Back to Blog button */}
-          <div className="mt-12 text-center">
-            <a
-              href="/blog"
-              className="inline-block px-6 py-3 bg-green-500 text-black font-semibold rounded-xl shadow hover:bg-green-400 transition"
-            >
-              ← Back to Blog
-            </a>
           </div>
+        </div>
+
+        {/* Recommended Section */}
+        <div className="mt-16">
+          <h2 className="text-2xl font-bold mb-8">Recommended for you</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {recommended.map((rec) => (
+              <div
+                key={rec.id}
+                className="bg-[#121417] border border-[#1f2129] rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition"
+              >
+                <img
+                  src={rec.imageUrl}
+                  alt={rec.imageAlt}
+                  className="w-full h-40 object-cover"
+                />
+                <div className="p-4">
+                  <span className="text-xs font-semibold uppercase text-gray-500">
+                    {rec.category}
+                  </span>
+                  <h3 className="text-lg font-bold mt-2">{rec.title}</h3>
+                  <p className="text-gray-400 text-sm mt-2 line-clamp-3">
+                    {rec.summary}
+                  </p>
+                  <div className="mt-4 flex items-center justify-between">
+                    <Link
+                      href={`/blog/${rec.id}`}
+                      className="text-green-400 font-semibold hover:underline text-sm"
+                    >
+                      Read More →
+                    </Link>
+                    <span className="text-gray-500 text-xs">{rec.date}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Back to Blog */}
+        <div className="mt-12 text-center">
+          <a
+            href="/blog"
+            className="inline-block px-6 py-3 bg-green-500 text-black font-semibold rounded-xl shadow hover:bg-green-400 transition"
+          >
+            ← Back to Blog
+          </a>
         </div>
       </main>
     </div>
