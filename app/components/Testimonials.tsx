@@ -112,7 +112,7 @@ const Testimonials: FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="mt-16 grid grid-cols-1 md:grid-cols-3 text-center gap-10">
+      <div className="mt-16 grid grid-cols-1 md:grid-cols-3 text-center gap-2">
         {stats.map((s, i) => (
           <div key={i}>
             <p className="text-green-400 text-3xl font-bold">{s.value}</p>
