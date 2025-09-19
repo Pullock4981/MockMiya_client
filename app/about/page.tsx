@@ -2,6 +2,7 @@ import React from "react";
 import Hero from "./components/Hero";
 import WhyWhatHow from "./components/WhyWhatHow";
 import MissionVisionValues from "./components/MissionVisionValues";
+import Features from "./components/Features";
 
 export default function AboutPage() {
   return (
@@ -13,6 +14,7 @@ export default function AboutPage() {
               <Hero></Hero>
               <WhyWhatHow></WhyWhatHow>
               <MissionVisionValues></MissionVisionValues>
+              <Features></Features>
           </div>
       <div className="max-w-4xl text-center space-y-8">
         {/* Title */}
