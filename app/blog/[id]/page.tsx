@@ -1,6 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Head from "next/head";
 
 interface BlogPost {
   id: number;
@@ -77,6 +78,19 @@ export default function BlogDetails({ params }: { params: { id: string } }) {
   const recommended = blogPosts.filter((p) => p.id !== post.id).slice(0, 3);
 
   return (
+    <><Head>
+        <title>{post.title}</title>
+        <meta
+          name="description"
+          content="Stay updated with the latest in career tips, interview preparation, technical skills, and AI advancements with MockMiya Blog."
+        />
+        <meta property="og:title" content="MockMiya Blog" />
+        <meta
+          property="og:description"
+          content="Stay updated with the latest in career tips, interview preparation, technical skills, and AI advancements with MockMiya Blog."
+        />
+        <meta property="og:type" content="website" />
+      </Head>
     <div className="bg-[#0b0c0f] text-gray-200 min-h-screen font-[Poppins]">
       <main className="container mx-auto px-4 py-16 max-w-5xl">
         {/* Blog Details */}
@@ -155,5 +169,6 @@ export default function BlogDetails({ params }: { params: { id: string } }) {
         </div>
       </main>
     </div>
+    </>
   );
 }

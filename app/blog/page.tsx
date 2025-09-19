@@ -1,5 +1,7 @@
+import Head from "next/head";
 import Link from "next/link";
 import React from "react";
+import { Helmet } from "react-helmet";
 
 interface BlogPost {
   id: number;
@@ -74,38 +76,66 @@ const blogPosts: BlogPost[] = [
   },
 ];
 
+
+export const metadata = {
+  title: "MockMiya Blog - Career Tips, Tech & AI",
+  description:
+    "Stay updated with the latest in career tips, interview preparation, technical skills, and AI advancements with MockMiya Blog.",
+  openGraph: {
+    title: "MockMiya Blog",
+    description:
+      "Stay updated with the latest in career tips, interview preparation, technical skills, and AI advancements with MockMiya Blog.",
+    type: "website",
+  },
+};
 const Blog = () => {
   return (
+    <>
+  <Head>
+        <title>MockMiya Blog - Career Tips, Tech & AI</title>
+        <meta
+          name="description"
+          content="Stay updated with the latest in career tips, interview preparation, technical skills, and AI advancements with MockMiya Blog."
+        />
+        <meta property="og:title" content="MockMiya Blog" />
+        <meta
+          property="og:description"
+          content="Stay updated with the latest in career tips, interview preparation, technical skills, and AI advancements with MockMiya Blog."
+        />
+        <meta property="og:type" content="website" />
+      </Head>
     <div className="bg-[#0b0c0f] text-gray-200 min-h-screen font-[Poppins]">
+      
       <main className="container mx-auto px-4 py-16">
         {/* Blog Header */}
-       <header className="text-center mb-20">
-  <div className="relative inline-block">
+      <header className="text-center mb-20">
+  <div className="relative w-full md:w-auto">
     {/* Banner Background */}
-    <div className="bg-gradient-to-r from-green-500 to-blue-500 px-16 py-10 rounded-2xl shadow-2xl relative z-10">
-      <h1 className="text-5xl md:text-6xl font-extrabold tracking-widest text-white uppercase drop-shadow-lg">
+    <div className="bg-gradient-to-r from-green-500 to-blue-500 px-6 md:px-16 py-6 md:py-10 rounded-none md:rounded-2xl shadow-2xl relative z-10">
+      <h1 className="text-3xl md:text-6xl font-extrabold tracking-widest text-white uppercase drop-shadow-lg">
         MockMiya <span className="text-yellow-300">Blog</span>
       </h1>
-      <p className="text-base md:text-2xl text-gray-100 mt-4 font-semibold tracking-wide">
+      <p className="text-sm md:text-2xl text-gray-100 mt-3 md:mt-4 font-medium md:font-semibold tracking-wide">
         Stay updated with the latest in career tips, tech trends, and AI advancements.
       </p>
     </div>
 
-    {/* Left Ribbon */}
-    <div className="absolute top-1/2 left-[-50px] -translate-y-1/2 w-0 h-0 
+    {/* Left Ribbon (hidden on small screens) */}
+    <div className="hidden md:block absolute top-1/2 left-[-50px] -translate-y-1/2 w-0 h-0 
                     border-t-[70px] border-t-transparent 
                     border-b-[70px] border-b-transparent 
                     border-r-[50px] border-r-green-700">
     </div>
 
-    {/* Right Ribbon */}
-    <div className="absolute top-1/2 right-[-50px] -translate-y-1/2 w-0 h-0 
+    {/* Right Ribbon (hidden on small screens) */}
+    <div className="hidden md:block absolute top-1/2 right-[-50px] -translate-y-1/2 w-0 h-0 
                     border-t-[70px] border-t-transparent 
                     border-b-[70px] border-b-transparent 
                     border-l-[50px] border-l-blue-700">
     </div>
   </div>
 </header>
+
 
         {/* Blog Posts as Hero Sections */}
         <section className="space-y-16">
@@ -153,6 +183,7 @@ const Blog = () => {
         </section>
       </main>
     </div>
+    </>
   );
 };
 
