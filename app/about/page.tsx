@@ -1,5 +1,6 @@
 import React from "react";
 import Hero from "./components/Hero";
+import WhyWhatHow from "./components/WhyWhatHow";
 
 export default function AboutPage() {
   return (
@@ -9,6 +10,7 @@ export default function AboutPage() {
       >
           <div>
               <Hero></Hero>
+              <WhyWhatHow></WhyWhatHow>
           </div>
       <div className="max-w-4xl text-center space-y-8">
         {/* Title */}
