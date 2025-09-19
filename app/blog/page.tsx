@@ -79,22 +79,43 @@ const Blog = () => {
     <div className="bg-[#0b0c0f] text-gray-200 min-h-screen font-[Poppins]">
       <main className="container mx-auto px-4 py-16">
         {/* Blog Header */}
-        <header className="text-center mb-16">
-          <h1 className="text-5xl font-extrabold tracking-tight">
-            MockMiya <span className="gradient-text">Blog</span>
-          </h1>
-          <p className="text-lg text-gray-400 mt-4">
-            Stay updated with the latest in career tips, tech trends, and AI
-            advancements.
-          </p>
-        </header>
+       <header className="text-center mb-16">
+  <div className="relative inline-block">
+    {/* Banner Background */}
+    <div className="bg-gradient-to-r from-green-500 to-blue-500 px-10 py-4 rounded-md shadow-lg relative z-10">
+      <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white uppercase">
+        MockMiya <span className="text-yellow-300">Blog</span>
+      </h1>
+    </div>
+
+    {/* Left Ribbon */}
+    <div className="absolute top-1/2 left-[-30px] -translate-y-1/2 w-0 h-0 
+                    border-t-[30px] border-t-transparent 
+                    border-b-[30px] border-b-transparent 
+                    border-r-[30px] border-r-green-600">
+    </div>
+
+    {/* Right Ribbon */}
+    <div className="absolute top-1/2 right-[-30px] -translate-y-1/2 w-0 h-0 
+                    border-t-[30px] border-t-transparent 
+                    border-b-[30px] border-b-transparent 
+                    border-l-[30px] border-l-blue-600">
+    </div>
+  </div>
+
+  {/* Subtitle */}
+  <p className="text-lg text-gray-400 mt-6">
+    Stay updated with the latest in career tips, tech trends, and AI
+    advancements.
+  </p>
+</header>
 
         {/* Blog Posts as Hero Sections */}
         <section className="space-y-16">
           {blogPosts.map((post, index) => (
             <div
               key={post.id}
-              className={`flex flex-col md:flex-row lg:max-h-72 ${
+              className={`flex flex-col md:flex-row lg:max-h-80 ${
                 index % 2 === 1 ? "md:flex-row-reverse" : ""
               } items-center gap-8 bg-[#121417] rounded-3xl border border-[#1f2129] shadow-lg overflow-hidden`}
             >
@@ -112,10 +133,10 @@ const Blog = () => {
                 <span className="text-xs font-semibold uppercase text-gray-500 tracking-widest">
                   {post.category}
                 </span>
-                <h2 className="text-2xl md:text-3xl font-bold mt-2">
+                <h2 className="text-2xl md:text-3xl font-bold mt-3 mb-4 bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent hover:from-green-300 hover:to-blue-300 transition-colors duration-300">
                   {post.title}
                 </h2>
-                <p className="text-gray-400 mt-4 text-sm md:text-base leading-relaxed">
+                <p className="text-gray-400 mt-2 text-sm md:text-base leading-relaxed">
                   {post.summary}
                 </p>
                 <div className="mt-6 flex items-center justify-between">
