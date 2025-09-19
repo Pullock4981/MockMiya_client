@@ -8,7 +8,7 @@ export default function Hero() {
       </h1>
       <p className="text-lg max-w-2xl mx-auto text-gray-300">
         Your AI-powered companion for resume building and mock interviews.
-        Helping job seekers gain confidence and land their dream jobs.
+        Helping job seekers gain confidence and land their dream jobs.....
       </p>
     </section>
   );
