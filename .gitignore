@@ -43,8 +43,6 @@ next-env.d.ts
 
 # my Branch
 
-Loading.tsx
-PostCard.tsx
 Sidebar.tsx
 StateCard.tsx
 Routes
