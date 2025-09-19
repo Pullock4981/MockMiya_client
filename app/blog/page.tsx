@@ -1,7 +1,6 @@
 import Link from "next/link";
 import React from "react";
 
-// Blog post type
 interface BlogPost {
   id: number;
   category: string;
@@ -12,7 +11,6 @@ interface BlogPost {
   imageAlt: string;
 }
 
-// Blog data
 const blogPosts: BlogPost[] = [
   {
     id: 1,
@@ -91,26 +89,26 @@ const Blog = () => {
           </p>
         </header>
 
-        {/* Blog Posts as hero sections */}
+        {/* Blog Posts as Hero Sections */}
         <section className="space-y-16">
           {blogPosts.map((post, index) => (
             <div
               key={post.id}
               className={`flex flex-col md:flex-row ${
                 index % 2 === 1 ? "md:flex-row-reverse" : ""
-              } items-center gap-8 bg-[#121417] p-6 md:p-10 rounded-3xl border border-[#1f2129] shadow-lg`}
+              } items-center gap-8 bg-[#121417] rounded-3xl border border-[#1f2129] shadow-lg overflow-hidden`}
             >
-              {/* Left: Image */}
-              <div className="md:w-1/2">
+              {/* Hero Image */}
+              <div className="w-full md:w-1/2">
                 <img
-                  className="rounded-2xl w-full h-72 object-cover shadow-md"
                   src={post.imageUrl}
                   alt={post.imageAlt}
+                  className="w-full h-64 md:h-full object-cover"
                 />
               </div>
 
-              {/* Right: Info */}
-              <div className="md:w-1/2">
+              {/* Hero Content */}
+              <div className="w-full md:w-1/2 p-6 md:p-10">
                 <span className="text-xs font-semibold uppercase text-gray-500 tracking-widest">
                   {post.category}
                 </span>
