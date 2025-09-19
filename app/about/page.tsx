@@ -3,6 +3,7 @@ import Hero from "./components/Hero";
 import WhyWhatHow from "./components/WhyWhatHow";
 import MissionVisionValues from "./components/MissionVisionValues";
 import Features from "./components/Features";
+import Story from "./components/Story";
 
 export default function AboutPage() {
   return (
@@ -15,6 +16,7 @@ export default function AboutPage() {
               <WhyWhatHow></WhyWhatHow>
               <MissionVisionValues></MissionVisionValues>
               <Features></Features>
+              <Story></Story>
           </div>
       <div className="max-w-4xl text-center space-y-8">
         {/* Title */}
