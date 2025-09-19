@@ -1,8 +1,35 @@
+'use client';
+
 import { FcGoogle } from 'react-icons/fc';
+import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const GoogleAuth = () => {
-  const handleGoogleSignIn = () => {
-    console.log('Google Sign In Triggered');
+  const { googleSignIn } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await googleSignIn();
+      const user = result.user;
+
+
+      toast(`Welcome ${user.displayName || 'User'} 🎉`, {
+        position: 'top-center',
+      });
+
+      const from = searchParams.get('from') || '/dashboard';
+      router.push(from);
+    } catch (error: any) {
+      console.error('Google Sign In Error:', error);
+
+      // ❌ Error toast
+      toast.error(error.message || 'Google Sign In failed', {
+        position: 'top-center',
+      });
+    }
   };
 
   return (

@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Lottie from 'lottie-react';
-import { ArrowLeft, CircleCheck, RollerCoaster } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -38,7 +38,7 @@ export default function AuthPage() {
           <span>Back to Home</span>
         </Link>
 
-        {/* Role Selection */}
+        {/* Role Selection
         <div className="relative flex justify-around gap-5 p-2 bg-[#0f1412]/80 rounded-2xl border border-green-900/40 shadow w-full mb-4">
           <div className="flex items-center">
             <RollerCoaster className="text-green-500" size={22} />
@@ -62,7 +62,7 @@ export default function AuthPage() {
               Admin {activeRole === 'admin' && <CircleCheck size={16} className="text-green-300" />}
             </button>
           </div>
-        </div>
+        </div> */}
 
         {/* Auth Card */}
         <div className="bg-[#0f1412]/90 backdrop-blur-xl border border-green-900/50 p-8 rounded-3xl">
@@ -110,11 +110,7 @@ export default function AuthPage() {
             exit={{ opacity: 0, x: activeTab === 'signin' ? -50 : 50 }}
             transition={{ duration: 0.4 }}
           >
-            {activeTab === 'signin' ? (
-              <LoginForm role={activeRole} />
-            ) : (
-              <SignupForm role={activeRole} />
-            )}
+            {activeTab === 'signin' ? <LoginForm /> : <SignupForm />}
           </motion.div>
         </div>
       </div>

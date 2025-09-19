@@ -1,5 +1,6 @@
 // app/auth/layout.tsx
-import React from "react";
+import React from 'react';
+import { Bounce, ToastContainer } from 'react-toastify';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,6 +14,20 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       }}
     >
       {children}
+
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
     </div>
   );
 }

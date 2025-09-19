@@ -2,8 +2,13 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
+import { Eye, EyeOff } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
 import { z } from 'zod';
+import { useAuth } from './context/AuthContext';
 
 // Validation schema
 const signupSchema = z
@@ -20,21 +25,67 @@ const signupSchema = z
 
 type SignupFormData = z.infer<typeof signupSchema>;
 
-type SignupFormProps = {
-  role: 'user' | 'admin';
-};
+export default function SignupForm() {
+  const { createUser, updateUser, loading } = useAuth();
+  const router = useRouter();
 
-export default function SignupForm({ role }: SignupFormProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordValidation, setPasswordValidation] = useState({
+    hasNumber: false,
+    hasUpperCase: false,
+    hasLowerCase: false,
+    hasSpecialChar: false,
+    isLongEnough: false,
+  });
+
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
   });
 
-  const onSubmit = (data: SignupFormData) => {
-    console.log('Signup Data:', data, 'Role:', role);
+  const password = watch('password', '');
+
+  // Password validation check
+  useEffect(() => {
+    setPasswordValidation({
+      hasNumber: /\d/.test(password),
+      hasUpperCase: /[A-Z]/.test(password),
+      hasLowerCase: /[a-z]/.test(password),
+      hasSpecialChar: /[^\w\s]/.test(password),
+      isLongEnough: password.length >= 6,
+    });
+  }, [password]);
+
+  const validatePassword = (pwd: string) => {
+    return (
+      (/\d/.test(pwd) &&
+        /[A-Z]/.test(pwd) &&
+        /[a-z]/.test(pwd) &&
+        /[^\w\s]/.test(pwd) &&
+        pwd.length >= 6) ||
+      'Password does not meet complexity requirements'
+    );
+  };
+
+  const onSubmit = async (data: SignupFormData) => {
+    try {
+      const userCredential = await createUser(data.email, data.password);
+
+      if (data.name) {
+        await updateUser({ displayName: data.name });
+      }
+
+      toast('🦄 Account created successfully!');
+      router.push('/dashboard');
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || 'Failed to create account');
+    }
   };
 
   const inputClass =
@@ -105,38 +156,65 @@ export default function SignupForm({ role }: SignupFormProps) {
         </div>
 
         {/* Password */}
-        <div className="relative">
-          <input
-            type="password"
-            {...register('password')}
-            placeholder=" "
-            className={`${inputClass} ${errors.password ? 'border-red-500 border-2' : ''}`}
-            autoComplete="new-password"
-          />
-          <label
-            className={`
-              absolute left-4 top-2 text-green-400 text-sm transition-all duration-300
-              peer-placeholder-shown:top-5 peer-placeholder-shown:text-green-200 peer-placeholder-shown:text-base
-              peer-focus:top-1 peer-focus:text-green-400 peer-focus:text-sm pointer-events-none
-            `}
-          >
-            Password
-          </label>
+        <div>
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              {...register('password', { validate: validatePassword })}
+              placeholder=" "
+              className={`${inputClass} pr-10 ${errors.password ? 'border-red-500 border-2' : ''}`}
+              autoComplete="new-password"
+            />
+            <label
+              className={`
+      absolute left-4 top-2 text-green-400 text-sm transition-all duration-300
+      peer-placeholder-shown:top-5 peer-placeholder-shown:text-green-200 peer-placeholder-shown:text-base
+      peer-focus:top-1 peer-focus:text-green-400 peer-focus:text-sm pointer-events-none
+    `}
+            >
+              Password
+            </label>
+            <div
+              className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-green-300"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </div>
+          </div>
+
           {errors.password && (
             <motion.p
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-red-500 text-sm mt-1"
             >
-              {errors.password.message}
+              {errors.password.message as string}
             </motion.p>
           )}
+          {/* Password Strength */}
+          <ul className="text-xs text-green-400 mt-1 pl-4 list-disc">
+            <li className={passwordValidation.isLongEnough ? 'text-green-400' : 'text-red-500'}>
+              At least 6 characters
+            </li>
+            <li className={passwordValidation.hasUpperCase ? 'text-green-400' : 'text-red-500'}>
+              At least 1 uppercase letter
+            </li>
+            <li className={passwordValidation.hasLowerCase ? 'text-green-400' : 'text-red-500'}>
+              At least 1 lowercase letter
+            </li>
+            <li className={passwordValidation.hasNumber ? 'text-green-400' : 'text-red-500'}>
+              At least 1 number
+            </li>
+            <li className={passwordValidation.hasSpecialChar ? 'text-green-400' : 'text-red-500'}>
+              At least 1 special character
+            </li>
+          </ul>
         </div>
 
         {/* Confirm Password */}
         <div className="relative">
           <input
-            type="password"
+            type={showConfirmPassword ? 'text' : 'password'}
             {...register('confirmPassword')}
             placeholder=" "
             className={`${inputClass} ${errors.confirmPassword ? 'border-red-500 border-2' : ''}`}
@@ -151,6 +229,12 @@ export default function SignupForm({ role }: SignupFormProps) {
           >
             Confirm Password
           </label>
+          <div
+            className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-green-300"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          >
+            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </div>
           {errors.confirmPassword && (
             <motion.p
               initial={{ opacity: 0, y: -5 }}
@@ -162,12 +246,14 @@ export default function SignupForm({ role }: SignupFormProps) {
           )}
         </div>
 
+        {/* Submit Button */}
         <motion.input
           type="submit"
-          value={`Sign Up as ${role}`}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          className="w-full rounded-xl py-3 text-green-50 font-bold uppercase transition-all duration-300 shadow-[0_0_5px_rgba(0,255,100,0.5)] hover:shadow-[0_0_10px_rgba(0,255,100,0.7)] cursor-pointer"
+          value={loading ? 'Signing up...' : 'Sign Up'}
+          disabled={loading}
+          whileHover={{ scale: loading ? 1 : 1.03 }}
+          whileTap={{ scale: loading ? 1 : 0.97 }}
+          className="w-full rounded-xl py-3 text-green-50 font-bold uppercase transition-all duration-300 shadow-[0_0_5px_rgba(0,255,100,0.5)] hover:shadow-[0_0_10px_rgba(0,255,100,0.7)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         />
       </form>
 

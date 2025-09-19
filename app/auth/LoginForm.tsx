@@ -2,8 +2,13 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
+import { Eye, EyeOff } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { useAuth } from './context/AuthContext';
+import { toast } from 'react-toastify';
 
 // Validation schema
 const loginSchema = z.object({
@@ -13,11 +18,11 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-type LoginFormProps = {
-  role: 'user' | 'admin';
-};
+export default function LoginForm() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { signInUser, loading } = useAuth();
 
-export default function LoginForm({ role }: LoginFormProps) {
   const {
     register,
     handleSubmit,
@@ -26,9 +31,28 @@ export default function LoginForm({ role }: LoginFormProps) {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = (data: LoginFormData) => {
-    console.log('Login Data:', data, 'Role:', role);
-  };
+  const [showPassword, setShowPassword] = useState(false);
+
+const onSubmit = async (data: LoginFormData) => {
+  try {
+    const from = searchParams.get('from') || '/dashboard';
+    const userCredential = await signInUser(data.email, data.password);
+
+    if (userCredential.user) {
+
+      toast(`Welcome ${userCredential.user.displayName || 'User'} 🎉`);
+
+      router.push(from);
+    }
+  } catch (error: any) {
+    console.error('Login Error:', error);
+
+    toast.error(error.message || 'Login failed. Please try again.', {
+      position: 'top-center',
+    });
+  }
+};
+
 
   const inputClass =
     'peer w-full rounded-xl bg-[#1a231f]/90 px-4 pt-5 pb-2 text-green-200 outline-none transition-all duration-300 border border-green-800/50';
@@ -68,10 +92,10 @@ export default function LoginForm({ role }: LoginFormProps) {
         {/* Password */}
         <div className="relative">
           <input
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             {...register('password')}
             placeholder=" "
-            className={`${inputClass} ${errors.password ? 'border-red-500 border-2' : ''}`}
+            className={`${inputClass} pr-10 ${errors.password ? 'border-red-500 border-2' : ''}`} // 👈 pr-10 for icon space
             autoComplete="current-password"
           />
           <label
@@ -83,6 +107,13 @@ export default function LoginForm({ role }: LoginFormProps) {
           >
             Password
           </label>
+          {/* Eye Icon */}
+          <div
+            className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-green-300"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </div>
           {errors.password && (
             <motion.p
               initial={{ opacity: 0, y: -5 }}
@@ -97,10 +128,16 @@ export default function LoginForm({ role }: LoginFormProps) {
         {/* Submit Button */}
         <motion.input
           type="submit"
-          value={`Signin as ${role}`}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          className="w-full rounded-xl py-3 text-green-50 font-bold uppercase transition-all duration-300 shadow-[0_0_5px_rgba(0,255,100,0.5)] hover:shadow-[0_0_10px_rgba(0,255,100,0.7)] cursor-pointer"
+          value={loading ? 'Signing in...' : 'Signin'}
+          whileHover={{ scale: loading ? 1 : 1.03 }}
+          whileTap={{ scale: loading ? 1 : 0.97 }}
+          disabled={loading}
+          className="w-full rounded-xl py-3 text-green-50 font-bold uppercase transition-all duration-300 
+             shadow-[0_0_5px_rgba(0,255,100,0.5)] 
+             hover:shadow-[0_0_10px_rgba(0,255,100,0.7)] 
+             cursor-pointer 
+             disabled:opacity-50 
+             disabled:cursor-not-allowed"
         />
       </form>
 
