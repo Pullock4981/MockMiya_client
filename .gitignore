@@ -44,3 +44,8 @@ next-env.d.ts
 # my Branch
 dashboard
 components
+Loading.tsx
+PostCard.tsx
+Sidebar.tsx
+StateCard.tsx
+ThemeSwitch.tsx
