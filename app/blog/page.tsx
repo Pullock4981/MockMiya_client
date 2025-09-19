@@ -94,7 +94,7 @@ const Blog = () => {
           {blogPosts.map((post, index) => (
             <div
               key={post.id}
-              className={`flex flex-col md:flex-row ${
+              className={`flex flex-col md:flex-row lg:max-h-72 ${
                 index % 2 === 1 ? "md:flex-row-reverse" : ""
               } items-center gap-8 bg-[#121417] rounded-3xl border border-[#1f2129] shadow-lg overflow-hidden`}
             >
