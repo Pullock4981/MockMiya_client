@@ -7,7 +7,7 @@ export default function Hero() {
         About <span className="text-[#00FF84]">MockMiya</span>
       </h1>
       <p className="text-lg max-w-2xl mx-auto text-gray-300">
-        Your AI-powered companion for resume building and mock interviews.
+        Your AI-powered companion for resume building and mock interviews...
         Helping job seekers gain confidence and land their dream jobs.....
       </p>
     </section>
