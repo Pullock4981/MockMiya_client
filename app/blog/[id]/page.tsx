@@ -73,39 +73,39 @@ export default function BlogDetails({ params }: { params: { id: string } }) {
   const post = blogPosts.find((p) => p.id === Number(params.id));
   if (!post) return notFound();
 
-  // Pick 3 recommended posts (excluding current one)
-  const recommended = blogPosts
-    .filter((p) => p.id !== post.id)
-    .slice(0, 3);
+  // Recommended posts (excluding current one)
+  const recommended = blogPosts.filter((p) => p.id !== post.id).slice(0, 3);
 
   return (
     <div className="bg-[#0b0c0f] text-gray-200 min-h-screen font-[Poppins]">
-      <main className="container mx-auto px-4 py-16">
-        {/* Hero Section */}
-        <div className="flex flex-row items-center gap-10 bg-[#121417] p-6 md:p-12 rounded-3xl shadow-lg border border-[#1f2129]">
-          {/* Image Left */}
-          <div className="w-1/2">
-            <img
-              src={post.imageUrl}
-              alt={post.imageAlt}
-              className="w-full h-[400px] object-cover rounded-2xl"
-            />
-          </div>
+      <main className="container mx-auto px-4 py-16 max-w-5xl">
+        {/* Blog Details */}
+        <article className="bg-[#121417] p-6 md:p-10 lg:p-12 rounded-3xl shadow-lg border border-[#1f2129]">
+          {/* Category */}
+          <span className="text-xs font-semibold uppercase text-green-400 tracking-widest">
+            {post.category}
+          </span>
 
-          {/* Info Right */}
-          <div className="w-1/2">
-            <span className="text-xs font-semibold uppercase text-gray-500 tracking-widest">
-              {post.category}
-            </span>
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-2">
-              {post.title}
-            </h1>
-            <p className="text-gray-400 text-sm mt-2">{post.date}</p>
-            <p className="text-gray-300 text-base leading-relaxed mt-6 whitespace-pre-wrap">
-              {post.summary}
-            </p>
-          </div>
-        </div>
+          {/* Image */}
+          <img
+            src={post.imageUrl}
+            alt={post.imageAlt}
+            className="w-full h-[400px] object-cover rounded-2xl my-6"
+          />
+
+          {/* Date */}
+          <p className="text-gray-400 text-sm">{post.date}</p>
+
+          {/* Title */}
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-4">
+            {post.title}
+          </h1>
+
+          {/* Details */}
+          <p className="text-gray-300 text-base leading-relaxed mt-6 whitespace-pre-wrap">
+            {post.summary}
+          </p>
+        </article>
 
         {/* Recommended Section */}
         <div className="mt-16">
