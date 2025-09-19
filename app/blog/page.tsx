@@ -79,35 +79,32 @@ const Blog = () => {
     <div className="bg-[#0b0c0f] text-gray-200 min-h-screen font-[Poppins]">
       <main className="container mx-auto px-4 py-16">
         {/* Blog Header */}
-       <header className="text-center mb-16">
+       <header className="text-center mb-20">
   <div className="relative inline-block">
     {/* Banner Background */}
-    <div className="bg-gradient-to-r from-green-500 to-blue-500 px-10 py-4 rounded-md shadow-lg relative z-10">
-      <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white uppercase">
+    <div className="bg-gradient-to-r from-green-500 to-blue-500 px-16 py-10 rounded-2xl shadow-2xl relative z-10">
+      <h1 className="text-5xl md:text-6xl font-extrabold tracking-widest text-white uppercase drop-shadow-lg">
         MockMiya <span className="text-yellow-300">Blog</span>
       </h1>
+      <p className="text-base md:text-2xl text-gray-100 mt-4 font-semibold tracking-wide">
+        Stay updated with the latest in career tips, tech trends, and AI advancements.
+      </p>
     </div>
 
     {/* Left Ribbon */}
-    <div className="absolute top-1/2 left-[-30px] -translate-y-1/2 w-0 h-0 
-                    border-t-[30px] border-t-transparent 
-                    border-b-[30px] border-b-transparent 
-                    border-r-[30px] border-r-green-600">
+    <div className="absolute top-1/2 left-[-50px] -translate-y-1/2 w-0 h-0 
+                    border-t-[70px] border-t-transparent 
+                    border-b-[70px] border-b-transparent 
+                    border-r-[50px] border-r-green-700">
     </div>
 
     {/* Right Ribbon */}
-    <div className="absolute top-1/2 right-[-30px] -translate-y-1/2 w-0 h-0 
-                    border-t-[30px] border-t-transparent 
-                    border-b-[30px] border-b-transparent 
-                    border-l-[30px] border-l-blue-600">
+    <div className="absolute top-1/2 right-[-50px] -translate-y-1/2 w-0 h-0 
+                    border-t-[70px] border-t-transparent 
+                    border-b-[70px] border-b-transparent 
+                    border-l-[50px] border-l-blue-700">
     </div>
   </div>
-
-  {/* Subtitle */}
-  <p className="text-lg text-gray-400 mt-6">
-    Stay updated with the latest in career tips, tech trends, and AI
-    advancements.
-  </p>
 </header>
 
         {/* Blog Posts as Hero Sections */}
