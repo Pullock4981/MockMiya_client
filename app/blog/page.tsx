@@ -1,8 +1,8 @@
-import Head from "next/head";
+import Head from "next/head"; // ✅ Next.js way of adding SEO tags (for pages router / client components)
 import Link from "next/link";
 import React from "react";
-import { Helmet } from "react-helmet";
 
+// Type definition for a blog post
 interface BlogPost {
   id: number;
   category: string;
@@ -13,6 +13,7 @@ interface BlogPost {
   imageAlt: string;
 }
 
+// Static blog posts (in real apps, this would come from DB or API)
 const blogPosts: BlogPost[] = [
   {
     id: 1,
@@ -75,23 +76,12 @@ const blogPosts: BlogPost[] = [
     imageAlt: "Professionals collaborating in a modern office.",
   },
 ];
-
-
-export const metadata = {
-  title: "MockMiya Blog - Career Tips, Tech & AI",
-  description:
-    "Stay updated with the latest in career tips, interview preparation, technical skills, and AI advancements with MockMiya Blog.",
-  openGraph: {
-    title: "MockMiya Blog",
-    description:
-      "Stay updated with the latest in career tips, interview preparation, technical skills, and AI advancements with MockMiya Blog.",
-    type: "website",
-  },
-};
+// ✅ Blog Page Component
 const Blog = () => {
   return (
     <>
-  <Head>
+      {/* SEO Metadata */}
+      <Head>
         <title>MockMiya Blog - Career Tips, Tech & AI</title>
         <meta
           name="description"
@@ -104,85 +94,85 @@ const Blog = () => {
         />
         <meta property="og:type" content="website" />
       </Head>
-    <div className="bg-[#0b0c0f] text-gray-200 min-h-screen font-[Poppins]">
-      
-      <main className="container mx-auto px-4 py-16">
-        {/* Blog Header */}
-      <header className="text-center mb-20">
-  <div className="relative w-full md:w-auto">
-    {/* Banner Background */}
-    <div className="bg-gradient-to-r from-green-500 to-blue-500 px-6 md:px-16 py-6 md:py-10 rounded-none md:rounded-2xl shadow-2xl relative z-10">
-      <h1 className="text-3xl md:text-6xl font-extrabold tracking-widest text-white uppercase drop-shadow-lg">
-        MockMiya <span className="text-yellow-300">Blog</span>
-      </h1>
-      <p className="text-sm md:text-2xl text-gray-100 mt-3 md:mt-4 font-medium md:font-semibold tracking-wide">
-        Stay updated with the latest in career tips, tech trends, and AI advancements.
-      </p>
-    </div>
 
-    {/* Left Ribbon (hidden on small screens) */}
-    <div className="hidden md:block absolute top-1/2 left-[-50px] -translate-y-1/2 w-0 h-0 
-                    border-t-[70px] border-t-transparent 
-                    border-b-[70px] border-b-transparent 
-                    border-r-[50px] border-r-green-700">
-    </div>
-
-    {/* Right Ribbon (hidden on small screens) */}
-    <div className="hidden md:block absolute top-1/2 right-[-50px] -translate-y-1/2 w-0 h-0 
-                    border-t-[70px] border-t-transparent 
-                    border-b-[70px] border-b-transparent 
-                    border-l-[50px] border-l-blue-700">
-    </div>
-  </div>
-</header>
-
-
-        {/* Blog Posts as Hero Sections */}
-        <section className="space-y-16">
-          {blogPosts.map((post, index) => (
-            <div
-              key={post.id}
-              className={`flex flex-col md:flex-row lg:max-h-80 ${
-                index % 2 === 1 ? "md:flex-row-reverse" : ""
-              } items-center gap-8 bg-[#121417] rounded-3xl border border-[#1f2129] shadow-lg overflow-hidden`}
-            >
-              {/* Hero Image */}
-              <div className="w-full md:w-1/2">
-                <img
-                  src={post.imageUrl}
-                  alt={post.imageAlt}
-                  className="w-full h-64 md:h-full object-cover"
-                />
+      {/* Main Page Layout */}
+      <div className="bg-[#0b0c0f] text-gray-200 min-h-screen font-[Poppins]">
+        <main className="container mx-auto px-4 py-16">
+          {/* ---------------- Header Section ---------------- */}
+          <header className="text-center mb-20">
+            <div className="relative w-full md:w-auto">
+              {/* Gradient Banner Background */}
+              <div className="bg-gradient-to-r from-green-500 to-blue-500 px-6 md:px-16 py-6 md:py-10 rounded-none md:rounded-2xl shadow-2xl relative z-10">
+                <h1 className="text-3xl md:text-6xl font-extrabold tracking-widest text-white uppercase drop-shadow-lg">
+                  MockMiya <span className="text-yellow-300">Blog</span>
+                </h1>
+                <p className="text-sm md:text-2xl text-gray-100 mt-3 md:mt-4 font-medium md:font-semibold tracking-wide">
+                  Stay updated with the latest in career tips, tech trends, and AI advancements.
+                </p>
               </div>
 
-              {/* Hero Content */}
-              <div className="w-full md:w-1/2 p-6 md:p-10">
-                <span className="text-xs font-semibold uppercase text-gray-500 tracking-widest">
-                  {post.category}
-                </span>
-                <h2 className="text-2xl md:text-3xl font-bold mt-3 mb-4 bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent hover:from-green-300 hover:to-blue-300 transition-colors duration-300">
-                  {post.title}
-                </h2>
-                <p className="text-gray-400 mt-2 text-sm md:text-base leading-relaxed">
-                  {post.summary}
-                </p>
-                <div className="mt-6 flex items-center justify-between">
-                  <Link
-                    href={`/blog/${post.id}`}
-                    className="text-green-400 font-semibold hover:underline"
-                  >
-                    Read More &rarr;
-                  </Link>
-                  <span className="text-gray-500 text-xs md:text-sm">
-                    {post.date}
+              {/* Decorative Ribbon Left */}
+              <div className="hidden md:block absolute top-1/2 left-[-50px] -translate-y-1/2 w-0 h-0 
+                              border-t-[70px] border-t-transparent 
+                              border-b-[70px] border-b-transparent 
+                              border-r-[50px] border-r-green-700" />
+
+              {/* Decorative Ribbon Right */}
+              <div className="hidden md:block absolute top-1/2 right-[-50px] -translate-y-1/2 w-0 h-0 
+                              border-t-[70px] border-t-transparent 
+                              border-b-[70px] border-b-transparent 
+                              border-l-[50px] border-l-blue-700" />
+            </div>
+          </header>
+
+          {/* ---------------- Blog Posts List ---------------- */}
+          <section className="space-y-16">
+            {blogPosts.map((post, index) => (
+              <div
+                key={post.id}
+                className={`flex flex-col md:flex-row lg:max-h-80 ${
+                  index % 2 === 1 ? "md:flex-row-reverse" : ""
+                } items-center gap-8 bg-[#121417] rounded-3xl border border-[#1f2129] shadow-lg overflow-hidden`}
+              >
+                {/* Blog Image */}
+                <div className="w-full md:w-1/2">
+                  <img
+                    src={post.imageUrl}
+                    alt={post.imageAlt}
+                    className="w-full h-64 md:h-full object-cover"
+                  />
+                </div>
+
+                {/* Blog Content */}
+                <div className="w-full md:w-1/2 p-6 md:p-10">
+                  <span className="text-xs font-semibold uppercase text-gray-500 tracking-widest">
+                    {post.category}
                   </span>
+                  <h2 className="text-2xl md:text-3xl font-bold mt-3 mb-4 bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent hover:from-green-300 hover:to-blue-300 transition-colors duration-300">
+                    {post.title}
+                  </h2>
+                  <p className="text-gray-400 mt-2 text-sm md:text-base leading-relaxed">
+                    {post.summary}
+                  </p>
+
+                  {/* CTA and Date */}
+                  <div className="mt-6 flex items-center justify-between">
+                    <Link
+                      href={`/blog/${post.id}`}
+                      className="text-green-400 font-semibold hover:underline"
+                    >
+                      Read More →
+                    </Link>
+                    <span className="text-gray-500 text-xs md:text-sm">
+                      {post.date}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </section>
-      </main>
-    </div>
+            ))}
+          </section>
+        </main>
+      </div>
     </>
   );
 };
