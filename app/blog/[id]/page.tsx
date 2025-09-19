@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Head from "next/head";
 
+// Type definition for a blog post
 interface BlogPost {
   id: number;
   category: string;
@@ -13,6 +14,7 @@ interface BlogPost {
   imageAlt: string;
 }
 
+// Static blog posts (later can be replaced with DB or API call)
 const blogPosts: BlogPost[] = [
   {
     id: 1,
@@ -71,106 +73,115 @@ const blogPosts: BlogPost[] = [
 ];
 
 export default function BlogDetails({ params }: { params: { id: string } }) {
+  // Find the post that matches the dynamic route parameter (:id)
   const post = blogPosts.find((p) => p.id === Number(params.id));
+
+  // If no post is found, show Next.js "Not Found" page
   if (!post) return notFound();
 
-  // Recommended posts (excluding current one)
+  // Select 3 recommended posts (excluding the current one)
   const recommended = blogPosts.filter((p) => p.id !== post.id).slice(0, 3);
 
   return (
-    <><Head>
-      {/* Title add */}
-        <title>{post.title}</title>
-
+    <>
+      {/* ✅ SEO Metadata for this blog post */}
+      <Head>
+        <title>{post.title} | MockMiya Blog</title>
         <meta
           name="description"
           content="Stay updated with the latest in career tips, interview preparation, technical skills, and AI advancements with MockMiya Blog."
         />
-        <meta property="og:title" content="MockMiya Blog" />
+        <meta property="og:title" content={post.title} />
         <meta
           property="og:description"
           content="Stay updated with the latest in career tips, interview preparation, technical skills, and AI advancements with MockMiya Blog."
         />
-        <meta property="og:type" content="website" />
+        <meta property="og:type" content="article" />
       </Head>
-    <div className="bg-[#0b0c0f] text-gray-200 min-h-screen font-[Poppins]">
-      <main className="container mx-auto px-4 py-16 max-w-5xl">
-        {/* Blog Details */}
-        <article className="bg-[#121417] p-6 md:p-10 lg:p-12 rounded-3xl shadow-lg border border-[#1f2129]">
-          {/* Category */}
-          <span className="text-xs font-semibold uppercase text-green-400 tracking-widest">
-            {post.category}
-          </span>
 
-          {/* Image */}
-          <img
-            src={post.imageUrl}
-            alt={post.imageAlt}
-            className="w-full h-[400px] object-cover rounded-2xl my-6"
-          />
+      <div className="bg-[#0b0c0f] text-gray-200 min-h-screen font-[Poppins]">
+        <main className="container mx-auto px-4 py-16 max-w-5xl">
+          {/* ---------------- Blog Details Section ---------------- */}
+          <article className="bg-[#121417] p-6 md:p-10 lg:p-12 rounded-3xl shadow-lg border border-[#1f2129]">
+            {/* Category Tag */}
+            <span className="text-xs font-semibold uppercase text-green-400 tracking-widest">
+              {post.category}
+            </span>
 
-          {/* Date */}
-          <p className="text-gray-400 text-sm">{post.date}</p>
+            {/* Featured Image */}
+            <img
+              src={post.imageUrl}
+              alt={post.imageAlt}
+              className="w-full h-[400px] object-cover rounded-2xl my-6"
+            />
 
-          {/* Title */}
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-4">
-            {post.title}
-          </h1>
+            {/* Date */}
+            <p className="text-gray-400 text-sm">{post.date}</p>
 
-          {/* Details */}
-          <p className="text-gray-300 text-base leading-relaxed mt-6 whitespace-pre-wrap">
-            {post.summary}
-          </p>
-        </article>
+            {/* Title */}
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-4">
+              {post.title}
+            </h1>
 
-        {/* Recommended Section */}
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold mb-8">Recommended for you</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {recommended.map((rec) => (
-              <div
-                key={rec.id}
-                className="bg-[#121417] border border-[#1f2129] rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition"
-              >
-                <img
-                  src={rec.imageUrl}
-                  alt={rec.imageAlt}
-                  className="w-full h-40 object-cover"
-                />
-                <div className="p-4">
-                  <span className="text-xs font-semibold uppercase text-gray-500">
-                    {rec.category}
-                  </span>
-                  <h3 className="text-lg font-bold mt-2">{rec.title}</h3>
-                  <p className="text-gray-400 text-sm mt-2 line-clamp-3">
-                    {rec.summary}
-                  </p>
-                  <div className="mt-4 flex items-center justify-between">
-                    <Link
-                      href={`/blog/${rec.id}`}
-                      className="text-green-400 font-semibold hover:underline text-sm"
-                    >
-                      Read More →
-                    </Link>
-                    <span className="text-gray-500 text-xs">{rec.date}</span>
+            {/* Main Content */}
+            <p className="text-gray-300 text-base leading-relaxed mt-6 whitespace-pre-wrap">
+              {post.summary}
+            </p>
+          </article>
+
+          {/* ---------------- Recommended Posts ---------------- */}
+          <div className="mt-16">
+            <h2 className="text-2xl font-bold mb-8">Recommended for you</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {recommended.map((rec) => (
+                <div
+                  key={rec.id}
+                  className="bg-[#121417] border border-[#1f2129] rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition"
+                >
+                  {/* Thumbnail */}
+                  <img
+                    src={rec.imageUrl}
+                    alt={rec.imageAlt}
+                    className="w-full h-40 object-cover"
+                  />
+
+                  {/* Post Info */}
+                  <div className="p-4">
+                    <span className="text-xs font-semibold uppercase text-gray-500">
+                      {rec.category}
+                    </span>
+                    <h3 className="text-lg font-bold mt-2">{rec.title}</h3>
+                    <p className="text-gray-400 text-sm mt-2 line-clamp-3">
+                      {rec.summary}
+                    </p>
+
+                    {/* Link to Read More + Date */}
+                    <div className="mt-4 flex items-center justify-between">
+                      <Link
+                        href={`/blog/${rec.id}`}
+                        className="text-green-400 font-semibold hover:underline text-sm"
+                      >
+                        Read More →
+                      </Link>
+                      <span className="text-gray-500 text-xs">{rec.date}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Back to Blog */}
-        <div className="mt-12 text-center">
-          <a
-            href="/blog"
-            className="inline-block px-6 py-3 bg-green-500 text-black font-semibold rounded-xl shadow hover:bg-green-400 transition"
-          >
-            ← Back to Blog
-          </a>
-        </div>
-      </main>
-    </div>
+          {/* ---------------- Back to Blog Button ---------------- */}
+          <div className="mt-12 text-center">
+            <Link
+              href="/blog"
+              className="inline-block px-6 py-3 bg-green-500 text-black font-semibold rounded-xl shadow hover:bg-green-400 transition"
+            >
+              ← Back to Blog
+            </Link>
+          </div>
+        </main>
+      </div>
     </>
   );
 }
