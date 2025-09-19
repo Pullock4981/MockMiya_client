@@ -14,7 +14,7 @@ export default function DreamTechJob() {
         </div>
 
         {/* Title */}
-        <h1 className="text-3xl md:text-4xl font-extrabold mb-4 leading-snug">
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-4 leading-snug">
           Ready to Land Your{" "} <br />
           <span className="text-green-400">Dream Tech Job?</span>
         </h1>

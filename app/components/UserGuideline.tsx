@@ -1,5 +1,5 @@
 // components/UserGuideline.tsx
-import { UserPlus, FileText, MessageSquare, Download, Send } from "lucide-react";
+import { UserPlus, FileText, MessageSquare, Download, Send, ArrowRight } from "lucide-react";
 
 const steps = [
   {
@@ -45,7 +45,7 @@ export default function UserGuideline() {
     <section className="py-16 bg-gray-900 text-gray-100">
       <div className="max-w-6xl mx-auto px-6 text-center">
         {/* Heading */}
-        <h2 className="text-3xl font-bold mb-4">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4">
           Your Path to <span className="text-green-400">Success</span>
         </h2>
         <p className="text-gray-400 mb-12">
@@ -55,13 +55,26 @@ export default function UserGuideline() {
         {/* Steps */}
         <div className="flex flex-col md:flex-row justify-between items-center md:space-x-6 space-y-10 md:space-y-0">
           {steps.map((step) => (
-            <div key={step.id} className="flex flex-col items-center text-center relative">
-              <div className="w-14 h-14 rounded-full bg-gray-800 flex items-center justify-center text-green-400 relative">
-                {step.icon}
-                <span className="absolute -top-2 -right-2 bg-green-500 text-black text-xs font-bold rounded-full px-1.5 py-0.5">
-                  {step.id}
-                </span>
+            <div key={step.id} className="flex flex-col items-center  text-center relative group">
+              <div className="flex items-center">
+                {/* Circle with icon */}
+                <div className="w-20 h-20 rounded-full border-2 border-gray-500 
+                  group-hover:border-green-400 flex items-center justify-center 
+                  text-green-400 relative transition-colors">
+                  {step.icon}
+                  <span className="absolute -top-2 -right-2 bg-green-500 text-black 
+                     text-xs font-bold rounded-full px-1.5 py-0.5">
+                    {step.id}
+                  </span>
+                </div>
+
+                {/* Right Arrow (except last step) */}
+                {step.id !== steps.length && (
+                  <ArrowRight className="w-6 h-6 text-gray-500 ml-2  transition-colors duration-300 group-hover:text-green-400" />
+                )}
               </div>
+
+
               <h3 className="mt-4 font-semibold">{step.title}</h3>
               <p className="text-gray-400 text-sm">{step.description}</p>
             </div>
@@ -73,7 +86,7 @@ export default function UserGuideline() {
           {highlights.map((item, index) => (
             <div
               key={index}
-              className="bg-gray-800 p-6 rounded-xl shadow-md"
+              className="border border-gray-500 hover:border-green-400 p-6 rounded-xl shadow-md"
             >
               <h4 className="text-green-400 text-xl font-bold">{item.label}</h4>
               <p className="text-gray-400">{item.text}</p>
