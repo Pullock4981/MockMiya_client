@@ -1,6 +1,6 @@
-// import CTASection from '@/components/layout/CTASection';
-// import FAQSection from '@/components/layout/FAQSection';
-// import Footer from '@/components/layout/Footer';
+import CTASection from '@/components/layout/CTASection';
+import FAQSection from '@/components/layout/FAQSection';
+import Footer from '@/components/layout/Footer';
 // import PricingSection from '@/components/layout/PricingSection';
 // import TestimonialsSection from '@/components/layout/TestimonialSection';
 import ProcessSection from '@/components/layout/ProcessSection';
@@ -18,10 +18,10 @@ export default function Home() {
         <FeaturesSection />
         <ProcessSection />
         {/* <PricingSection />
-        <TestimonialsSection />
+        <TestimonialsSection /> */}
         <FAQSection />
         <CTASection />
-        <Footer /> */}
+        <Footer />
       </ThemeProvider>
     </div>
   );
