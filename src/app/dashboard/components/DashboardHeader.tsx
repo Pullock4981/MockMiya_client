@@ -71,7 +71,7 @@ export function DashboardHeader() {
       {/* Right: Actions */}
       <div className="flex items-center gap-3">
         {/* Theme Switch */}
-        <div className="scale-46 -mr-12 -ml-7">
+        <div className="-mr-12 -ml-7">
           <ThemeSwitch />
         </div>
 

@@ -7,11 +7,11 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import loginAnimation from '@/assets/lottie/login.json';
+import signupAnimation from '@/assets/lottie/signup.json';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import GoogleAuth from './socialAuth/GoogleAuth';
-import loginAnimation from '/public/lottie/login.json';
-import signupAnimation from '/public/lottie/signup.json';
 
 export default function AuthPage() {
   const searchParams = useSearchParams();
