@@ -1,13 +1,13 @@
 'use client';
 
-import { Button } from '@/src/app/components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/app/components/ui/card';
+} from '@/components/ui/card';
 import { Award, FileText, MessageSquare, Target, TrendingUp, User } from 'lucide-react';
 
 interface OverviewProps {

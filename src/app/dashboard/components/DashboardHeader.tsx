@@ -1,13 +1,13 @@
 'use client';
 
 import { useAuth } from '@/app/auth/context/AuthContext';
-import { Button } from '@/src/app/components/ui/button';
 import { motion } from 'framer-motion';
 import { ChevronDown, LogOut, Search, Settings, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import ThemeSwitch from './ThemeSwitch';
+import { Button } from '@/components/ui/button';
 
 interface DashboardHeaderProps {
   collapsed: boolean;

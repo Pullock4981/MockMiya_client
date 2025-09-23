@@ -1,11 +1,11 @@
 'use client';
 
-import { ThemeProvider } from '@/src/app/components/ui/ThemeContext';
 import { ReactNode, useState } from 'react';
-import { AuthProvider } from '../auth/context/AuthContext';
 import { DashboardHeader } from './components/DashboardHeader';
 import Sidebar from './components/Sidebar';
 import { ActiveTabProvider } from './dashcontext/ActiveTabContext';
+import { ThemeProvider } from '@/components/ui/ThemeProvider';
+import { AuthProvider } from '../auth/context/AuthContext';
 
 interface LayoutProps {
   children: ReactNode;
