@@ -2,7 +2,7 @@
 
 import { ThemeProvider } from '@/components/ui/ThemeProvider';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { AuthProvider } from './auth/context/AuthContext';
+import { AuthProvider } from '../context/AuthContext';
 import './globals.css';
 
 const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist', display: 'swap' });

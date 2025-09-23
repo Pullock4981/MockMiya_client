@@ -5,7 +5,7 @@ import { DashboardHeader } from './components/DashboardHeader';
 import Sidebar from './components/Sidebar';
 import { ActiveTabProvider } from './dashcontext/ActiveTabContext';
 import { ThemeProvider } from '@/components/ui/ThemeProvider';
-import { AuthProvider } from '../auth/context/AuthContext';
+import { AuthProvider } from '../../context/AuthContext';
 
 interface LayoutProps {
   children: ReactNode;

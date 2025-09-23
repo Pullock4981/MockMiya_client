@@ -1,7 +1,7 @@
 'use client';
 
 import { redirect, usePathname } from 'next/navigation';
-import { useAuth } from '../auth/context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
