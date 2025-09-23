@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/app/auth/context/AuthContext';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/src/app/components/ui/button';
 import { motion } from 'framer-motion';
 import { ChevronDown, LogOut, Search, Settings, User } from 'lucide-react';
 import Link from 'next/link';

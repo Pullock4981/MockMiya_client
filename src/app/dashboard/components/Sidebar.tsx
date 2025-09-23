@@ -1,7 +1,7 @@
 'use client';
 
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/src/app/components/ui/avatar';
+import { Button } from '@/src/app/components/ui/button';
 import {
   BarChart3,
   Bot,

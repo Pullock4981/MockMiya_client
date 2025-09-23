@@ -1,6 +1,6 @@
 'use client';
 
-import { ThemeProvider } from '@/components/ui/ThemeContext';
+import { ThemeProvider } from '@/src/app/components/ui/ThemeContext';
 import { ReactNode, useState } from 'react';
 import { AuthProvider } from '../auth/context/AuthContext';
 import { DashboardHeader } from './components/DashboardHeader';
