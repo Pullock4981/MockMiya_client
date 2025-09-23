@@ -1,21 +1,24 @@
 // app/layout.tsx
-import type { Metadata } from 'next';
+
+import { ThemeProvider } from '@/components/ui/ThemeProvider';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { AuthProvider } from './auth/context/AuthContext';
 import './globals.css';
 
-const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist' });
-const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' });
-
-export const metadata: Metadata = {
-  title: 'Mock Miya',
-  description: 'Landing page',
-};
+const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist', display: 'swap' });
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-geist-mono',
+  display: 'swap',
+});
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-      <body>
-        {children}
+    <html lang="en" className="antialiased" suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <AuthProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

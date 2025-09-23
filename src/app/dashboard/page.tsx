@@ -1,8 +1,14 @@
 'use client';
 
-import { FileText, MessageSquare, User, Award, Target, TrendingUp } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Award, FileText, MessageSquare, Target, TrendingUp, User } from 'lucide-react';
 
 interface OverviewProps {
   setActiveTab: (tab: string) => void;
@@ -10,17 +16,41 @@ interface OverviewProps {
 
 const Dashboard = ({ setActiveTab }: OverviewProps) => {
   const stats = [
-    { title: "Resumes Created", value: "3", change: "+1 this week", icon: FileText, color: "text-blue-400" },
-    { title: "Interviews Practiced", value: "12", change: "+4 this week", icon: MessageSquare, color: "text-green-primary" },
-    { title: "Profile Completion", value: "85%", change: "+15% this month", icon: User, color: "text-purple-400" },
-    { title: "Success Score", value: "92", change: "+8 points", icon: Award, color: "text-yellow-400" },
+    {
+      title: 'Resumes Created',
+      value: '3',
+      change: '+1 this week',
+      icon: FileText,
+      color: 'text-blue-400',
+    },
+    {
+      title: 'Interviews Practiced',
+      value: '12',
+      change: '+4 this week',
+      icon: MessageSquare,
+      color: 'text-green-primary',
+    },
+    {
+      title: 'Profile Completion',
+      value: '85%',
+      change: '+15% this month',
+      icon: User,
+      color: 'text-purple-400',
+    },
+    {
+      title: 'Success Score',
+      value: '92',
+      change: '+8 points',
+      icon: Award,
+      color: 'text-yellow-400',
+    },
   ];
 
   const recentActivities = [
-    { type: "resume", action: "Updated Software Engineer Resume", time: "2 hours ago" },
-    { type: "interview", action: "Completed Technical Interview", time: "1 day ago" },
-    { type: "profile", action: "Added new skill: React", time: "3 days ago" },
-    { type: "coding", action: "Solved 5 coding challenges", time: "1 week ago" },
+    { type: 'resume', action: 'Updated Software Engineer Resume', time: '2 hours ago' },
+    { type: 'interview', action: 'Completed Technical Interview', time: '1 day ago' },
+    { type: 'profile', action: 'Added new skill: React', time: '3 days ago' },
+    { type: 'coding', action: 'Solved 5 coding challenges', time: '1 week ago' },
   ];
 
   return (
@@ -40,9 +70,7 @@ const Dashboard = ({ setActiveTab }: OverviewProps) => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {stat.title}
-                  </p>
+                  <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
                   <p className="text-2xl font-bold">{stat.value}</p>
                   <p className="text-xs text-green-primary">{stat.change}</p>
                 </div>
@@ -61,15 +89,10 @@ const Dashboard = ({ setActiveTab }: OverviewProps) => {
               <FileText className="h-5 w-5 mr-2" />
               Resume Builder
             </CardTitle>
-            <CardDescription>
-              Create and optimize your resume with AI assistance
-            </CardDescription>
+            <CardDescription>Create and optimize your resume with AI assistance</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
-              className="btn-hero w-full"
-              onClick={() => setActiveTab("resume")}
-            >
+            <Button className="btn-hero w-full" onClick={() => setActiveTab('resume')}>
               Start Building
             </Button>
           </CardContent>
@@ -81,15 +104,10 @@ const Dashboard = ({ setActiveTab }: OverviewProps) => {
               <Target className="h-5 w-5 mr-2" />
               Practice Interviews
             </CardTitle>
-            <CardDescription>
-              Practice with AI-powered interview scenarios
-            </CardDescription>
+            <CardDescription>Practice with AI-powered interview scenarios</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
-              className="btn-hero w-full"
-              onClick={() => setActiveTab("text-interview")}
-            >
+            <Button className="btn-hero w-full" onClick={() => setActiveTab('text-interview')}>
               Start Practicing
             </Button>
           </CardContent>
@@ -101,15 +119,10 @@ const Dashboard = ({ setActiveTab }: OverviewProps) => {
               <TrendingUp className="h-5 w-5 mr-2" />
               View Analytics
             </CardTitle>
-            <CardDescription>
-              Track your progress and improvement
-            </CardDescription>
+            <CardDescription>Track your progress and improvement</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
-              className="btn-hero w-full"
-              onClick={() => setActiveTab("analytics")}
-            >
+            <Button className="btn-hero w-full" onClick={() => setActiveTab('analytics')}>
               View Insights
             </Button>
           </CardContent>

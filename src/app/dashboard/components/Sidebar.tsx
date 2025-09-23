@@ -1,7 +1,6 @@
 'use client';
 
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+
 import {
   BarChart3,
   Bot,
@@ -24,6 +23,8 @@ import {
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useActiveTab } from '../dashcontext/ActiveTabContext';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 
 interface SidebarProps {
   collapsed?: boolean;

@@ -1,13 +1,13 @@
 'use client';
 
 import { useAuth } from '@/app/auth/context/AuthContext';
-import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { ChevronDown, LogOut, Search, Settings, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import ThemeSwitch from './ThemeSwitch';
+import { Button } from '@/components/ui/button';
 
 interface DashboardHeaderProps {
   collapsed: boolean;
@@ -71,7 +71,7 @@ export function DashboardHeader() {
       {/* Right: Actions */}
       <div className="flex items-center gap-3">
         {/* Theme Switch */}
-        <div className="scale-46 -mr-12 -ml-7">
+        <div className="-mr-12 -ml-7">
           <ThemeSwitch />
         </div>
 
