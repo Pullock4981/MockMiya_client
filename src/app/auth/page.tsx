@@ -16,7 +16,6 @@ import signupAnimation from '/public/lottie/signup.json';
 export default function AuthPage() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
-  const [activeRole, setActiveRole] = useState<'user' | 'admin'>('user');
 
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -24,7 +23,6 @@ export default function AuthPage() {
   }, [searchParams]);
 
   const tabX = activeTab === 'signin' ? '0%' : '100%';
-  const roleX = activeRole === 'user' ? '0%' : '100%';
 
   return (
     <div className="relative z-10 w-full max-w-5xl flex flex-col md:flex-row items-center justify-center gap-10">
@@ -37,32 +35,6 @@ export default function AuthPage() {
           <ArrowLeft className="h-4 w-4" />
           <span>Back to Home</span>
         </Link>
-
-        {/* Role Selection
-        <div className="relative flex justify-around gap-5 p-2 bg-[#0f1412]/80 rounded-2xl border border-green-900/40 shadow w-full mb-4">
-          <div className="flex items-center">
-            <RollerCoaster className="text-green-500" size={22} />
-          </div>
-          <div className="relative flex justify-center gap-10">
-            <motion.div
-              className="absolute top-0 left-0 h-full w-1/2 bg-[#0f1412]/20 rounded-xl z-0 shadow-[0_0_5px_rgba(0,255,120,0.6)]"
-              animate={{ x: roleX }}
-              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-            />
-            <button
-              className="relative z-10 w-full flex justify-center items-center gap-5 px-6 py-2 font-semibold text-green-300 hover:text-green-200"
-              onClick={() => setActiveRole('user')}
-            >
-              User {activeRole === 'user' && <CircleCheck size={16} className="text-green-300" />}
-            </button>
-            <button
-              className="relative z-10 w-full flex justify-center items-center gap-5 px-6 py-2 font-semibold text-green-300 hover:text-green-200"
-              onClick={() => setActiveRole('admin')}
-            >
-              Admin {activeRole === 'admin' && <CircleCheck size={16} className="text-green-300" />}
-            </button>
-          </div>
-        </div> */}
 
         {/* Auth Card */}
         <div className="bg-[#0f1412]/90 backdrop-blur-xl border border-green-900/50 p-8 rounded-3xl">

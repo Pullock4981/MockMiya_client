@@ -15,10 +15,7 @@ const GoogleAuth = () => {
       const result = await googleSignIn();
       const user = result.user;
 
-
-      toast(`Welcome ${user.displayName || 'User'} 🎉`, {
-        position: 'top-center',
-      });
+      toast(`Welcome ${user.displayName || 'User'} 🎉`);
 
       const from = searchParams.get('from') || '/dashboard';
       router.push(from);
