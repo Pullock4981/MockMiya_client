@@ -1,3 +1,5 @@
+
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,7 +12,6 @@ import { z } from 'zod';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 
-// Validation schema
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
@@ -21,38 +22,53 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function LoginForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { signInUser, loading } = useAuth();
+  const { signInUser, resetPassword, loading } = useAuth();
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const emailValue = watch("email");
 
-const onSubmit = async (data: LoginFormData) => {
-  try {
-    const from = searchParams.get('from') || '/dashboard';
-    const userCredential = await signInUser(data.email, data.password);
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      const from = searchParams.get('from') || '/dashboard';
+      const userCredential = await signInUser(data.email, data.password);
 
-    if (userCredential.user) {
-
-      toast(`Welcome ${userCredential.user.displayName || 'User'} 🎉`);
-
-      router.push(from);
+      if (userCredential.user) {
+        toast.success(`Welcome ${userCredential.user.displayName || 'User'} 🎉`);
+        router.push(from);
+      }
+    } catch (error: any) {
+      console.error('Login Error:', error);
+      toast.error(error.message || 'Login failed. Please try again.', {
+        position: 'top-center',
+      });
     }
-  } catch (error: any) {
-    console.error('Login Error:', error);
+  };
 
-    toast.error(error.message || 'Login failed. Please try again.', {
-      position: 'top-center',
-    });
-  }
-};
-
+  const handleForgotPassword = async () => {
+    if (!emailValue) {
+      toast.error("Please enter your email first!", { position: "top-center" });
+      return;
+    }
+    try {
+      await resetPassword(emailValue);
+      toast.success("Password reset email sent! Check your inbox.", {
+        position: "top-center",
+      });
+    } catch (error: any) {
+      toast.error(error.message || "Failed to send reset email.", {
+        position: "top-center",
+      });
+    }
+  };
 
   const inputClass =
     'peer w-full rounded-xl bg-[#1a231f]/90 px-4 pt-5 pb-2 text-green-200 outline-none transition-all duration-300 border border-green-800/50';
@@ -95,7 +111,7 @@ const onSubmit = async (data: LoginFormData) => {
             type={showPassword ? 'text' : 'password'}
             {...register('password')}
             placeholder=" "
-            className={`${inputClass} pr-10 ${errors.password ? 'border-red-500 border-2' : ''}`} // 👈 pr-10 for icon space
+            className={`${inputClass} pr-10 ${errors.password ? 'border-red-500 border-2' : ''}`}
             autoComplete="current-password"
           />
           <label
@@ -107,7 +123,6 @@ const onSubmit = async (data: LoginFormData) => {
           >
             Password
           </label>
-          {/* Eye Icon */}
           <div
             className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-green-300"
             onClick={() => setShowPassword(!showPassword)}
@@ -123,6 +138,17 @@ const onSubmit = async (data: LoginFormData) => {
               {errors.password.message}
             </motion.p>
           )}
+        </div>
+
+        {/* Forgot Password */}
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={handleForgotPassword}
+            className="text-green-400 hover:underline text-sm"
+          >
+            Forgot Password?
+          </button>
         </div>
 
         {/* Submit Button */}
@@ -152,3 +178,5 @@ const onSubmit = async (data: LoginFormData) => {
     </>
   );
 }
+
+

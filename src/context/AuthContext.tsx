@@ -11,6 +11,7 @@ import {
   updateProfile,
   User,
   UserCredential,
+  sendPasswordResetEmail,
 } from 'firebase/auth';
 import { auth } from './Firebase/firebase.init';
 
@@ -25,6 +26,7 @@ interface AuthContextType {
   signInUser: (email: string, password: string) => Promise<UserCredential>;
   googleSignIn: () => Promise<UserCredential>;
   logoutUser: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>; // 👈 NEW
 }
 
 // =======================
@@ -76,6 +78,14 @@ export const AuthProvider = ({ children }: Props) => {
       setLoading(false);
     }
   };
+  const resetPassword = async (email: string): Promise<void> => {
+    setLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -93,6 +103,7 @@ export const AuthProvider = ({ children }: Props) => {
     signInUser,
     googleSignIn,
     logoutUser,
+    resetPassword, // 👈 add here
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -108,3 +119,13 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
+
+
+
+
+
+
+
+
+
+
