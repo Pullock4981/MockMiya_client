@@ -97,7 +97,6 @@ export default function BlogPage() {
         </header>
 
         {/* Blog posts */}
-        {/* It's me hridoy sheikh  */}
         <section className="space-y-16">
           {blogPosts.map((post, index) => (
             <div

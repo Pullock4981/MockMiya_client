@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, ChangeEvent, FormEvent } from "react";
-import jsPDF from "jspdf"; // 📄 For PDF export
+import jsPDF from "jspdf";
 
-// Define a type for our form data
 interface FormData {
   name: string;
   jobTitle: string;
@@ -23,18 +22,13 @@ export default function HomePage() {
   const [coverLetter, setCoverLetter] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Handle input change
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  // Handle form submit
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -43,9 +37,7 @@ export default function HomePage() {
     try {
       const response = await fetch("/api/generate/cover", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
@@ -59,14 +51,12 @@ export default function HomePage() {
     } catch (error) {
       if (error instanceof Error) {
         console.error("Failed to generate cover letter:", error.message);
-        alert(error.message);
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // 📄 Export to PDF
   const handleDownloadPDF = () => {
     if (!coverLetter) return;
     const doc = new jsPDF();
@@ -76,7 +66,6 @@ export default function HomePage() {
     doc.save("cover_letter.pdf");
   };
 
-  // 📝 Export to Text File
   const handleDownloadText = () => {
     if (!coverLetter) return;
     const blob = new Blob([coverLetter], { type: "text/plain" });
@@ -87,17 +76,14 @@ export default function HomePage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
-      <div className="bg-white p-8 rounded-2xl shadow-lg max-w-2xl w-full">
+    <main className="min-h-screen bg-gray-100 dark:bg-gray-950 flex items-center justify-center p-6 transition-colors">
+      <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-8 rounded-2xl shadow-lg max-w-2xl w-full">
         <h1 className="text-3xl font-bold text-center mb-6">
           Cover Letter Generator 🤖
         </h1>
 
         {/* Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-4 text-black"
-        >
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             type="text"
             name="name"
@@ -105,7 +91,7 @@ export default function HomePage() {
             value={formData.name}
             onChange={handleChange}
             required
-            className="p-3 border rounded-lg"
+            className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
           />
           <input
             type="text"
@@ -114,7 +100,7 @@ export default function HomePage() {
             value={formData.jobTitle}
             onChange={handleChange}
             required
-            className="p-3 border rounded-lg"
+            className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
           />
           <input
             type="text"
@@ -123,7 +109,7 @@ export default function HomePage() {
             value={formData.companyName}
             onChange={handleChange}
             required
-            className="p-3 border rounded-lg"
+            className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
           />
           <textarea
             name="skills"
@@ -131,7 +117,7 @@ export default function HomePage() {
             value={formData.skills}
             onChange={handleChange}
             required
-            className="p-3 border rounded-lg h-24"
+            className="p-3 border rounded-lg h-24 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
           />
           <textarea
             name="experience"
@@ -139,13 +125,13 @@ export default function HomePage() {
             value={formData.experience}
             onChange={handleChange}
             required
-            className="p-3 border rounded-lg h-24"
+            className="p-3 border rounded-lg h-24 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
           />
 
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-500 transition"
+            className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
           >
             {loading ? "Generating..." : "Generate Cover Letter"}
           </button>
@@ -153,7 +139,7 @@ export default function HomePage() {
 
         {/* Generated Cover Letter */}
         {coverLetter && (
-          <div className="mt-8 p-6 border rounded-lg bg-gray-50">
+          <div className="mt-8 p-6 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
             <h2 className="text-xl font-semibold mb-4">
               Your Generated Cover Letter 📄
             </h2>
@@ -163,13 +149,13 @@ export default function HomePage() {
             <div className="flex gap-4 mt-6">
               <button
                 onClick={handleDownloadPDF}
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-500"
+                className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded transition"
               >
                 Download PDF
               </button>
               <button
                 onClick={handleDownloadText}
-                className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600"
+                className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded transition"
               >
                 Download TXT
               </button>
