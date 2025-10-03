@@ -57,10 +57,10 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-4">
             <ThemeSwitch />
             <Button variant="outline" className="border-border-light hover:bg-card-secondary" asChild>
-              <Link href="/dashboard">Sign In</Link>
+              <Link href="/auth">Sign In</Link>
             </Button>
             <Button className="bg-primary hover:bg-primary-dark text-primary-foreground glow-effect" asChild>
-              <Link href="/dashboard">Get Started Free</Link>
+              <Link href="/auth">Get Started Free</Link>
             </Button>
           </div>
 
@@ -107,10 +107,10 @@ const Navbar = () => {
                   <ThemeSwitch />
                 </div>
                 <Button variant="outline" className="border-border-light hover:bg-card-secondary" asChild>
-                  <Link href="/dashboard">Sign In</Link>
+                  <Link href="/auth">Sign In</Link>
                 </Button>
                 <Button className="bg-primary hover:bg-primary-dark text-primary-foreground" asChild>
-                  <Link href="/dashboard">Get Started Free</Link>
+                  <Link href="/auth">Get Started Free</Link>
                 </Button>
               </div>
             </div>
