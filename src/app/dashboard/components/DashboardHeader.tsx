@@ -8,6 +8,8 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import ThemeSwitch from './ThemeSwitch';
 import { Button } from '@/components/ui/button';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 
 interface DashboardHeaderProps {
   collapsed: boolean;
@@ -19,6 +21,7 @@ export function DashboardHeader() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const { user, logoutUser } = useAuth();
 
@@ -37,6 +40,18 @@ export function DashboardHeader() {
     e.preventDefault();
     if (searchQuery.trim()) {
       console.log('Searching for:', searchQuery);
+    }
+  };
+
+  // ✅ Handle Logout
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      toast.success("Logged out successfully");
+      router.push("/auth");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to logout");
     }
   };
 
@@ -118,10 +133,7 @@ export function DashboardHeader() {
                 </button>
                 <div className="border-t border-border my-1" />
                 <button
-                  onClick={() => {
-                    logoutUser(); // Firebase logout
-                    setShowProfileDropdown(false);
-                  }}
+                  onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-3 py-2 text-sm text-error hover:bg-error/10 rounded-md transition-colors"
                 >
                   <LogOut className="w-4 h-4" />

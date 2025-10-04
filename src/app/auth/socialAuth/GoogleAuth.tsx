@@ -17,7 +17,7 @@ const GoogleAuth = () => {
 
       toast(`Welcome ${user.displayName || 'User'} 🎉`);
 
-      const from = searchParams.get('from') || '/dashboard';
+      const from = searchParams.get('from') || '/';
       router.push(from);
     } catch (error: any) {
       console.error('Google Sign In Error:', error);
