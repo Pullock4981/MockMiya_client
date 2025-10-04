@@ -57,7 +57,6 @@ EducationForm.tsx
 
 ResumeFrom.tsx
 
-WorkExperienceForm.tsx
 
 
 AdditionalInfo.tsx
@@ -65,5 +64,3 @@ Certifications.tsx
 Education.tsx
 
 
-
-WorkExperience.tsx
