@@ -43,8 +43,6 @@ next-env.d.ts
 
 # my Branch
 
-utils
-export-pdf
 
 
 useAutosave.ts 
