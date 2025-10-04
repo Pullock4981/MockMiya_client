@@ -55,7 +55,6 @@ AIReTouchForm.tsx
 CertificationsForm.tsx
 EducationForm.tsx
 
-ProjectsForm.tsx
 ResumeFrom.tsx
 
 WorkExperienceForm.tsx
@@ -65,6 +64,6 @@ AdditionalInfo.tsx
 Certifications.tsx
 Education.tsx
 
-Projects.tsx
+
 
 WorkExperience.tsx
