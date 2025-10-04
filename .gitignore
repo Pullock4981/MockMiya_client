@@ -49,6 +49,3 @@ export-pdf
 
 useAutosave.ts 
 useLocalStorage.ts
-
-
-ATSDetails.tsx
