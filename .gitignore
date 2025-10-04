@@ -53,7 +53,5 @@ useLocalStorage.ts
 
 ATSDetails.tsx
 ResumeAdditionalInfo.tsx
-ResumeCertifications.tsx
-
 
 ResumeThemeContext.tsx
