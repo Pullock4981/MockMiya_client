@@ -50,16 +50,10 @@ useAISuggestions.ts
 useATS.ts
 useAutosave.ts 
 useLocalStorage.ts
-AdditionalInfoForm.tsx
+
 AIReTouchForm.tsx
 
 
 
 ResumeFrom.tsx
-
-
-
-AdditionalInfo.tsx
-
-
 
