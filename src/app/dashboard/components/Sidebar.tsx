@@ -25,6 +25,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useActiveTab } from '../dashcontext/ActiveTabContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -32,6 +35,8 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: SidebarProps) => {
+  const { user, logoutUser } = useAuth();
+  const router = useRouter();
   const { activeTab, setActiveTab } = useActiveTab();
 
   const sidebarItems = [
@@ -188,6 +193,18 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
     return acc;
   }, {} as Record<string, typeof sidebarItems>);
 
+  // ✅ Handle Logout
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      toast.success("Logged out successfully");
+      router.push("/auth");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to logout");
+    }
+  };
+
   return (
     <aside
       ref={sidebarRef}
@@ -225,11 +242,10 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
               <Link key={item.id} href={item.path} passHref>
                 <button
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full sidebar-button flex items-center rounded-lg px-3 py-2 text-sm transition-colors ${
-                    activeTab === item.id
-                      ? 'active-button'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                  } ${collapsed ? 'justify-center' : ''}`}
+                  className={`w-full sidebar-button flex items-center rounded-lg px-3 py-2 text-sm transition-colors ${activeTab === item.id
+                    ? 'active-button'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                    } ${collapsed ? 'justify-center' : ''}`}
                 >
                   <item.icon className="h-4 w-4" />
                   {!collapsed && <span className="ml-3">{item.name}</span>}
@@ -255,7 +271,7 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
             </div>
           </div>
         )}
-        <Button variant="outline" size="sm" className="w-full">
+        <Button variant="outline" size="sm" className="w-full" onClick={handleLogout}>
           <LogOut className="h-3 w-3 mr-2" />
           {!collapsed && 'Sign Out'}
         </Button>
@@ -264,9 +280,8 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
       {/* Drag Handle */}
       <div
         onMouseDown={() => setDragging(true)}
-        className={`w-1 cursor-col-resize h-full absolute right-0 top-0 z-10 ${
-          dragging ? 'bg-indigo-500' : 'hover:bg-indigo-300'
-        }`}
+        className={`w-1 cursor-col-resize h-full absolute right-0 top-0 z-10 ${dragging ? 'bg-indigo-500' : 'hover:bg-indigo-300'
+          }`}
       />
     </aside>
   );
