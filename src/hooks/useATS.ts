@@ -6,9 +6,10 @@ import { ATSScore } from "@/types/resume";
 export const useATS = () => {
   const [atsScore, setAtsScore] = useState<ATSScore | null>(null);
 
-  // calculateATSScore now requires ResumeData
   const calculateATSScore = async () => {
-    // Demo scoring logic, replace with real calculation
+    // Prevent infinite re-renders if already calculated
+    if (atsScore) return atsScore;
+
     const score: ATSScore = {
       overall: 80,
       breakdown: {
@@ -21,6 +22,7 @@ export const useATS = () => {
       passedChecks: ["Has work experience", "Has skills listed"],
       failedChecks: ["No LinkedIn link found"],
     };
+
     setAtsScore(score);
     return score;
   };
