@@ -45,7 +45,6 @@ next-env.d.ts
 resumePreview
 utils
 export-pdf
-resume
 
 
 useAutosave.ts 
