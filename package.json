@@ -13,22 +13,34 @@
     "@lottiefiles/react-lottie-player": "^3.6.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-avatar": "^1.1.10",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-progress": "^1.1.7",
+    "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-switch": "^1.2.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "docx": "^9.5.1",
     "firebase": "^12.2.1",
     "framer-motion": "^12.23.13",
+    "html2pdf.js": "^0.12.1",
+    "jspdf": "^3.0.3",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.544.0",
+    "mongodb": "^6.20.0",
     "next": "15.5.3",
     "next-themes": "^0.4.6",
+    "puppeteer": "^24.23.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.62.0",
     "react-icons": "^5.5.0",
+    "react-to-print": "^3.1.1",
     "react-toastify": "^11.0.5",
     "styled-components": "^6.1.19",
     "tailwind-merge": "^3.3.1",
+    "uuid": "^13.0.0",
     "zod": "^4.1.9"
   },
   "devDependencies": {
@@ -42,5 +54,18 @@
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.8",
     "typescript": "^5"
-  }
+  },
+  "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pullock4981/MockMiya_client.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Pullock4981/MockMiya_client/issues"
+  },
+  "homepage": "https://github.com/Pullock4981/MockMiya_client#readme"
 }

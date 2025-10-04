@@ -42,3 +42,29 @@ next-env.d.ts
 
 
 # my Branch
+resumePreview
+utils
+export-pdf
+resume
+useAISuggestions.ts
+useATS.ts
+useAutosave.ts 
+useLocalStorage.ts
+AdditionalInfoForm.tsx
+AIReTouchForm.tsx
+CertificationsForm.tsx
+EducationForm.tsx
+ProfessionalLinksForm.tsx
+ProjectsForm.tsx
+ResumeFrom.tsx
+SkillsForm.tsx
+WorkExperienceForm.tsx
+
+
+AdditionalInfo.tsx
+Certifications.tsx
+Education.tsx
+ProfessionalLinks.tsx
+Projects.tsx
+Skills.tsx
+WorkExperience.tsx

@@ -1,7 +1,6 @@
 'use client';
 
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
@@ -30,7 +29,7 @@ interface AuthContextType {
 // =======================
 // Create Context
 // =======================
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined); // <-- export added ✅
 
 // =======================
 // Provider
