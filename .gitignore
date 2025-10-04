@@ -52,7 +52,7 @@ useAutosave.ts
 useLocalStorage.ts
 AdditionalInfoForm.tsx
 AIReTouchForm.tsx
-CertificationsForm.tsx
+
 
 
 ResumeFrom.tsx
@@ -60,6 +60,6 @@ ResumeFrom.tsx
 
 
 AdditionalInfo.tsx
-Certifications.tsx
+
 
 
