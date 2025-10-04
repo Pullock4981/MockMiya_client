@@ -42,7 +42,7 @@ next-env.d.ts
 
 
 # my Branch
-resumePreview
+
 utils
 export-pdf
 
@@ -51,3 +51,13 @@ useAutosave.ts
 useLocalStorage.ts
 
 
+ATSDetails.tsx
+ResumeAdditionalInfo.tsx
+ResumeCertifications.tsx
+ResumeEducation.tsx
+ResumeProfessionalLinks.tsx
+ResumeProjects.tsx
+ResumeProvider.tsx
+ResumeSkills.tsx
+ResumeThemeContext.tsx
+ResumeWorkExperience.tsx
