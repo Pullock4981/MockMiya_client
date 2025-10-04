@@ -2,7 +2,7 @@
 
 import { FcGoogle } from 'react-icons/fc';
 import { toast } from 'react-toastify';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../../context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 const GoogleAuth = () => {
@@ -17,7 +17,7 @@ const GoogleAuth = () => {
 
       toast(`Welcome ${user.displayName || 'User'} 🎉`);
 
-      const from = searchParams.get('from') || '/dashboard';
+      const from = searchParams.get('from') || '/';
       router.push(from);
     } catch (error: any) {
       console.error('Google Sign In Error:', error);

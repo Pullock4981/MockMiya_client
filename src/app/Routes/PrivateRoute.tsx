@@ -1,10 +1,11 @@
 "use client";
 
-import { useAuth } from "@/app/auth/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { redirect, usePathname } from 'next/navigation';
 
 import { useEffect } from "react";
 import { LoadingSpinner } from "../dashboard/components/Loading";
+import { useAuth } from "@/context/AuthContext";
 
 interface PrivateRouteProps {
   children: React.ReactNode;
