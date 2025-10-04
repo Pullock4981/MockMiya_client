@@ -46,13 +46,10 @@ resumePreview
 utils
 export-pdf
 resume
-useAISuggestions.ts
-useATS.ts
+
+
 useAutosave.ts 
 useLocalStorage.ts
-
-AIReTouchForm.tsx
-
 
 
 ResumeFrom.tsx
