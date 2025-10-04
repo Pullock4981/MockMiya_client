@@ -55,9 +55,7 @@ ATSDetails.tsx
 ResumeAdditionalInfo.tsx
 ResumeCertifications.tsx
 ResumeEducation.tsx
-ResumeProfessionalLinks.tsx
-ResumeProjects.tsx
-ResumeProvider.tsx
+
 ResumeSkills.tsx
 ResumeThemeContext.tsx
 ResumeWorkExperience.tsx
