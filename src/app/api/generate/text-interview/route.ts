@@ -4,9 +4,26 @@ import { GoogleGenAI } from "@google/genai";
 const apiKey = process.env.GOOGLE_API_KEY || "";
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
+// Types for the request
+interface GenerateRequestBody {
+  role: string;
+  type: "text" | "mcq";
+  questionCount: number;
+}
+
+// Type for MCQ question structure
+interface MCQQuestion {
+  id: number;
+  q: string;
+  options: string[];
+  correct: string | null;
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { role, type, questionCount } = await req.json();
+    const body: GenerateRequestBody = await req.json();
+
+    const { role, type, questionCount } = body;
 
     if (!role || !type || !questionCount) {
       return NextResponse.json(
@@ -14,6 +31,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
     if (!ai) {
       return NextResponse.json({ questions: [] }, { status: 200 });
     }
@@ -47,9 +65,9 @@ D) option4
       contents: prompt,
     });
 
-    const text = resp.text || "";
+    const text = resp.text ?? "";
 
-    let questions: any[] = [];
+    let questions: string[] | MCQQuestion[] = [];
 
     if (type === "text") {
       questions = text
@@ -58,25 +76,28 @@ D) option4
         .filter(Boolean)
         .map((s) => s.replace(/^\d+\s*[\.\)]\s*/, ""));
     } else if (type === "mcq") {
-      // Parse MCQs into structured format
       const blocks = text.split(/\n(?=\d+\.)/).map((b) => b.trim()).filter(Boolean);
       questions = blocks.map((block, i) => {
         const lines = block.split("\n").map((l) => l.trim());
         const qText = lines[0].replace(/^\d+\.\s*/, "");
         const options = lines.slice(1).map((opt) => opt.replace(/\[correct\]/, "").trim());
-        const correct = lines.find((l) => l.includes("[correct]"));
+        const correctLine = lines.find((l) => l.includes("[correct]"));
+        const correct =
+          correctLine?.replace(/[A-D]\)|\[correct\]/g, "").trim() ?? null;
+
         return {
           id: i + 1,
           q: qText,
           options,
-          correct: correct ? correct.replace(/[A-D]\)|\[correct\]/g, "").trim() : null,
+          correct,
         };
       });
     }
 
     return NextResponse.json({ questions });
-  } catch (err) {
-    console.error("AI generate error:", err);
+  } catch (error) {
+    const err = error instanceof Error ? error : { message: "Unknown error" };
+    console.error("AI generate error:", err.message);
     return NextResponse.json({ questions: [] }, { status: 200 });
   }
 }

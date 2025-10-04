@@ -14,46 +14,48 @@ export const AIReTouchForm: React.FC = () => {
 
   // Section definitions
   const sections = [
-    { id: 'summary', name: 'Professional Summary', hasContent: !!resumeData.summary },
-    { id: 'experience', name: 'Work Experience', hasContent: resumeData.workExperience.length > 0 },
-    { id: 'skills', name: 'Skills', hasContent: resumeData.skills.length > 0 },
-    { id: 'projects', name: 'Projects', hasContent: resumeData.projects.length > 0 },
-    { id: 'education', name: 'Education', hasContent: resumeData.education.length > 0 },
+    { id: "summary", name: "Professional Summary", hasContent: !!resumeData.summary },
+    { id: "experience", name: "Work Experience", hasContent: resumeData.workExperience.length > 0 },
+    { id: "skills", name: "Skills", hasContent: resumeData.skills.length > 0 },
+    { id: "projects", name: "Projects", hasContent: resumeData.projects.length > 0 },
+    { id: "education", name: "Education", hasContent: resumeData.education.length > 0 },
   ];
 
-  // Handlers
+  // ✅ Improve Writing (AI Enhancement)
   const handleImproveWriting = async (section: string) => {
     setIsProcessing(`improve-${section}`);
     try {
       await getAISuggestions(section);
-      setCompletedActions(prev => [...prev, `improve-${section}`]);
+      setCompletedActions((prev) => [...prev, `improve-${section}`]);
     } catch (error) {
-      console.error(error);
+      console.error("Error improving section:", error);
     } finally {
       setIsProcessing(null);
     }
   };
 
+  // ✅ ATS Optimization
   const handleATSOptimize = async () => {
-    setIsProcessing('ats-optimize');
+    setIsProcessing("ats-optimize");
     try {
-      await calculateATSScore(resumeData);
-      setCompletedActions(prev => [...prev, 'ats-optimize']);
+      // FIXED: Removed argument — matches correct hook definition
+      await calculateATSScore();
+      setCompletedActions((prev) => [...prev, "ats-optimize"]);
     } catch (error) {
-      console.error(error);
+      console.error("Error calculating ATS score:", error);
     } finally {
       setIsProcessing(null);
     }
   };
 
-
+  // ✅ Summarize or Expand Section
   const handleSummarize = async (section: string) => {
     setIsProcessing(`summarize-${section}`);
     try {
       await getAISuggestions(section);
-      setCompletedActions(prev => [...prev, `summarize-${section}`]);
+      setCompletedActions((prev) => [...prev, `summarize-${section}`]);
     } catch (error) {
-      console.error(error);
+      console.error("Error summarizing section:", error);
     } finally {
       setIsProcessing(null);
     }
@@ -61,7 +63,6 @@ export const AIReTouchForm: React.FC = () => {
 
   return (
     <div className="space-y-6">
-
       {/* ATS Optimization */}
       <Card className="p-6 bg-gradient-subtle border-border/50">
         <div className="flex items-center justify-between mb-4">
@@ -71,26 +72,34 @@ export const AIReTouchForm: React.FC = () => {
               Optimize your resume for Applicant Tracking Systems
             </p>
           </div>
+
           {atsScore && (
             <Badge
-              variant={atsScore.overall >= 80 ? 'default' : atsScore.overall >= 60 ? 'secondary' : 'destructive'}
+              variant={
+                atsScore.overall >= 80
+                  ? "default"
+                  : atsScore.overall >= 60
+                  ? "secondary"
+                  : "destructive"
+              }
               className="text-lg px-3 py-1"
             >
               {atsScore.overall}%
             </Badge>
           )}
         </div>
+
         <Button
           onClick={handleATSOptimize}
-          disabled={isProcessing === 'ats-optimize'}
+          disabled={isProcessing === "ats-optimize"}
           className="w-full bg-gradient-ai text-white hover:shadow-ai transition-all duration-300"
         >
-          {isProcessing === 'ats-optimize' ? (
+          {isProcessing === "ats-optimize" ? (
             <>
               <Clock className="h-4 w-4 mr-2 animate-spin" />
               Analyzing ATS Score...
             </>
-          ) : completedActions.includes('ats-optimize') ? (
+          ) : completedActions.includes("ats-optimize") ? (
             <>
               <CheckCircle className="h-4 w-4 mr-2" />
               ATS Score Updated
@@ -127,6 +136,7 @@ export const AIReTouchForm: React.FC = () => {
 
             {section.hasContent && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {/* Improve Button */}
                 <Button
                   variant="outline"
                   size="sm"
@@ -152,6 +162,7 @@ export const AIReTouchForm: React.FC = () => {
                   )}
                 </Button>
 
+                {/* Summarize Button */}
                 <Button
                   variant="outline"
                   size="sm"
@@ -188,7 +199,9 @@ export const AIReTouchForm: React.FC = () => {
         <Button
           variant="default"
           className="w-full bg-gradient-primary hover:shadow-paper transition-all duration-300"
-          onClick={() => sections.forEach(section => section.hasContent && handleImproveWriting(section.id))}
+          onClick={() =>
+            sections.forEach((section) => section.hasContent && handleImproveWriting(section.id))
+          }
           disabled={!!isProcessing}
         >
           <Zap className="h-4 w-4 mr-2" />
@@ -196,13 +209,13 @@ export const AIReTouchForm: React.FC = () => {
         </Button>
       </Card>
 
-      {/* Tips */}
+      {/* AI Tips */}
       <Card className="p-4 bg-muted/30 border-border/30">
         <h4 className="text-sm font-semibold text-foreground mb-2">💡 AI Enhancement Tips</h4>
         <ul className="text-xs text-muted-foreground space-y-1">
-          <li>• "Improve Writing" enhances grammar, clarity, and impact</li>
-          <li>• "ATS Optimize" ensures compatibility with tracking systems</li>
-          <li>• "Summarize/Expand" adjusts content length for better fit</li>
+          <li>• Improve Writing enhances grammar, clarity, and impact</li>
+          <li>• ATS Optimize ensures compatibility with tracking systems</li>
+          <li>• Summarize/Expand adjusts content length for better fit</li>
           <li>• Review AI suggestions before accepting them</li>
           <li>• Higher ATS scores increase interview chances</li>
         </ul>

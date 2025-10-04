@@ -73,20 +73,23 @@ export default function SignupForm() {
   };
 
   const onSubmit = async (data: SignupFormData) => {
-    try {
-      const userCredential = await createUser(data.email, data.password);
+  try {
+    // No variable assignment needed
+    await createUser(data.email, data.password);
 
-      if (data.name) {
-        await updateUser({ displayName: data.name });
-      }
-
-      toast('🦄 Account created successfully!');
-      router.push('/dashboard');
-    } catch (error: any) {
-      console.error(error);
-      toast.error(error.message || 'Failed to create account');
+    if (data.name) {
+      await updateUser({ displayName: data.name });
     }
-  };
+
+    toast('🦄 Account created successfully!');
+    router.push('/dashboard');
+  } catch (error) {
+    const err = error instanceof Error ? error : { message: 'Unknown error' };
+    console.error('Signup Error:', err.message);
+    toast.error(err.message || 'Failed to create account');
+  }
+};
+
 
   const inputClass =
     'peer w-full rounded-xl bg-[#1a231f]/90 px-4 pt-5 pb-2 text-green-200 outline-none transition-all duration-300 border border-green-800/50';
@@ -167,10 +170,10 @@ export default function SignupForm() {
             />
             <label
               className={`
-      absolute left-4 top-2 text-green-400 text-sm transition-all duration-300
-      peer-placeholder-shown:top-5 peer-placeholder-shown:text-green-200 peer-placeholder-shown:text-base
-      peer-focus:top-1 peer-focus:text-green-400 peer-focus:text-sm pointer-events-none
-    `}
+                absolute left-4 top-2 text-green-400 text-sm transition-all duration-300
+                peer-placeholder-shown:top-5 peer-placeholder-shown:text-green-200 peer-placeholder-shown:text-base
+                peer-focus:top-1 peer-focus:text-green-400 peer-focus:text-sm pointer-events-none
+              `}
             >
               Password
             </label>
@@ -191,8 +194,9 @@ export default function SignupForm() {
               {errors.password.message as string}
             </motion.p>
           )}
+
           {/* Password Strength */}
-          <ul className="text-xs text-green-400 mt-1 pl-4 list-disc">
+          <ul className="text-xs mt-1 pl-4 list-disc">
             <li className={passwordValidation.isLongEnough ? 'text-green-400' : 'text-red-500'}>
               At least 6 characters
             </li>
@@ -205,7 +209,9 @@ export default function SignupForm() {
             <li className={passwordValidation.hasNumber ? 'text-green-400' : 'text-red-500'}>
               At least 1 number
             </li>
-            <li className={passwordValidation.hasSpecialChar ? 'text-green-400' : 'text-red-500'}>
+            <li
+              className={passwordValidation.hasSpecialChar ? 'text-green-400' : 'text-red-500'}
+            >
               At least 1 special character
             </li>
           </ul>
@@ -217,7 +223,9 @@ export default function SignupForm() {
             type={showConfirmPassword ? 'text' : 'password'}
             {...register('confirmPassword')}
             placeholder=" "
-            className={`${inputClass} ${errors.confirmPassword ? 'border-red-500 border-2' : ''}`}
+            className={`${inputClass} ${
+              errors.confirmPassword ? 'border-red-500 border-2' : ''
+            }`}
             autoComplete="new-password"
           />
           <label

@@ -6,7 +6,7 @@ import { AIsuggestion, ResumeData } from "@/types/resume";
 export const useAISuggestions = () => {
   const [suggestions, setSuggestions] = useState<AIsuggestion[]>([]);
 
-  const getSuggestions = async (resumeData: ResumeData, section: string) => {
+  const getSuggestions = async (resumeData: ResumeData) => {
     // mock suggestion logic
     const mock: AIsuggestion[] = [
       {

@@ -18,7 +18,6 @@ import Link from "next/link";
 import ThemeSwitch from "../ui/ThemeSwitch";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "react-toastify";
-import Image from "next/image";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

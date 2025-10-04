@@ -33,9 +33,6 @@ const ResumeControls: React.FC<ResumeControlsProps> = ({
   setShowATSDetails,
   template,
   setTemplate,
-  userId,
-  theme,
-  setTheme,
 }) => {
   const { textTheme, setTextTheme } = useResumeTheme();
 

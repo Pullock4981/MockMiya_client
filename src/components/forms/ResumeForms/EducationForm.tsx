@@ -10,7 +10,7 @@ import { GraduationCap, Plus, X } from "lucide-react";
 import { Education } from "@/types/resume";
 
 export const EducationForm: React.FC = () => {
-  const { education, addEducation, updateEducation, removeEducation } = useEducation();
+  const { education, addEducation, removeEducation } = useEducation();
 
   const [newEdu, setNewEdu] = useState<Omit<Education, "id">>({
     degree: "",

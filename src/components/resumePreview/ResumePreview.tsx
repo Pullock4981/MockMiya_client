@@ -24,22 +24,30 @@ const ResumePreview: React.FC = () => {
   const [showATSDetails, setShowATSDetails] = useState(false);
   const [template, setTemplate] = useState<"Single Column" | "Two Columns">("Single Column");
   const [theme, setTheme] = useState<"Light" | "Dark">("Light");
-  const userId = "user_12345"; // Replace with dynamic userId if available
+
+  const userId = "user_12345";
 
   useEffect(() => {
-    const timer = setTimeout(() => calculateATSScore(resumeData), 500);
-    return () => clearTimeout(timer);
+
+    try {
+      if (typeof calculateATSScore === "function") {
+
+        calculateATSScore();
+      }
+    } catch (err) {
+      console.error("Error calculating ATS Score:", err);
+    }
   }, [resumeData, calculateATSScore]);
 
   const isEmpty =
-    !resumeData.personalInfo.firstName &&
-    !resumeData.personalInfo.lastName &&
+    !resumeData.personalInfo?.firstName &&
+    !resumeData.personalInfo?.lastName &&
     !resumeData.summary &&
-    resumeData.skills.length === 0 &&
-    resumeData.projects.length === 0 &&
-    resumeData.workExperience.length === 0 &&
-    resumeData.education.length === 0 &&
-    resumeData.certifications.length === 0;
+    (!resumeData.skills || resumeData.skills.length === 0) &&
+    (!resumeData.projects || resumeData.projects.length === 0) &&
+    (!resumeData.workExperience || resumeData.workExperience.length === 0) &&
+    (!resumeData.education || resumeData.education.length === 0) &&
+    (!resumeData.certifications || resumeData.certifications.length === 0);
 
   return (
     <div className="space-y-6">
@@ -63,16 +71,21 @@ const ResumePreview: React.FC = () => {
         }`}
       >
         <div
-          style={{ padding: "2rem", maxWidth: "794px", margin: "0 auto", fontFamily: "serif" }}
+          style={{
+            padding: "2rem",
+            maxWidth: "794px",
+            margin: "0 auto",
+            fontFamily: "serif",
+          }}
         >
           <ResumeHeader />
           {resumeData.summary && <ResumeSummary />}
-          {resumeData.skills.length > 0 && <ResumeSkills />}
-          {resumeData.projects.length > 0 && <ResumeProjects />}
-          {resumeData.workExperience.length > 0 && <ResumeWorkExperience />}
-          {resumeData.education.length > 0 && <ResumeEducation />}
+          {resumeData.skills?.length > 0 && <ResumeSkills />}
+          {resumeData.projects?.length > 0 && <ResumeProjects />}
+          {resumeData.workExperience?.length > 0 && <ResumeWorkExperience />}
+          {resumeData.education?.length > 0 && <ResumeEducation />}
           {resumeData.additionalInfo?.languages?.length > 0 && <ResumeAdditionalInfo />}
-          {resumeData.certifications.length > 0 && <ResumeCertifications />}
+          {resumeData.certifications?.length > 0 && <ResumeCertifications />}
           {isEmpty && <EmptyState />}
         </div>
       </Card>

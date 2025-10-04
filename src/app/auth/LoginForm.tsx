@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,7 +32,13 @@ export default function LoginForm() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const emailValue = watch("email");
+  const emailValue = watch('email');
+
+  // Type-safe error type
+  type AuthError = {
+    message?: string;
+    code?: string;
+  };
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -45,9 +49,10 @@ export default function LoginForm() {
         toast.success(`Welcome ${userCredential.user.displayName || 'User'} 🎉`);
         router.push(from);
       }
-    } catch (error: any) {
-      console.error('Login Error:', error);
-      toast.error(error.message || 'Login failed. Please try again.', {
+    } catch (error) {
+      const err = error as AuthError;
+      console.error('Login Error:', err);
+      toast.error(err.message ?? 'Login failed. Please try again.', {
         position: 'top-center',
       });
     }
@@ -55,17 +60,18 @@ export default function LoginForm() {
 
   const handleForgotPassword = async () => {
     if (!emailValue) {
-      toast.error("Please enter your email first!", { position: "top-center" });
+      toast.error('Please enter your email first!', { position: 'top-center' });
       return;
     }
     try {
       await resetPassword(emailValue);
-      toast.success("Password reset email sent! Check your inbox.", {
-        position: "top-center",
+      toast.success('Password reset email sent! Check your inbox.', {
+        position: 'top-center',
       });
-    } catch (error: any) {
-      toast.error(error.message || "Failed to send reset email.", {
-        position: "top-center",
+    } catch (error) {
+      const err = error as AuthError;
+      toast.error(err.message ?? 'Failed to send reset email.', {
+        position: 'top-center',
       });
     }
   };
@@ -178,5 +184,3 @@ export default function LoginForm() {
     </>
   );
 }
-
-

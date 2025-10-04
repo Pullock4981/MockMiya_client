@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { redirect, usePathname } from 'next/navigation';
 
 import { useEffect } from "react";
 import { LoadingSpinner } from "../dashboard/components/Loading";

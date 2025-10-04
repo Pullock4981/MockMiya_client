@@ -4,25 +4,17 @@ import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
 import { ChevronDown, LogOut, Search, Settings, User } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import ThemeSwitch from './ThemeSwitch';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 
-interface DashboardHeaderProps {
-  collapsed: boolean;
-  setCollapsed: (value: boolean) => void;
-}
-
 export function DashboardHeader() {
-  const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState('');
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-
   const { user, logoutUser } = useAuth();
 
   // Close dropdown on outside click
@@ -43,15 +35,14 @@ export function DashboardHeader() {
     }
   };
 
-  // ✅ Handle Logout
   const handleLogout = async () => {
     try {
       await logoutUser();
-      toast.success("Logged out successfully");
-      router.push("/auth");
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to logout");
+      toast.success('Logged out successfully');
+      router.push('/auth');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to logout');
     }
   };
 
@@ -77,8 +68,8 @@ export function DashboardHeader() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 pr-4 py-2 w-full bg-input border border-border rounded-lg
-                 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
-                 hover:bg-input-hover transition-colors"
+                       focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
+                       hover:bg-input-hover transition-colors"
           />
         </form>
       </div>
@@ -98,7 +89,6 @@ export function DashboardHeader() {
           >
             <div className="text-right hidden md:block">
               <div className="text-sm font-medium">{user?.displayName ?? 'User'}</div>
-              {/* <div className="text-xs text-foreground-muted">{user?.role ?? 'Member'}</div> */}
             </div>
             <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
               <span className="text-sm font-medium text-white">

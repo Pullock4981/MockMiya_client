@@ -15,7 +15,7 @@ import { WorkExperienceForm } from "@/components/forms/ResumeForms/WorkExperienc
 import { EducationForm } from "@/components/forms/ResumeForms/EducationForm";
 import { SkillsForm } from "@/components/forms/ResumeForms/SkillsForm";
 import { ProjectsForm } from "@/components/forms/ResumeForms/ProjectsForm";
-import { CertificationsForm } from "@/components/forms/ResumeForms/CertificationsForm";
+// import { CertificationsForm } from "@/components/forms/ResumeForms/CertificationsForm";
 import { ProfessionalLinksForm } from "@/components/forms/ResumeForms/ProfessionalLinksForm";
 import { AdditionalInfoForm } from "@/components/forms/ResumeForms/AdditionalInfoForm";
 import { AIReTouchForm } from "@/components/forms/ResumeForms/AIReTouchForm";

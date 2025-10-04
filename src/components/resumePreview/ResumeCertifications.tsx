@@ -8,7 +8,7 @@ interface ResumeCertificationsProps {
   lineHeight?: string;
 }
 
-const ResumeCertifications: React.FC<ResumeCertificationsProps> = ({ fontSize = "sm", lineHeight = "tight" }) => {
+const ResumeCertifications: React.FC<ResumeCertificationsProps> = ({ lineHeight = "tight" }) => {
   const { resumeData } = useResume();
   const certifications = Array.isArray(resumeData.certifications) ? resumeData.certifications : [];
   if (certifications.length === 0) return null;

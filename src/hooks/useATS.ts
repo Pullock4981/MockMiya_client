@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { ATSScore, ResumeData } from "@/types/resume";
+import { ATSScore } from "@/types/resume";
 
 export const useATS = () => {
   const [atsScore, setAtsScore] = useState<ATSScore | null>(null);
 
   // calculateATSScore now requires ResumeData
-  const calculateATSScore = async (resumeData: ResumeData) => {
+  const calculateATSScore = async () => {
     // Demo scoring logic, replace with real calculation
     const score: ATSScore = {
       overall: 80,

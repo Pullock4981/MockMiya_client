@@ -1,11 +1,11 @@
 'use client';
 
+import React, { Suspense, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Lottie from 'lottie-react';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
 
 import loginAnimation from '@/assets/lottie/login.json';
 import signupAnimation from '@/assets/lottie/signup.json';
@@ -13,7 +13,10 @@ import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import GoogleAuth from './socialAuth/GoogleAuth';
 
-export default function AuthPage() {
+/* ===============================
+   ✅ Inner component with hook
+================================ */
+function AuthPageInner() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
 
@@ -41,7 +44,9 @@ export default function AuthPage() {
           <div>
             <div className="mb-4">
               <h1 className="text-3xl font-bold text-center">Welcome</h1>
-              <p className="text-lg text-center">Sign in to your account or create a new one</p>
+              <p className="text-lg text-center">
+                Sign in to your account or create a new one
+              </p>
             </div>
 
             <GoogleAuth />
@@ -96,5 +101,16 @@ export default function AuthPage() {
         />
       </div>
     </div>
+  );
+}
+
+/* ===============================
+   ✅ Outer Suspense Wrapper
+================================ */
+export default function AuthPage() {
+  return (
+    <Suspense fallback={<div className="text-center text-green-300">Loading...</div>}>
+      <AuthPageInner />
+    </Suspense>
   );
 }

@@ -14,8 +14,6 @@ import { useMeta } from "@/context/ResumeContext/MetaContext";
 import { ResumeData, FormStep } from "@/types/resume";
 import { useATS } from "./useATS";
 
-import { exportResumeHandler } from "@/utils/exportResume";
-
 export const useResume = () => {
   const [currentStep, setCurrentStep] = useState(0);
 

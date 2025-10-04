@@ -35,7 +35,7 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: SidebarProps) => {
-  const { user, logoutUser } = useAuth();
+  const { logoutUser } = useAuth();
   const router = useRouter();
   const { activeTab, setActiveTab } = useActiveTab();
 
