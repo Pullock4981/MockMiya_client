@@ -59,7 +59,7 @@ const Dashboard = ({ setActiveTab }: OverviewProps) => {
       <div>
         <h1 className="text-3xl font-bold">Welcome back, John!</h1>
         <p className="text-muted-foreground mt-2">
-          Here's what's happening with your career preparation
+          Here what happening with your career preparation
         </p>
       </div>
 

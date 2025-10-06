@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -15,12 +16,12 @@ const NotFound = () => {
       <div className="text-center">
         <h1 className="text-6xl font-bold mb-4 text-gray-800 dark:text-gray-100">404</h1>
         <p className="text-xl text-gray-600 dark:text-gray-400 mb-4">Oops! Page not found</p>
-        <a
+        <Link
           href="/"
           className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-600 underline"
         >
           Return to Home
-        </a>
+        </Link>
       </div>
     </div>
   );

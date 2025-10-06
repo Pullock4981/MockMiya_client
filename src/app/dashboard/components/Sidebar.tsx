@@ -82,7 +82,7 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
       name: 'Video Interview',
       icon: Video,
       section: 'interviews',
-      path: '/dashboard/video-interview',
+      path: '/dashboard/live-interview',
     },
     {
       id: 'coding',

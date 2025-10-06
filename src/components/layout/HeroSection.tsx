@@ -30,7 +30,7 @@ const HeroSection = () => {
               </h1>
               
               <p className="text-xl text-foreground-secondary max-w-lg leading-relaxed">
-                Revolutionary AI tool for developers. Build perfect resumes, practice interviews, and ace your next tech job with MockMiya's comprehensive suite.
+                Revolutionary AI tool for developers. Build perfect resumes, practice interviews, and ace your next tech job with MockMiya comprehensive suite.
               </p>
             </div>
 

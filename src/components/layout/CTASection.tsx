@@ -23,7 +23,7 @@ const CTASection = () => {
 
           {/* Subheadline */}
           <p className="text-xl lg:text-2xl text-foreground-secondary mb-8 max-w-2xl mx-auto leading-relaxed">
-            Join 50,000+ developers who've accelerated their careers with MockMiya's AI-powered platform
+            Join 50,000+ developers who have accelerated their careers with MockMiya AI-powered platform
           </p>
 
           {/* CTA Buttons */}

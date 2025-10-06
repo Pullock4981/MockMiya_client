@@ -4,6 +4,7 @@ import { FcGoogle } from 'react-icons/fc';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../../context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { UserCredential } from 'firebase/auth';
 
 const GoogleAuth = () => {
   const { googleSignIn } = useAuth();
@@ -12,26 +13,30 @@ const GoogleAuth = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      const result = await googleSignIn();
+      const result: UserCredential = await googleSignIn();
       const user = result.user;
 
-      toast(`Welcome ${user.displayName || 'User'} 🎉`);
-
-      const from = searchParams.get('from') || '/dashboard';
-      router.push(from);
-    } catch (error: any) {
-      console.error('Google Sign In Error:', error);
-
-      // ❌ Error toast
-      toast.error(error.message || 'Google Sign In failed', {
+      toast.success(`Welcome ${user.displayName ?? 'User'} 🎉`, {
         position: 'top-center',
       });
+
+      const from = searchParams.get('from') ?? '/';
+      router.push(from);
+    } catch (error: unknown) {
+      // Fully type-safe error handling
+      let message = 'Google Sign In failed';
+
+      if (error instanceof Error) {
+        message = error.message;
+      }
+
+      console.error('Google Sign In Error:', message);
+      toast.error(message, { position: 'top-center' });
     }
   };
 
   return (
     <div className="text-center space-y-4">
-      {/* Google Button */}
       <button
         onClick={handleGoogleSignIn}
         className="w-full flex items-center justify-center gap-3 px-6 py-3 
@@ -45,7 +50,6 @@ const GoogleAuth = () => {
         <span>Continue with Google</span>
       </button>
 
-      {/* Divider */}
       <div className="flex items-center justify-center gap-4">
         <div className="h-[1px] flex-1 bg-green-900/40"></div>
         <span className="text-green-400 text-sm font-medium">OR</span>

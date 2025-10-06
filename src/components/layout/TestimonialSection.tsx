@@ -48,7 +48,7 @@ const TestimonialsSection = () => {
             <span className="text-gradient">Developers</span>
           </h2>
           <p className="text-xl text-foreground-secondary max-w-2xl mx-auto">
-            Join thousands of developers who've accelerated their careers with MockMiya
+            Join thousands of developers who have accelerated their careers with MockMiya
           </p>
         </div>
 
@@ -72,7 +72,7 @@ const TestimonialsSection = () => {
 
               {/* Content */}
               <p className="text-foreground-secondary mb-6 leading-relaxed">
-                "{testimonial.content}"
+                {testimonial.content}
               </p>
 
               {/* Author */}
