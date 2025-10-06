@@ -19,6 +19,8 @@ import { ProjectsForm } from "@/components/forms/ResumeForms/ProjectsForm";
 import { ProfessionalLinksForm } from "@/components/forms/ResumeForms/ProfessionalLinksForm";
 import { AdditionalInfoForm } from "@/components/forms/ResumeForms/AdditionalInfoForm";
 import { AIReTouchForm } from "@/components/forms/ResumeForms/AIReTouchForm";
+import { exportResumeHandler } from "@/utils/exportResume";
+import { CertificationsForm } from "./CertificationsForm";
 
 // Define typed step
 type FormStepType = {
@@ -38,9 +40,10 @@ export const ResumeForm: React.FC = () => {
     { id: "professionalLinks", title: "Professional Links", component: ProfessionalLinksForm, isCompleted: false },
     { id: "summary", title: "Summary", component: SummaryForm, isCompleted: false },
     { id: "skills", title: "Skills", component: SkillsForm, isCompleted: false },
-    { id: "projects", title: "Projects", component: ProjectsForm, isCompleted: false },
-    { id: "workExperience", title: "Work Experience", component: WorkExperienceForm, isCompleted: false },
     { id: "education", title: "Education", component: EducationForm, isCompleted: false },
+    { id: "workExperience", title: "Work Experience", component: WorkExperienceForm, isCompleted: false },
+    { id: "projects", title: "Projects", component: ProjectsForm, isCompleted: false },
+     { id: "certifications", title: "Certifications", component: CertificationsForm, isCompleted: false },
     { id: "additionalInfo", title: "Additional Info", component: AdditionalInfoForm, isCompleted: false },
     { id: "aiRetouch", title: "AI Retouch", component: AIReTouchForm, isCompleted: false },
   ];
@@ -75,35 +78,19 @@ export const ResumeForm: React.FC = () => {
   }, [currentStep]);
 
   // Download PDF
-  const handleDownloadPDF = async () => {
+const handleExport = async () => {
     try {
-      const response = await fetch("/api/exportResume");
-      if (!response.ok) throw new Error("Failed to download PDF");
-
-      // Ensure the Uint8Array is properly converted
-      const arrayBuffer = await response.arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
-
-      const blob = new Blob([uint8Array], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "resume.pdf";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      await exportResumeHandler();
     } catch (error) {
-      console.error("Error downloading PDF:", error);
+      console.error("PDF Export failed:", error);
     }
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full ">
       {/* Header */}
-      <div className="flex-none sticky top-0 z-20 p-4 bg-white shadow-sm">
-        <div className="flex items-center justify-between">
+      <div className="flex-none sticky top-0 z-20 p-4 shadow-sm bg-card text-card-foreground">
+        <div className="flex items-center justify-between ">
           <div>
             <h2 className="text-xl font-semibold text-foreground">
               Step {currentStep + 1} of {formSteps.length}
@@ -128,7 +115,7 @@ export const ResumeForm: React.FC = () => {
       {/* Tabs */}
       <div
         ref={tabsRef}
-        className="flex gap-2 overflow-x-auto sticky top-[72px] z-10 bg-white p-4 border-b border-border shadow-sm"
+        className="flex gap-2 overflow-x-auto sticky top-[72px] z-10 bg-card text-card-foreground p-4 border-b border-border shadow-sm"
       >
         {formSteps.map((step, index) => (
           <Button
@@ -158,12 +145,14 @@ export const ResumeForm: React.FC = () => {
       {/* Body */}
       <div className="flex-1 overflow-y-auto p-4">
         <Card className="overflow-visible p-6 shadow-md border-border/50">
-          {FormComponent ? <FormComponent /> : <div className="text-center py-8 text-muted-foreground">Form component not found</div>}
+          {FormComponent ? 
+          <FormComponent /> : 
+          <div className="text-center py-8 text-muted-foreground">Form component not found</div>}
         </Card>
       </div>
 
       {/* Footer */}
-      <div className="flex-none sticky bottom-0 z-10 p-4 bg-white shadow-sm">
+      <div className="flex-none sticky bottom-0 z-10 p-4 bg-card text-card-foreground shadow-sm">
         <div className="flex items-center justify-between">
           <Button
             variant="outline"
@@ -185,12 +174,12 @@ export const ResumeForm: React.FC = () => {
             ) : (
               <>
                 <Button
-                  onClick={handleDownloadPDF}
-                  className="flex items-center gap-2 bg-gradient-primary hover:shadow-paper transition-all duration-300"
+                  onClick={handleExport}
+                  className="flex items-center gap-2 transition-all duration-300"
                 >
                   Download PDF
                 </Button>
-                <Button className="flex items-center gap-2 bg-gradient-primary hover:shadow-paper transition-all duration-300">
+                <Button className="flex items-center gap-2 transition-all duration-300">
                   Complete Resume <ChevronRight className="h-4 w-4" />
                 </Button>
               </>

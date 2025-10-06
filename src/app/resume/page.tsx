@@ -9,8 +9,8 @@ import { Card } from "@/components/ui/card";
 import { Eye, Edit3, Menu, X, Download } from "lucide-react";
 import { ResumeForm } from "@/components/forms/ResumeForms/ResumeForm";
 import ResumePreview from "@/components/resumePreview/ResumePreview";
-
 import { exportResumeHandler } from "@/utils/exportResume";
+import { ResumeNavbar } from "@/components/layout/ResumeNavbar";
 
 const ResumePage = () => {
   const [isMobilePreviewMode, setIsMobilePreviewMode] = useState(false);
@@ -83,10 +83,11 @@ const ResumePage = () => {
               `}
             >
               <Card className="h-full overflow-y-auto border-0 shadow-none lg:rounded-none">
-                <div className="sticky top-0 bg-card/95 backdrop-blur-sm border-b border-border p-4 z-10">
-                  <h2 className="text-lg font-semibold text-foreground">Live Preview</h2>
+                <div className="sticky -top-8 bg-card/95 backdrop-blur-sm p-4 z-10">
+                  {/* <h2 className="text-lg font-semibold text-foreground">Live Preview</h2> */}
+                  <ResumeNavbar/>
                 </div>
-                <div className="p-6">
+                <div className="p-6 border m-4 rounded-lg">
                   <ResumePreview />
                 </div>
               </Card>

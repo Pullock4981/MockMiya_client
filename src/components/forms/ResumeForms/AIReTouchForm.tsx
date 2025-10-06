@@ -92,7 +92,7 @@ export const AIReTouchForm: React.FC = () => {
         <Button
           onClick={handleATSOptimize}
           disabled={isProcessing === "ats-optimize"}
-          className="w-full bg-gradient-ai text-white hover:shadow-ai transition-all duration-300"
+          className="w-full text-white hover:shadow-ai transition-all duration-300"
         >
           {isProcessing === "ats-optimize" ? (
             <>

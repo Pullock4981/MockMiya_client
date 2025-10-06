@@ -1,10 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Palette, Download, Layout, Share2, Eye, EyeOff } from "lucide-react";
 import { exportResumeHandler } from "@/utils/exportResume";
 import { useResumeTheme } from "./ResumeThemeContext";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import TemplateSelector from "@/utils/TemplateSelector";
 
 export type TextTheme = "Default" | "Green" | "Blue" | "Orange" | "Purple";
 
@@ -20,8 +22,8 @@ interface ResumeControlsProps {
   atsScore?: number;
   showATSDetails: boolean;
   setShowATSDetails: (value: boolean) => void;
-  template: "Single Column" | "Two Columns";
-  setTemplate: (template: "Single Column" | "Two Columns") => void;
+  template: string;
+  setTemplate: (template: string) => void;
   userId: string;
   theme: "Light" | "Dark";
   setTheme: (theme: "Light" | "Dark") => void;
@@ -35,18 +37,18 @@ const ResumeControls: React.FC<ResumeControlsProps> = ({
   setTemplate,
 }) => {
   const { textTheme, setTextTheme } = useResumeTheme();
+  const [openTemplateSelector, setOpenTemplateSelector] = useState(false);
 
-const handleExport = async () => {
-  try {
-    await exportResumeHandler();
-  } catch (error) {
-    console.error("PDF Export failed:", error);
-  }
-};
-
+  const handleExport = async () => {
+    try {
+      await exportResumeHandler();
+    } catch (error) {
+      console.error("PDF Export failed:", error);
+    }
+  };
 
   return (
-    <div className="flex flex-wrap justify-between items-center gap-4">
+    <div className="flex flex-wrap justify-between items-center gap-4 bg-foreground-muted p-2 rounded-lg">
       {/* ATS Toggle */}
       <div className="flex items-center gap-3">
         {atsScore !== undefined && (
@@ -62,18 +64,25 @@ const handleExport = async () => {
 
       {/* Controls */}
       <div className="flex items-center gap-2 flex-wrap">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-          onClick={() =>
-            setTemplate(template === "Single Column" ? "Two Columns" : "Single Column")
-          }
-        >
-          <Layout className="h-4 w-4" /> Template
-        </Button>
+        {/* Template Selector */}
+        <Popover open={openTemplateSelector} onOpenChange={setOpenTemplateSelector}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Layout className="h-4 w-4" /> {template}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[350px]">
+            <TemplateSelector
+              selectedTemplate={template}
+              onSelectTemplate={(tpl) => {
+                setTemplate(tpl);
+                setOpenTemplateSelector(false);
+              }}
+            />
+          </PopoverContent>
+        </Popover>
 
-        {/* Palette */}
+        {/* Color Palette */}
         <div className="flex items-center gap-2">
           <Palette className="h-4 w-4" />
           <div className="flex gap-1">

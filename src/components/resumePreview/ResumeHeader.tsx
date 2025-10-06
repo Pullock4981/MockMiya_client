@@ -1,9 +1,7 @@
 "use client";
-
 import React from "react";
 import { useResume } from "@/hooks/useResume";
 import { useResumeTheme } from "./ResumeThemeContext";
-
 
 const ResumeHeader: React.FC = () => {
   const { resumeData } = useResume();
@@ -11,24 +9,53 @@ const ResumeHeader: React.FC = () => {
   const { firstName, lastName, jobTitle, email, phone, location } = resumeData.personalInfo;
   const professionalLinks = resumeData.socialLinks || [];
 
-  if (!firstName && !lastName) return null;
-
   return (
-    <div className="text-center space-y-2">
-      <h1 style={{ color: getTextColor("heading") }} className="font-bold text-2xl lg:text-3xl">
-        {firstName} {lastName}
+    <section className="text-center space-y-2">
+      {/* Name */}
+      <h1
+        style={{ color: getTextColor("heading") }}
+        className="font-bold text-2xl lg:text-3xl"
+      >
+        {firstName || lastName ? (
+          `${firstName} ${lastName}`
+        ) : (
+          <span className="inline-block w-32 h-6 bg-gray-100 animate-pulse rounded" />
+        )}
       </h1>
-      {jobTitle && (
-        <div style={{ color: getTextColor("subHeading"), fontWeight: 500 }} className="text-sm">
+
+      {/* Job Title */}
+      {jobTitle ? (
+        <div
+          style={{ color: getTextColor("subHeading"), fontWeight: 500 }}
+          className="text-sm"
+        >
           {jobTitle}
         </div>
+      ) : (
+        <div className="w-24 h-4 bg-gray-100 animate-pulse mx-auto rounded" />
       )}
-      <div className="flex flex-wrap justify-center gap-2 text-sm" style={{ color: getTextColor("subHeading") }}>
-        {location && <span>{location}</span>}
-        {email && <span>• {email}</span>}
-        {phone && <span>• {phone}</span>}
+
+      {/* Contact Info */}
+      <div className="flex flex-wrap justify-center gap-2 text-sm">
+        {location ? (
+          location
+        ) : (
+          <span className="w-24 h-3 bg-gray-100 animate-pulse inline-block rounded" />
+        )}
+        {email ? (
+          `• ${email}`
+        ) : (
+          <span className="w-32 h-3 bg-gray-100 animate-pulse inline-block rounded" />
+        )}
+        {phone ? (
+          `• ${phone}`
+        ) : (
+          <span className="w-24 h-3 bg-gray-100 animate-pulse inline-block rounded" />
+        )}
       </div>
-      {professionalLinks.length > 0 && (
+
+      {/* Social Links */}
+      {professionalLinks.length > 0 ? (
         <div className="flex flex-wrap justify-center gap-3 text-sm">
           {professionalLinks.map((link) => (
             <a
@@ -42,8 +69,20 @@ const ResumeHeader: React.FC = () => {
             </a>
           ))}
         </div>
+      ) : (
+        <div className="flex flex-wrap justify-center gap-2 mt-1">
+          {/* Placeholder for links */}
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <span
+              key={idx}
+              className="w-16 h-3 bg-gray-100 animate-pulse inline-block rounded"
+            />
+          ))}
+        </div>
       )}
-    </div>
+
+      <hr className="border-2 border-gray-300 border-dashed mt-2" />
+    </section>
   );
 };
 

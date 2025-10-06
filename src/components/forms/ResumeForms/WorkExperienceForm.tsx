@@ -187,7 +187,7 @@ export const WorkExperienceForm: React.FC = () => {
 
           <Button
             onClick={handleAddExperience}
-            className="w-full bg-gradient-primary hover:shadow-paper transition-all duration-300"
+            className="w-full transition-all duration-300"
             disabled={!newExperience.jobTitle || !newExperience.company}
           >
             Add Experience

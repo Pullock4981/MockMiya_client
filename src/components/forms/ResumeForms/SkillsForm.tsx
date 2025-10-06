@@ -84,7 +84,7 @@ export const SkillsForm: React.FC = () => {
 
           <Button
             onClick={handleAddSkill}
-            className="w-full bg-gradient-primary hover:shadow-paper transition-all duration-300"
+            className="w-full hover:shadow-paper transition-all duration-300"
             disabled={!newSkill.name}
           >
             <Plus className="h-4 w-4 mr-2" />
