@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { Education } from "@/types/resume";
 import { v4 as uuidv4 } from "uuid";
 
@@ -13,8 +13,17 @@ interface EducationContextType {
 
 const EducationContext = createContext<EducationContextType | undefined>(undefined);
 
-export const EducationProvider = ({ children }: { children: React.ReactNode }) => {
+interface Props {
+  children: React.ReactNode;
+  initialData?: Education[];
+}
+
+export const EducationProvider = ({ children, initialData }: Props) => {
   const [education, setEducation] = useState<Education[]>([]);
+
+  useEffect(() => {
+    if (initialData) setEducation(initialData);
+  }, [initialData]);
 
   const addEducation = (edu: Omit<Education, "id">) => {
     setEducation((prev) => [...prev, { id: uuidv4(), ...edu }]);

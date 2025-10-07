@@ -1,192 +1,137 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useProfessionalLinks } from "@/context/ResumeContext/ProfessionalLinks";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Plus, Trash2, ExternalLink } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Trash2, ExternalLink, Linkedin, Github, Twitter, Globe, Link as LinkIcon } from "lucide-react";
 import { SocialLink } from "@/types/resume";
 
-// Define union type for platforms
-type Platform = "LinkedIn" | "GitHub" | "Twitter" | "Portfolio" | "Other";
+// All possible platforms (stable constant)
+const allPlatforms: Platform[] = ["LinkedIn", "GitHub", "Portfolio", "Twitter", "Other"];
+
+type Platform = "LinkedIn" | "GitHub" | "Portfolio" | "Twitter" | "Other";
+
+// Icon mapping for each platform
+const platformIcons: Record<Platform, React.ReactNode> = {
+  LinkedIn: <Linkedin className="w-4 h-4" />,
+  GitHub: <Github className="w-4 h-4" />,
+  Portfolio: <Globe className="w-4 h-4" />,
+  Twitter: <Twitter className="w-4 h-4" />,
+  Other: <LinkIcon className="w-4 h-4" />,
+};
 
 export const ProfessionalLinksForm: React.FC = () => {
   const { socialLinks, addLink, removeLink } = useProfessionalLinks();
 
+  // Memoized function to calculate available platforms
+  const getAvailablePlatforms = useCallback((): Platform[] => {
+    return allPlatforms.filter((p) => !socialLinks.some((link) => link.platform === p));
+  }, [socialLinks]);
+
+  const [availablePlatforms, setAvailablePlatforms] = useState<Platform[]>(getAvailablePlatforms());
+
   const [newLink, setNewLink] = useState<Omit<SocialLink, "id">>({
-    platform: "LinkedIn",
+    platform: availablePlatforms[0] || "LinkedIn",
     url: "",
-    username: "",
   });
 
+  // Update available platforms whenever socialLinks or newLink.platform changes
+  useEffect(() => {
+    const platforms = getAvailablePlatforms();
+    setAvailablePlatforms(platforms);
+
+    if (!platforms.includes(newLink.platform)) {
+      setNewLink({
+        platform: platforms[0] || "LinkedIn",
+        url: "",
+      });
+    }
+  }, [socialLinks, newLink.platform, getAvailablePlatforms]);
+
+  // Add new link to context
   const handleAddLink = () => {
     if (!newLink.url) return;
-    addLink(newLink);
-    setNewLink({ platform: "LinkedIn", url: "", username: "" });
-  };
 
-  const handleUpdateLink = (
-    id: string,
-    field: keyof SocialLink,
-    value: string
-  ) => {
-    const updatedLinks = socialLinks.map((link) =>
-      link.id === id ? { ...link, [field]: value } : link
-    );
-    // Update context state
-    // Assuming useProfessionalLinks has a setter or replace add/remove logic
-    // For simplicity, remove + add workaround
-    removeLink(id);
-    addLink(updatedLinks.find((l) => l.id === id)!);
+    const linkWithId: SocialLink = {
+      id: Math.random().toString(36).substring(2, 9),
+      platform: newLink.platform,
+      url: newLink.url,
+    };
+
+    addLink(linkWithId);
+    setNewLink({ ...newLink, url: "" });
   };
 
   return (
-    <div className="space-y-6">
-      {socialLinks.map((link, index) => (
-        <Card key={link.id} className="p-4 border-border/50">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium text-foreground">
-                Professional Link {index + 1}
-              </h4>
+    <div className="space-y-3">
+      {/* Existing Links */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {socialLinks.map((link) => (
+          <Card key={link.id} className="p-2 flex items-center justify-between">
+            <div className="flex items-center gap-3 flex-1">
+              {platformIcons[link.platform]}
+              <span className="font-medium">{link.platform}</span>
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline flex items-center gap-1"
+              >
+                <ExternalLink className="w-4 h-4" /> Link
+              </a>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => removeLink(link.id)}
-                className="text-destructive hover:text-destructive-foreground hover:bg-destructive/10"
+                className="text-destructive hover:bg-destructive/10"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="w-4 h-4" />
               </Button>
             </div>
+          </Card>
+        ))}
+      </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Platform</Label>
-                <Select
-                  value={link.platform}
-                  onValueChange={(value: Platform) =>
-                    handleUpdateLink(link.id, "platform", value)
-                  }
-                >
-                  <SelectTrigger className="border-border/50">
-                    <SelectValue placeholder="Select platform" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="LinkedIn">LinkedIn</SelectItem>
-                    <SelectItem value="GitHub">GitHub</SelectItem>
-                    <SelectItem value="Twitter">Twitter</SelectItem>
-                    <SelectItem value="Portfolio">Portfolio</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Username</Label>
-                <Input
-                  type="text"
-                  value={link.username || ""}
-                  onChange={(e) =>
-                    handleUpdateLink(link.id, "username", e.target.value)
-                  }
-                  placeholder="@username"
-                  className="border-border/50 focus:border-primary transition-colors"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Full URL</Label>
-              <div className="flex gap-2">
-                <Input
-                  type="url"
-                  value={link.url}
-                  onChange={(e) =>
-                    handleUpdateLink(link.id, "url", e.target.value)
-                  }
-                  placeholder="https://linkedin.com/in/username"
-                  className="border-border/50 focus:border-primary transition-colors flex-1"
-                />
-                {link.url && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.open(link.url, "_blank")}
-                    className="px-3"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        </Card>
-      ))}
-
-      <Card className="p-4 border-dashed border-border/50 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Platform</Label>
+      {/* Add New Link */}
+      {availablePlatforms.length > 0 && (
+        <div className="p-2 flex flex-col gap-2">
+          <div className="flex items-center gap-4">
             <Select
               value={newLink.platform}
-              onValueChange={(value: Platform) =>
-                setNewLink({ ...newLink, platform: value })
+              onValueChange={(value) =>
+                setNewLink({ ...newLink, platform: value as Platform })
               }
             >
-              <SelectTrigger className="border-border/50">
-                <SelectValue placeholder="Select platform" />
+              <SelectTrigger className="w-36">
+                <SelectValue placeholder="Platform" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="LinkedIn">LinkedIn</SelectItem>
-                <SelectItem value="GitHub">GitHub</SelectItem>
-                <SelectItem value="Twitter">Twitter</SelectItem>
-                <SelectItem value="Portfolio">Portfolio</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
+                {availablePlatforms.map((p) => (
+                  <SelectItem key={p} value={p}>
+                    <div className="flex items-center gap-2">
+                      {platformIcons[p]}
+                      <span>{p}</span>
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
-          </div>
 
-          <div className="space-y-2">
-            <Label>Username</Label>
             <Input
-              value={newLink.username}
-              onChange={(e) =>
-                setNewLink({ ...newLink, username: e.target.value })
-              }
-              placeholder="@username"
-              className="border-border/50 focus:border-primary transition-colors"
+              value={newLink.url}
+              onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
+              placeholder="https://example.com"
+              className="flex-1"
             />
           </div>
+          <Button onClick={handleAddLink} className="flex items-center gap-1 px-3">
+            <Plus className="w-4 h-4" /> Add
+          </Button>
         </div>
-
-        <div className="space-y-2">
-          <Label>Full URL</Label>
-          <Input
-            type="url"
-            value={newLink.url}
-            onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
-            placeholder="https://linkedin.com/in/username"
-            className="border-border/50 focus:border-primary transition-colors"
-          />
-        </div>
-
-        <Button
-          className="w-full mt-2 bg-gradient-primary hover:shadow-paper transition-all duration-300"
-          onClick={handleAddLink}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Professional Link
-        </Button>
-      </Card>
+      )}
     </div>
   );
 };

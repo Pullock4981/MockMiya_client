@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { PersonalInfo } from "@/types/resume";
 
 interface PersonalInfoContextType {
@@ -10,7 +10,12 @@ interface PersonalInfoContextType {
 
 const PersonalInfoContext = createContext<PersonalInfoContextType | undefined>(undefined);
 
-export const PersonalInfoProvider = ({ children }: { children: React.ReactNode }) => {
+interface Props {
+  children: React.ReactNode;
+  initialData?: PersonalInfo;
+}
+
+export const PersonalInfoProvider = ({ children, initialData }: Props) => {
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
     firstName: "",
     lastName: "",
@@ -22,6 +27,10 @@ export const PersonalInfoProvider = ({ children }: { children: React.ReactNode }
     openToRelocate: false,
     profileImage: "",
   });
+
+  useEffect(() => {
+    if (initialData) setPersonalInfo(initialData);
+  }, [initialData]);
 
   const updatePersonalInfo = (info: Partial<PersonalInfo>) => {
     setPersonalInfo((prev) => ({ ...prev, ...info }));

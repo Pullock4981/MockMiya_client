@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { Certification } from "@/types/resume";
 import { v4 as uuidv4 } from "uuid";
 
@@ -13,8 +13,17 @@ interface CertificationsContextType {
 
 const CertificationsContext = createContext<CertificationsContextType | undefined>(undefined);
 
-export const CertificationsProvider = ({ children }: { children: React.ReactNode }) => {
+interface Props {
+  children: React.ReactNode;
+  initialData?: Certification[];
+}
+
+export const CertificationsProvider = ({ children, initialData }: Props) => {
   const [certifications, setCertifications] = useState<Certification[]>([]);
+
+  useEffect(() => {
+    if (initialData) setCertifications(initialData);
+  }, [initialData]);
 
   const addCertification = (cert: Omit<Certification, "id">) => {
     setCertifications((prev) => [...prev, { id: uuidv4(), ...cert }]);

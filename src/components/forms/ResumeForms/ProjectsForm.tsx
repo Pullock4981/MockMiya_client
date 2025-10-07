@@ -127,7 +127,7 @@ export const ProjectsForm: React.FC = () => {
             </div>
 
             <Button
-              className="w-full bg-gradient-primary hover:shadow-paper transition-all duration-300"
+              className="w-full transition-all duration-300"
               onClick={handleAddProject}
             >
               <Plus className="h-4 w-4 mr-2" />

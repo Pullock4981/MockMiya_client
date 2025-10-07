@@ -1,14 +1,20 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Palette, Download, Layout, Share2, Eye, EyeOff } from "lucide-react";
 import { exportResumeHandler } from "@/utils/exportResume";
-import { useResumeTheme } from "./ResumeThemeContext";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import TemplateSelector from "@/utils/TemplateSelector";
+import { useMeta } from "@/context/ResumeContext/MetaContext";
 
-export type TextTheme = "Default" | "Green" | "Blue" | "Orange" | "Purple";
+type ThemeColorOption = {
+  name: string;
+  colors: [string, string];
+};
 
-const themeColors: { name: TextTheme; colors: [string, string] }[] = [
+// Theme color options
+const themeColors: ThemeColorOption[] = [
   { name: "Default", colors: ["#ffffff", "#000000"] },
   { name: "Green", colors: ["#ffffff", "#34A853"] },
   { name: "Blue", colors: ["#ffffff", "#1A73E8"] },
@@ -17,36 +23,33 @@ const themeColors: { name: TextTheme; colors: [string, string] }[] = [
 ];
 
 interface ResumeControlsProps {
-  atsScore?: number;
   showATSDetails: boolean;
   setShowATSDetails: (value: boolean) => void;
-  template: "Single Column" | "Two Columns";
-  setTemplate: (template: "Single Column" | "Two Columns") => void;
   userId: string;
-  theme: "Light" | "Dark";
-  setTheme: (theme: "Light" | "Dark") => void;
 }
 
 const ResumeControls: React.FC<ResumeControlsProps> = ({
-  atsScore,
   showATSDetails,
   setShowATSDetails,
-  template,
-  setTemplate,
 }) => {
-  const { textTheme, setTextTheme } = useResumeTheme();
+  const { template, updateTemplate, theme, updateTheme, atsScore } = useMeta();
+  const [openTemplateSelector, setOpenTemplateSelector] = useState(false);
 
-const handleExport = async () => {
-  try {
-    await exportResumeHandler();
-  } catch (error) {
-    console.error("PDF Export failed:", error);
-  }
-};
+  // PDF export handler
+  const handleExport = async () => {
+    try {
+      await exportResumeHandler();
+    } catch (error) {
+      console.error("PDF Export failed:", error);
+    }
+  };
 
+  // Fallbacks to avoid undefined
+  const currentTemplate = template ?? { id: "default", name: "Classic", layout: "classic", sections: [] };
+  const currentTheme = theme ?? { id: "default", name: "Default", primaryColor: "#2563eb", accentColor: "#9333ea", textColor: "#111827", backgroundColor: "#ffffff", fontFamily: "Inter" };
 
   return (
-    <div className="flex flex-wrap justify-between items-center gap-4">
+    <div className="flex flex-wrap justify-between items-center gap-4 bg-foreground-muted p-2 rounded-lg">
       {/* ATS Toggle */}
       <div className="flex items-center gap-3">
         {atsScore !== undefined && (
@@ -62,27 +65,49 @@ const handleExport = async () => {
 
       {/* Controls */}
       <div className="flex items-center gap-2 flex-wrap">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-          onClick={() =>
-            setTemplate(template === "Single Column" ? "Two Columns" : "Single Column")
-          }
-        >
-          <Layout className="h-4 w-4" /> Template
-        </Button>
+        {/* Template Selector */}
+        <Popover open={openTemplateSelector} onOpenChange={setOpenTemplateSelector}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Layout className="h-4 w-4" /> {currentTemplate.name}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[350px]">
+            <TemplateSelector
+              selectedTemplate={currentTemplate.name}
+              onSelectTemplate={(tpl) => {
+                updateTemplate({ 
+                  ...currentTemplate, 
+                  name: tpl,
+                  id: currentTemplate.id || "default",
+                  layout: currentTemplate.layout || "classic",
+                  sections: currentTemplate.sections || [],
+                });
+                setOpenTemplateSelector(false);
+              }}
+            />
+          </PopoverContent>
+        </Popover>
 
-        {/* Palette */}
+        {/* Color Palette */}
         <div className="flex items-center gap-2">
           <Palette className="h-4 w-4" />
           <div className="flex gap-1">
             {themeColors.map((t) => (
               <button
                 key={t.name}
-                onClick={() => setTextTheme(t.name)}
+                onClick={() => updateTheme({ 
+                  ...currentTheme, 
+                  name: t.name, 
+                  id: currentTheme.id || "default",
+                  primaryColor: currentTheme.primaryColor || "#2563eb",
+                  accentColor: currentTheme.accentColor || "#9333ea",
+                  textColor: currentTheme.textColor || "#111827",
+                  backgroundColor: currentTheme.backgroundColor || "#ffffff",
+                  fontFamily: currentTheme.fontFamily || "Inter",
+                })}
                 className={`w-6 h-6 rounded-full border border-gray-300 flex overflow-hidden cursor-pointer ${
-                  textTheme === t.name ? "ring-2 ring-offset-1 ring-primary" : ""
+                  currentTheme.name === t.name ? "ring-2 ring-offset-1 ring-primary" : ""
                 }`}
               >
                 <div className="w-1/2 h-full" style={{ backgroundColor: t.colors[0] }} />
@@ -92,10 +117,12 @@ const handleExport = async () => {
           </div>
         </div>
 
+        {/* Export PDF */}
         <Button variant="outline" size="sm" onClick={handleExport}>
           <Download className="h-4 w-4" /> PDF
         </Button>
 
+        {/* Share Button */}
         <Button variant="outline" size="sm" className="flex items-center gap-2">
           <Share2 className="h-4 w-4" /> Share
         </Button>

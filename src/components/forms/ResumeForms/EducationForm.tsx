@@ -128,7 +128,7 @@ export const EducationForm: React.FC = () => {
 
           <Button
             onClick={handleAddEducation}
-            className="w-full bg-gradient-primary hover:shadow-paper transition-all duration-300"
+            className="w-full transition-all duration-300"
             disabled={!newEdu.degree || !newEdu.institution}
           >
             <Plus className="h-4 w-4 mr-2" />
