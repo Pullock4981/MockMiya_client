@@ -14,93 +14,198 @@ import { useMeta } from "@/context/ResumeContext/MetaContext";
 import { ResumeData, FormStep } from "@/types/resume";
 import { useATS } from "./useATS";
 import { useAuth } from "@/context/AuthContext";
+import { saveResumeStep } from "@/utils/resumeActions";
+
+import { v4 as uuidv4 } from "uuid";
 
 export const useResume = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [resumeId] = useState(() => uuidv4());
   const { user } = useAuth();
 
-  // --- Form steps setup ---
-  const formSteps: FormStep[] = [
-    { id: "personal", title: "Personal Info", description: "Add your personal details", component: "PersonalInfoForm", isCompleted: false, isRequired: true },
-    { id: "summary", title: "Summary", description: "Write a short summary", component: "SummaryForm", isCompleted: false, isRequired: true },
-    { id: "work", title: "Work Experience", description: "Add your work history", component: "WorkExperienceForm", isCompleted: false, isRequired: true },
-    { id: "education", title: "Education", description: "Add your education", component: "EducationForm", isCompleted: false, isRequired: true },
-    { id: "skills", title: "Skills", description: "Add your skills", component: "SkillsForm", isCompleted: false, isRequired: true },
-    { id: "projects", title: "Projects", description: "Showcase projects", component: "ProjectsForm", isCompleted: false, isRequired: false },
-    { id: "certifications", title: "Certifications", description: "List your certifications", component: "CertificationsForm", isCompleted: false, isRequired: false },
-    { id: "links", title: "Professional Links", description: "Add LinkedIn, GitHub etc", component: "ProfessionalLinksForm", isCompleted: false, isRequired: false },
-    { id: "additional", title: "Additional Info", description: "Languages, awards, etc.", component: "AdditionalInfoForm", isCompleted: false, isRequired: false },
-    { id: "ai", title: "AI ReTouch", description: "Get AI suggestions", component: "AIReTouchForm", isCompleted: false, isRequired: false },
-  ];
-
-  // --- Navigation handlers ---
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, formSteps.length - 1));
-  const previousStep = () => setCurrentStep(prev => Math.max(prev - 1, 0));
-  const goToStep = (step: number) => setCurrentStep(step);
-
-  // --- Context hooks ---
   const { personalInfo, updatePersonalInfo } = usePersonalInfo();
   const { summary, updateSummary } = useSummary();
-  const { workExperience, addWork, updateWork, removeWork } = useWorkExperience();
-  const { education, addEducation, updateEducation, removeEducation } = useEducation();
+  const { workExperience, addWork, updateWork, removeWork } =
+    useWorkExperience();
+  const { education, addEducation, updateEducation, removeEducation } =
+    useEducation();
   const { skills, addSkill, updateSkill, removeSkill } = useSkills();
   const { projects, addProject, updateProject, removeProject } = useProjects();
-  const { certifications, addCertification, updateCertification, removeCertification } = useCertifications();
-  const { socialLinks, addLink, updateLink, removeLink } = useProfessionalLinks();
-  const { additionalInfo, addLanguage, removeLanguage, updateAdditionalInfo } = useAdditionalInfo();
-  const { template, theme, aiSuggestions, updateTemplate, updateTheme } = useMeta();
+  const {
+    certifications,
+    addCertification,
+    updateCertification,
+    removeCertification,
+  } = useCertifications();
+  const { socialLinks, addLink, updateLink, removeLink } =
+    useProfessionalLinks();
+  const { additionalInfo, addLanguage, removeLanguage, updateAdditionalInfo } =
+    useAdditionalInfo();
+  const { template, theme, aiSuggestions, updateTemplate, updateTheme } =
+    useMeta();
   const { atsScore, calculateATSScore } = useATS();
 
-  // --- Resume ID Generator ---
-  const generateResumeId = useCallback(() => {
-    const firstNamePart = personalInfo?.firstName?.slice(0, 3).toUpperCase() || "USR";
-    const templatePart = template?.name?.slice(0, 3).toUpperCase() || "TMP";
-    const userPart = user?.uid?.slice(-4)?.toUpperCase() || Math.random().toString(36).substring(2, 6).toUpperCase();
-    return `${firstNamePart}-${templatePart}-${userPart}`;
-  }, [personalInfo?.firstName, template?.name, user?.uid]);
+  const formSteps: FormStep[] = useMemo(
+    () => [
+      {
+        id: "personal",
+        title: "Personal Info",
+        description: "Add your personal details",
+        component: "PersonalInfoForm",
+        isCompleted: false,
+        isRequired: true,
+      },
+      {
+        id: "summary",
+        title: "Summary",
+        description: "Write a short summary",
+        component: "SummaryForm",
+        isCompleted: false,
+        isRequired: true,
+      },
+      {
+        id: "work",
+        title: "Work Experience",
+        description: "Add your work history",
+        component: "WorkExperienceForm",
+        isCompleted: false,
+        isRequired: true,
+      },
+      {
+        id: "education",
+        title: "Education",
+        description: "Add your education",
+        component: "EducationForm",
+        isCompleted: false,
+        isRequired: true,
+      },
+      {
+        id: "skills",
+        title: "Skills",
+        description: "Add your skills",
+        component: "SkillsForm",
+        isCompleted: false,
+        isRequired: true,
+      },
+      {
+        id: "projects",
+        title: "Projects",
+        description: "Showcase projects",
+        component: "ProjectsForm",
+        isCompleted: false,
+        isRequired: false,
+      },
+      {
+        id: "certifications",
+        title: "Certifications",
+        description: "List your certifications",
+        component: "CertificationsForm",
+        isCompleted: false,
+        isRequired: false,
+      },
+      {
+        id: "links",
+        title: "Professional Links",
+        description: "Add LinkedIn, GitHub etc",
+        component: "ProfessionalLinksForm",
+        isCompleted: false,
+        isRequired: false,
+      },
+      {
+        id: "additional",
+        title: "Additional Info",
+        description: "Languages, awards, etc.",
+        component: "AdditionalInfoForm",
+        isCompleted: false,
+        isRequired: false,
+      },
+      {
+        id: "ai",
+        title: "AI ReTouch",
+        description: "Get AI suggestions",
+        component: "AIReTouchForm",
+        isCompleted: false,
+        isRequired: false,
+      },
+    ],
+    []
+  );
 
-  // --- Build Resume Data (now includes email) ---
-  const buildResumeData = useCallback((): ResumeData => ({
-    id: generateResumeId(),
-    userEmail: user?.email || "", 
-    personalInfo,
-    summary,
-    workExperience,
-    education,
-    skills,
-    projects,
-    certifications,
-    socialLinks,
-    additionalInfo,
-    template,
-    theme,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }), [
-    personalInfo,
-    summary,
-    workExperience,
-    education,
-    skills,
-    projects,
-    certifications,
-    socialLinks,
-    additionalInfo,
-    template,
-    theme,
-    generateResumeId,
-    user?.email
-  ]);
+  // Build safe resume data with defaults
+  const buildResumeData = useCallback(
+    (): ResumeData => ({
+      id: resumeId,
+      userEmail: user?.email || "",
+      personalInfo: personalInfo ?? {},
+      summary: summary ?? "",
+      workExperience: workExperience ?? [],
+      education: education ?? [],
+      skills: skills ?? [],
+      projects: projects ?? [],
+      certifications: certifications ?? [],
+      socialLinks: socialLinks ?? [],
+      additionalInfo: additionalInfo ?? {},
+      template: template ?? {
+        id: "default",
+        name: "Classic",
+        layout: "classic",
+        sections: [],
+      },
+      theme: theme ?? {
+        id: "default",
+        name: "Default",
+        primaryColor: "#2563eb",
+        accentColor: "#9333ea",
+        textColor: "#111827",
+        backgroundColor: "#ffffff",
+        fontFamily: "Inter",
+      },
+      meta: {
+        currentStep,
+        completed: currentStep === formSteps.length - 1,
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }),
+    [
+      resumeId,
+      user?.email,
+      personalInfo,
+      summary,
+      workExperience,
+      education,
+      skills,
+      projects,
+      certifications,
+      socialLinks,
+      additionalInfo,
+      template,
+      theme,
+      currentStep,
+      formSteps.length,
+    ]
+  );
 
   const resumeData = useMemo(() => buildResumeData(), [buildResumeData]);
 
-  // --- AI Suggestions ---
-  const getAISuggestions = async (section: string) => {
-    console.log("AI suggestions requested for:", section);
-    return aiSuggestions.filter(s => s.section === section);
+  // Navigation
+  const nextStep = async () => {
+    try {
+      await saveResumeStep(resumeData.id, resumeData.userEmail, resumeData);
+      setCurrentStep((prev) => Math.min(prev + 1, formSteps.length - 1));
+    } catch (err) {
+      console.error("Failed to save resume step:", err);
+    }
   };
 
-  // --- Export Resume ---
+  const previousStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
+  const goToStep = (step: number) => setCurrentStep(step);
+
+  // AI suggestions
+  const getAISuggestions = async (section: string) =>
+    aiSuggestions?.filter((s) => s.section === section) ?? [];
+
+  // Export resume as PDF
   const exportResumeHandler = async () => {
     try {
       const html = document.getElementById("resume-preview")?.outerHTML;
@@ -115,8 +220,8 @@ export const useResume = () => {
           }),
         });
       }
-    } catch (error) {
-      console.error("Export failed:", error);
+    } catch (err) {
+      console.error("Export failed:", err);
     }
   };
 

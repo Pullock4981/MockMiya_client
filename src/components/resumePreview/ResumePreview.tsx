@@ -1,8 +1,3 @@
-
-
-
-
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -23,15 +18,30 @@ import { useAuth } from "@/context/AuthContext";
 const ResumePreview: React.FC = () => {
   const { resumeData } = useResume();
   const { calculateATSScore } = useATS();
-  const { template, theme, setATSScore, atsScore } = useMeta(); // Context থেকে template, theme এবং atsScore
-
+  const { template, theme, setATSScore, atsScore } = useMeta();
   const [showATSDetails, setShowATSDetails] = useState(false);
-
   const { user } = useAuth();
   const userId = user?.email || "";
-  console.log(resumeData)
 
-  // ATS score calculate করে context এ save করা (async handled)
+  // Default template & theme fallback
+  const currentTemplate = template ?? {
+    id: "default",
+    name: "Classic",
+    layout: "classic",
+    sections: [],
+  };
+
+  const currentTheme = theme ?? {
+    id: "default",
+    name: "Default",
+    primaryColor: "#2563eb",
+    accentColor: "#9333ea",
+    textColor: "#111827",
+    backgroundColor: "#ffffff",
+    fontFamily: "Inter",
+  };
+
+  // ATS score calculate & save
   useEffect(() => {
     const timer = setTimeout(() => {
       const calculateScore = async () => {
@@ -48,28 +58,28 @@ const ResumePreview: React.FC = () => {
     return () => clearTimeout(timer);
   }, [resumeData, calculateATSScore, setATSScore]);
 
-  // Check if resume is empty
+  // Check if resume is empty safely
   const isEmpty =
     !resumeData.personalInfo?.firstName &&
     !resumeData.personalInfo?.lastName &&
     !resumeData.summary &&
-    resumeData.skills.length === 0 &&
-    resumeData.projects.length === 0 &&
-    resumeData.workExperience.length === 0 &&
-    resumeData.education.length === 0 &&
-    resumeData.certifications.length === 0;
+    !(resumeData.skills?.length > 0) &&
+    !(resumeData.projects?.length > 0) &&
+    !(resumeData.workExperience?.length > 0) &&
+    !(resumeData.education?.length > 0) &&
+    !(resumeData.certifications?.length > 0);
 
   // Render template dynamically
   const renderTemplate = () => {
     if (isEmpty) return <EmptyState />;
 
-    switch (template.name) {
+    switch (currentTemplate.name) {
       case "Modern":
-        return <ModernTemplate theme={theme} />;
+        return <ModernTemplate theme={currentTheme} />;
       case "Creative":
-        return <ClassicTemplate theme={theme} />;
+        return <ClassicTemplate theme={currentTheme} />;
       default:
-        return <ClassicTemplate theme={theme} />;
+        return <ClassicTemplate theme={currentTheme} />;
     }
   };
 
@@ -87,9 +97,9 @@ const ResumePreview: React.FC = () => {
         id="resume-preview"
         className="overflow-hidden"
         style={{
-          backgroundColor: theme.backgroundColor,
-          color: theme.textColor,
-          fontFamily: theme.fontFamily,
+          backgroundColor: currentTheme.backgroundColor,
+          color: currentTheme.textColor,
+          fontFamily: currentTheme.fontFamily,
         }}
       >
         {renderTemplate()}

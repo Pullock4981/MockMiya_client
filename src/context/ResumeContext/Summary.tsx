@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 interface SummaryContextType {
   summary: string;
@@ -9,8 +9,17 @@ interface SummaryContextType {
 
 const SummaryContext = createContext<SummaryContextType | undefined>(undefined);
 
-export const SummaryProvider = ({ children }: { children: React.ReactNode }) => {
+interface Props {
+  children: React.ReactNode;
+  initialData?: string;
+}
+
+export const SummaryProvider = ({ children, initialData }: Props) => {
   const [summary, setSummary] = useState("");
+
+  useEffect(() => {
+    if (initialData) setSummary(initialData);
+  }, [initialData]);
 
   const updateSummary = (newSummary: string) => {
     setSummary(newSummary);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { SocialLink } from "@/types/resume";
 import { v4 as uuidv4 } from "uuid";
 
@@ -13,8 +13,17 @@ interface ProfessionalLinksContextType {
 
 const ProfessionalLinksContext = createContext<ProfessionalLinksContextType | undefined>(undefined);
 
-export const ProfessionalLinksProvider = ({ children }: { children: React.ReactNode }) => {
+interface Props {
+  children: React.ReactNode;
+  initialData?: SocialLink[];
+}
+
+export const ProfessionalLinksProvider = ({ children, initialData }: Props) => {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+
+  useEffect(() => {
+    if (initialData) setSocialLinks(initialData);
+  }, [initialData]);
 
   const addLink = (link: Omit<SocialLink, "id">) => {
     setSocialLinks((prev) => [...prev, { id: uuidv4(), ...link }]);

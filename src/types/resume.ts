@@ -146,6 +146,11 @@ export interface ResumeTheme {
   fontFamily: string;
 }
 
+export interface ResumeMeta {
+  currentStep: number;
+  completed: boolean;
+}
+
 export type SectionOrder =
   | "summary"
   | "workExperience"
@@ -173,6 +178,7 @@ export interface ResumeData {
   theme: ResumeTheme;
   createdAt: string;
   updatedAt: string;
+  meta?: ResumeMeta;
 }
 
 // ---------- ATS Score ----------
@@ -252,10 +258,11 @@ export interface ResumeContextType {
 
 // ------------------------- Meta Context -------------------------
 export interface MetaContextType {
-  template: ResumeTemplate;
-  theme: ResumeTheme;
-  atsScore: ATSScore | null;
-  aiSuggestions: AIsuggestion[];
+  template?: ResumeTemplate;
+  theme?: ResumeTheme;
+  atsScore?: ATSScore;
+  aiSuggestions?: AIsuggestion[];
+
 
   updateTemplate: (template: ResumeTemplate) => void;
   updateTheme: (theme: ResumeTheme) => void;

@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useResume } from "@/hooks/useResume";
-import { useResumeTheme } from "./ResumeThemeContext";
+import { useResumeTheme } from "../../context/ResumeContext/ResumeThemeContext";
 
 const ResumeWorkExperience: React.FC = () => {
   const { resumeData } = useResume();

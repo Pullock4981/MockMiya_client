@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { Project } from "@/types/resume";
 import { v4 as uuidv4 } from "uuid";
 
@@ -13,17 +13,24 @@ interface ProjectsContextType {
 
 const ProjectsContext = createContext<ProjectsContextType | undefined>(undefined);
 
-export const ProjectsProvider = ({ children }: { children: React.ReactNode }) => {
+interface Props {
+  children: React.ReactNode;
+  initialData?: Project[];
+}
+
+export const ProjectsProvider = ({ children, initialData }: Props) => {
   const [projects, setProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    if (initialData) setProjects(initialData);
+  }, [initialData]);
 
   const addProject = (project: Omit<Project, "id">) => {
     setProjects((prev) => [...prev, { id: uuidv4(), ...project }]);
   };
 
   const updateProject = (id: string, project: Partial<Project>) => {
-    setProjects((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...project } : p))
-    );
+    setProjects((prev) => prev.map((p) => (p.id === id ? { ...p, ...project } : p)));
   };
 
   const removeProject = (id: string) => {
