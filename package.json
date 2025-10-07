@@ -30,7 +30,11 @@
     "firebase": "^12.2.1",
     "framer-motion": "^12.23.13",
     "gaxios": "^7.1.2",
+<<<<<<< HEAD
     "gcp-metadata": "5.3.0",
+=======
+    "gcp-metadata": "^5.3.0",
+>>>>>>> e38eb8fa625cb9b18a474d6eb2b4f53892dcda55
     "html2pdf.js": "^0.12.1",
     "jspdf": "^3.0.3",
     "jws": "^4.0.0",
