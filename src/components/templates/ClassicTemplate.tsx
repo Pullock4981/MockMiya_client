@@ -1,6 +1,5 @@
-"use client";
-
 import React from "react";
+import { ResumeTheme } from "@/types/resume";
 import ResumeHeader from "../resumePreview/ResumeHeader";
 import ResumeSummary from "../resumePreview/ResumeSummary";
 import ResumeWorkExperience from "../resumePreview/ResumeWorkExperience";
@@ -10,34 +9,28 @@ import ResumeProjects from "../resumePreview/ResumeProjects";
 import ResumeCertifications from "../resumePreview/ResumeCertifications";
 import ResumeAdditionalInfo from "../resumePreview/ResumeAdditionalInfo";
 
-const ClassicTemplate: React.FC = () => {
+interface ClassicTemplateProps {
+  theme?: ResumeTheme; // optional, যাতে আগে compatibility থাকে
+}
+
+const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ theme }) => {
   return (
-    <div className="font-serif text-base py-6 px-10 space-y-6">
-
-      {/* Header */}
+    <div
+      className="font-serif text-base py-6 px-10 space-y-3"
+      style={{
+        backgroundColor: theme?.backgroundColor || "#ffffff",
+        color: theme?.textColor || "#111827",
+        fontFamily: theme?.fontFamily || "serif",
+      }}
+    >
       <ResumeHeader />
-
-      {/* Summary */}
       <ResumeSummary />
-
-      {/* Skills */}
-      <ResumeSkills/>
-
-      {/* Education */}
+      <ResumeSkills />
       <ResumeEducation />
-
-      {/* Work Experience */}
       <ResumeWorkExperience />
-
-      {/* Projects */}
       <ResumeProjects />
-
-      {/* Certifications */}
       <ResumeCertifications />
-
-      {/* Additional Info */}
       <ResumeAdditionalInfo />
-
     </div>
   );
 };

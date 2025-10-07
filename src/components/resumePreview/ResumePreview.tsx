@@ -1,3 +1,8 @@
+
+
+
+
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -12,23 +17,41 @@ import EmptyState from "./EmptyState";
 import ModernTemplate from "../templates/ModernTemplate";
 import ClassicTemplate from "../templates/ClassicTemplate";
 
+import { useMeta } from "@/context/ResumeContext/MetaContext";
+import { useAuth } from "@/context/AuthContext";
+
 const ResumePreview: React.FC = () => {
   const { resumeData } = useResume();
-  const { atsScore, calculateATSScore } = useATS();
+  const { calculateATSScore } = useATS();
+  const { template, theme, setATSScore, atsScore } = useMeta(); // Context থেকে template, theme এবং atsScore
 
   const [showATSDetails, setShowATSDetails] = useState(false);
-  const [template, setTemplate] = useState<string>("Classic");
-  const [theme, setTheme] = useState<"Light" | "Dark">("Light");
-  const userId = "user_12345";
 
+  const { user } = useAuth();
+  const userId = user?.email || "";
+  console.log(resumeData)
+
+  // ATS score calculate করে context এ save করা (async handled)
   useEffect(() => {
-    const timer = setTimeout(() => calculateATSScore(resumeData), 500);
-    return () => clearTimeout(timer);
-  }, [resumeData, calculateATSScore]);
+    const timer = setTimeout(() => {
+      const calculateScore = async () => {
+        try {
+          const score = await calculateATSScore(resumeData);
+          setATSScore(score);
+        } catch (error) {
+          console.error("ATS calculation failed:", error);
+        }
+      };
+      calculateScore();
+    }, 500);
 
+    return () => clearTimeout(timer);
+  }, [resumeData, calculateATSScore, setATSScore]);
+
+  // Check if resume is empty
   const isEmpty =
-    !resumeData.personalInfo.firstName &&
-    !resumeData.personalInfo.lastName &&
+    !resumeData.personalInfo?.firstName &&
+    !resumeData.personalInfo?.lastName &&
     !resumeData.summary &&
     resumeData.skills.length === 0 &&
     resumeData.projects.length === 0 &&
@@ -36,35 +59,25 @@ const ResumePreview: React.FC = () => {
     resumeData.education.length === 0 &&
     resumeData.certifications.length === 0;
 
-  // Render template based on selection
+  // Render template dynamically
   const renderTemplate = () => {
     if (isEmpty) return <EmptyState />;
 
-    switch (template) {
+    switch (template.name) {
       case "Modern":
-        return <ModernTemplate />;
+        return <ModernTemplate theme={theme} />;
       case "Creative":
-        return (
-          <div className="font-mono text-sm tracking-tight">
-            <ClassicTemplate />
-          </div>
-        );
+        return <ClassicTemplate theme={theme} />;
       default:
-        // Default view is ClassicTemplate
-        return <ClassicTemplate />;
+        return <ClassicTemplate theme={theme} />;
     }
   };
 
   return (
     <div className="space-y-6">
       <ResumeControls
-        atsScore={atsScore?.overall}
         showATSDetails={showATSDetails}
         setShowATSDetails={setShowATSDetails}
-        template={template}
-        setTemplate={setTemplate}
-        theme={theme}
-        setTheme={setTheme}
         userId={userId}
       />
 
@@ -72,7 +85,12 @@ const ResumePreview: React.FC = () => {
 
       <div
         id="resume-preview"
-        className="overflow-hidden bg-white"
+        className="overflow-hidden"
+        style={{
+          backgroundColor: theme.backgroundColor,
+          color: theme.textColor,
+          fontFamily: theme.fontFamily,
+        }}
       >
         {renderTemplate()}
       </div>

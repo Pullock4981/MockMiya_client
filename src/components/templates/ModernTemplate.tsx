@@ -1,6 +1,5 @@
-"use client";
-
 import React from "react";
+import { ResumeTheme } from "@/types/resume";
 import { useResume } from "@/hooks/useResume";
 import ResumeSkills from "../resumePreview/ResumeSkills";
 import ResumeCertifications from "../resumePreview/ResumeCertifications";
@@ -12,16 +11,23 @@ import ResumeEducation from "../resumePreview/ResumeEducation";
 import ResumeProjects from "../resumePreview/ResumeProjects";
 import Image from "next/image";
 
-const ModernTemplate: React.FC = () => {
+interface ModernTemplateProps {
+  theme?: ResumeTheme;
+}
+
+const ModernTemplate: React.FC<ModernTemplateProps> = ({ theme }) => {
   const { resumeData } = useResume();
   const personal = resumeData.personalInfo;
 
-  const headerColor = "#1e40af"; // default blue
-  const placeholderBg = "#2563eb"; // blue background for initials
+  const headerColor = theme?.primaryColor || "#1e40af"; 
+  const placeholderBg = theme?.accentColor || "#2563eb";
   const initials = `${personal.firstName?.[0] || ""}${personal.lastName?.[0] || ""}`.toUpperCase();
 
   return (
-    <div className="p-5 font-sans grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div
+      className="p-5 font-sans grid grid-cols-1 md:grid-cols-2 gap-6"
+      style={{ backgroundColor: theme?.backgroundColor || "#ffffff", color: theme?.textColor || "#111827", fontFamily: theme?.fontFamily || "Inter" }}
+    >
       {/* ===== HEADER ===== */}
       <header className="col-span-2 flex flex-col sm:flex-row sm:items-center justify-between border-b-2 border-gray-200 pb-4 mb-6">
         <div className="flex items-center gap-4">
@@ -58,42 +64,18 @@ const ModernTemplate: React.FC = () => {
 
       {/* ===== MAIN CONTENT ===== */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 col-span-2">
-        {/* LEFT COLUMN */}
-        <div className="space-y-6 p-4" style={{ backgroundColor: "#f5f5f5" }}>
-          <section>
-            <ResumeSummary />
-          </section>
-
-          <section>
-            <ResumeEducation />
-          </section>
-
-          <section>
-            <ResumeWorkExperience />
-          </section>
-
-          <section>
-            <ResumeProjects />
-          </section>
+        <div className="space-y-6 p-4">
+          <ResumeSummary />
+          <ResumeEducation />
+          <ResumeWorkExperience />
+          <ResumeProjects />
         </div>
 
-        {/* RIGHT COLUMN */}
         <div className="space-y-6 p-4">
-          <section>
-            <ResumeSkills  />
-          </section>
-
-          <section>
-            <ResumeCertifications />
-          </section>
-
-          <section>
-            <ResumeProfessionalLinks />
-          </section>
-
-          <section>
-            <ResumeAdditionalInfo />
-          </section>
+          <ResumeSkills />
+          <ResumeCertifications />
+          <ResumeProfessionalLinks />
+          <ResumeAdditionalInfo />
         </div>
       </div>
     </div>

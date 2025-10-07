@@ -10,11 +10,11 @@ const ResumeHeader: React.FC = () => {
   const professionalLinks = resumeData.socialLinks || [];
 
   return (
-    <section className="text-center space-y-2">
+    <section className="text-center">
       {/* Name */}
       <h1
         style={{ color: getTextColor("heading") }}
-        className="font-bold text-2xl lg:text-3xl"
+        className="font-bold text-2xl lg:text-5xl"
       >
         {firstName || lastName ? (
           `${firstName} ${lastName}`

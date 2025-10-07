@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useRef, useEffect, FC } from "react";
@@ -15,12 +14,11 @@ import { WorkExperienceForm } from "@/components/forms/ResumeForms/WorkExperienc
 import { EducationForm } from "@/components/forms/ResumeForms/EducationForm";
 import { SkillsForm } from "@/components/forms/ResumeForms/SkillsForm";
 import { ProjectsForm } from "@/components/forms/ResumeForms/ProjectsForm";
-// import { CertificationsForm } from "@/components/forms/ResumeForms/CertificationsForm";
 import { ProfessionalLinksForm } from "@/components/forms/ResumeForms/ProfessionalLinksForm";
 import { AdditionalInfoForm } from "@/components/forms/ResumeForms/AdditionalInfoForm";
 import { AIReTouchForm } from "@/components/forms/ResumeForms/AIReTouchForm";
-import { exportResumeHandler } from "@/utils/exportResume";
 import { CertificationsForm } from "./CertificationsForm";
+import { exportResumeHandler } from "@/utils/exportResume";
 
 // Define typed step
 type FormStepType = {
@@ -31,10 +29,17 @@ type FormStepType = {
 };
 
 export const ResumeForm: React.FC = () => {
-  const { currentStep, nextStep, previousStep, goToStep, getAISuggestions } = useResume();
+  const {
+    currentStep,
+    nextStep,
+    previousStep,
+    goToStep,
+    getAISuggestions,
+    resumeData,
+  } = useResume();
+
   const tabsRef = useRef<HTMLDivElement>(null);
 
-  // Form steps
   const formSteps: FormStepType[] = [
     { id: "personalInfo", title: "Personal Info", component: PersonalInfoForm, isCompleted: false },
     { id: "professionalLinks", title: "Professional Links", component: ProfessionalLinksForm, isCompleted: false },
@@ -43,7 +48,7 @@ export const ResumeForm: React.FC = () => {
     { id: "education", title: "Education", component: EducationForm, isCompleted: false },
     { id: "workExperience", title: "Work Experience", component: WorkExperienceForm, isCompleted: false },
     { id: "projects", title: "Projects", component: ProjectsForm, isCompleted: false },
-     { id: "certifications", title: "Certifications", component: CertificationsForm, isCompleted: false },
+    { id: "certifications", title: "Certifications", component: CertificationsForm, isCompleted: false },
     { id: "additionalInfo", title: "Additional Info", component: AdditionalInfoForm, isCompleted: false },
     { id: "aiRetouch", title: "AI Retouch", component: AIReTouchForm, isCompleted: false },
   ];
@@ -78,7 +83,7 @@ export const ResumeForm: React.FC = () => {
   }, [currentStep]);
 
   // Download PDF
-const handleExport = async () => {
+  const handleExport = async () => {
     try {
       await exportResumeHandler();
     } catch (error) {
@@ -86,11 +91,31 @@ const handleExport = async () => {
     }
   };
 
+  // Save resume to MongoDB
+  const saveResumeToDB = async () => {
+    try {
+      await fetch("/api/saveResume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(resumeData),
+      });
+      console.log("Resume saved to MongoDB");
+    } catch (error) {
+      console.error("Failed to save resume:", error);
+    }
+  };
+
+  // Handle Next Step + Save
+  const handleNextStep = async () => {
+    await saveResumeToDB(); // Save before moving
+    nextStep();
+  };
+
   return (
-    <div className="flex flex-col h-full ">
+    <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex-none sticky top-0 z-20 p-4 shadow-sm bg-card text-card-foreground">
-        <div className="flex items-center justify-between ">
+        <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-foreground">
               Step {currentStep + 1} of {formSteps.length}
@@ -146,8 +171,8 @@ const handleExport = async () => {
       <div className="flex-1 overflow-y-auto p-4">
         <Card className="overflow-visible p-6 shadow-md border-border/50">
           {FormComponent ? 
-          <FormComponent /> : 
-          <div className="text-center py-8 text-muted-foreground">Form component not found</div>}
+            <FormComponent /> : 
+            <div className="text-center py-8 text-muted-foreground">Form component not found</div>}
         </Card>
       </div>
 
@@ -166,7 +191,7 @@ const handleExport = async () => {
           <div className="flex items-center gap-2">
             {currentStep < formSteps.length - 1 ? (
               <Button
-                onClick={nextStep}
+                onClick={handleNextStep}
                 className="flex items-center gap-2 hover:shadow-paper transition-all duration-300"
               >
                 Next <ChevronRight className="h-4 w-4" />
@@ -179,7 +204,10 @@ const handleExport = async () => {
                 >
                   Download PDF
                 </Button>
-                <Button className="flex items-center gap-2 transition-all duration-300">
+                <Button
+                  onClick={saveResumeToDB}
+                  className="flex items-center gap-2 transition-all duration-300"
+                >
                   Complete Resume <ChevronRight className="h-4 w-4" />
                 </Button>
               </>

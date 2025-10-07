@@ -24,9 +24,8 @@ export interface WorkExperience {
   current: boolean;
   responsibilities: string[];
   achievements: string[];
-  description?: string; 
+  description?: string;
 }
-
 
 // ---------- Education ----------
 export interface Education {
@@ -160,6 +159,7 @@ export type SectionOrder =
 // ---------- Resume Data ----------
 export interface ResumeData {
   id: string;
+  userEmail: string;
   personalInfo: PersonalInfo;
   summary: string;
   workExperience: WorkExperience[];
@@ -222,7 +222,10 @@ export interface ResumeContextType {
   updatePersonalInfo: (info: Partial<PersonalInfo>) => void;
   updateSummary: (summary: string) => void;
   addWorkExperience: (experience: Omit<WorkExperience, "id">) => void;
-  updateWorkExperience: (id: string, experience: Partial<WorkExperience>) => void;
+  updateWorkExperience: (
+    id: string,
+    experience: Partial<WorkExperience>
+  ) => void;
   removeWorkExperience: (id: string) => void;
   addEducation: (education: Omit<Education, "id">) => void;
   updateEducation: (id: string, education: Partial<Education>) => void;

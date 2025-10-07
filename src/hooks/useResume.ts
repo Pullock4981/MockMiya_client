@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { usePersonalInfo } from "@/context/ResumeContext/PersonalInfo";
 import { useSummary } from "@/context/ResumeContext/Summary";
 import { useWorkExperience } from "@/context/ResumeContext/WorkExperience";
@@ -13,10 +13,13 @@ import { useAdditionalInfo } from "@/context/ResumeContext/AdditionalInfo";
 import { useMeta } from "@/context/ResumeContext/MetaContext";
 import { ResumeData, FormStep } from "@/types/resume";
 import { useATS } from "./useATS";
+import { useAuth } from "@/context/AuthContext";
 
 export const useResume = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const { user } = useAuth();
 
+  // --- Form steps setup ---
   const formSteps: FormStep[] = [
     { id: "personal", title: "Personal Info", description: "Add your personal details", component: "PersonalInfoForm", isCompleted: false, isRequired: true },
     { id: "summary", title: "Summary", description: "Write a short summary", component: "SummaryForm", isCompleted: false, isRequired: true },
@@ -30,10 +33,12 @@ export const useResume = () => {
     { id: "ai", title: "AI ReTouch", description: "Get AI suggestions", component: "AIReTouchForm", isCompleted: false, isRequired: false },
   ];
 
-  const nextStep = () => currentStep < formSteps.length - 1 && setCurrentStep(currentStep + 1);
-  const previousStep = () => currentStep > 0 && setCurrentStep(currentStep - 1);
-  const goToStep = (step: number) => step >= 0 && step < formSteps.length && setCurrentStep(step);
+  // --- Navigation handlers ---
+  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, formSteps.length - 1));
+  const previousStep = () => setCurrentStep(prev => Math.max(prev - 1, 0));
+  const goToStep = (step: number) => setCurrentStep(step);
 
+  // --- Context hooks ---
   const { personalInfo, updatePersonalInfo } = usePersonalInfo();
   const { summary, updateSummary } = useSummary();
   const { workExperience, addWork, updateWork, removeWork } = useWorkExperience();
@@ -44,11 +49,20 @@ export const useResume = () => {
   const { socialLinks, addLink, updateLink, removeLink } = useProfessionalLinks();
   const { additionalInfo, addLanguage, removeLanguage, updateAdditionalInfo } = useAdditionalInfo();
   const { template, theme, aiSuggestions, updateTemplate, updateTheme } = useMeta();
-
   const { atsScore, calculateATSScore } = useATS();
 
-  const buildResumeData = (): ResumeData => ({
-    id: "resume-1",
+  // --- Resume ID Generator ---
+  const generateResumeId = useCallback(() => {
+    const firstNamePart = personalInfo?.firstName?.slice(0, 3).toUpperCase() || "USR";
+    const templatePart = template?.name?.slice(0, 3).toUpperCase() || "TMP";
+    const userPart = user?.uid?.slice(-4)?.toUpperCase() || Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `${firstNamePart}-${templatePart}-${userPart}`;
+  }, [personalInfo?.firstName, template?.name, user?.uid]);
+
+  // --- Build Resume Data (now includes email) ---
+  const buildResumeData = useCallback((): ResumeData => ({
+    id: generateResumeId(),
+    userEmail: user?.email || "", 
     personalInfo,
     summary,
     workExperience,
@@ -62,33 +76,49 @@ export const useResume = () => {
     theme,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-  });
+  }), [
+    personalInfo,
+    summary,
+    workExperience,
+    education,
+    skills,
+    projects,
+    certifications,
+    socialLinks,
+    additionalInfo,
+    template,
+    theme,
+    generateResumeId,
+    user?.email
+  ]);
 
-  const resumeData = buildResumeData();
+  const resumeData = useMemo(() => buildResumeData(), [buildResumeData]);
 
+  // --- AI Suggestions ---
   const getAISuggestions = async (section: string) => {
     console.log("AI suggestions requested for:", section);
+    return aiSuggestions.filter(s => s.section === section);
   };
 
+  // --- Export Resume ---
   const exportResumeHandler = async () => {
     try {
-      // 1️⃣ Client-side WYSIWYG PDF
-      await exportResumeHandler();
-
-      // 2️⃣ Server-side Puppeteer PDF + MongoDB
       const html = document.getElementById("resume-preview")?.outerHTML;
       if (html) {
         await fetch("/resume/api/export-pdf", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ htmlContent: html, fileName: "My_Resume.pdf" }),
+          body: JSON.stringify({
+            htmlContent: html,
+            fileName: `${resumeData.id}.pdf`,
+            email: user?.email || "",
+          }),
         });
       }
     } catch (error) {
       console.error("Export failed:", error);
     }
   };
-
 
   return {
     currentStep,

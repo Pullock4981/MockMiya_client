@@ -19,8 +19,8 @@ const MetaContext = createContext<MetaContextType | undefined>(undefined);
 export const MetaProvider = ({ children }: { children: React.ReactNode }) => {
   const [template, setTemplate] = useState<ResumeTemplate>({
     id: "default",
-    name: "Modern",
-    layout: "modern",
+    name: "classic",
+    layout: "classic",
     sections: ["summary", "workExperience", "education", "skills", "projects", "certifications", "socialLinks", "additionalInfo"],
   });
 
