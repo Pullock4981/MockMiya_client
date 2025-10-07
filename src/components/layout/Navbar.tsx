@@ -7,7 +7,6 @@ import {
   Code2,
   ChevronDown,
   User,
-  Settings,
   LogOut,
   LayoutDashboard,
 } from "lucide-react";
