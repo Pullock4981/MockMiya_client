@@ -1,7 +1,8 @@
+// src/app/resume/page.tsx
 "use client";
 
-import React, { useState } from "react";
-import { ResumeProvider } from "@/components/resumePreview/ResumeProvider";
+import React, { useState, useEffect } from "react";
+import { ResumeProvider } from "@/context/ResumeContext/ResumeProvider";
 import PrivateRoute from "@/app/Routes/PrivateRoute";
 
 import { Button } from "@/components/ui/button";
@@ -11,10 +12,37 @@ import { ResumeForm } from "@/components/forms/ResumeForms/ResumeForm";
 import ResumePreview from "@/components/resumePreview/ResumePreview";
 import { exportResumeHandler } from "@/utils/exportResume";
 import { ResumeNavbar } from "@/components/layout/ResumeNavbar";
+import { useRouter } from "next/navigation";
 
 const ResumePage = () => {
   const [isMobilePreviewMode, setIsMobilePreviewMode] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  const [draftId, setDraftId] = useState<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    // check localStorage for any draft id
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("resume_draft_id");
+      if (stored) setDraftId(stored);
+    }
+  }, []);
+
+  const handleContinueDraft = () => {
+    if (!draftId) return;
+    router.push(`/resume/${draftId}`);
+  };
+
+  const handleStartNew = () => {
+    // clear any draft data in localStorage and reload (start fresh)
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("resume_draft_id");
+      localStorage.removeItem("resume_currentStep");
+    }
+    // Force re-mounting of the provider/form by simply reloading the page to /resume
+    router.replace("/resume");
+  };
 
   return (
     <PrivateRoute>
@@ -62,6 +90,25 @@ const ResumePage = () => {
             </div>
           </div>
 
+          {/* Draft Banner (if any) */}
+          {draftId && (
+            <div className="p-4 sticky top-16 z-40 bg-card/95 border-b border-border">
+              <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+                <div className="text-sm text-muted-foreground">
+                  You have a draft resume saved. Continue editing or start a new one.
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" onClick={handleContinueDraft}>
+                    Continue draft
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={handleStartNew}>
+                    Start new
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Main Layout */}
           <div className="flex flex-col lg:flex-row h-screen">
             {/* Form Panel */}
@@ -84,8 +131,7 @@ const ResumePage = () => {
             >
               <Card className="h-full overflow-y-auto border-0 shadow-none lg:rounded-none">
                 <div className="sticky -top-8 bg-card/95 backdrop-blur-sm p-4 z-10">
-                  {/* <h2 className="text-lg font-semibold text-foreground">Live Preview</h2> */}
-                  <ResumeNavbar/>
+                  <ResumeNavbar />
                 </div>
                 <div className="p-6 border m-4 rounded-lg">
                   <ResumePreview />
