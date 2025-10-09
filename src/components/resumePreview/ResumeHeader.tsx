@@ -43,12 +43,12 @@ const ResumeHeader: React.FC = () => {
           <span className="w-24 h-3 bg-gray-100 animate-pulse inline-block rounded" />
         )}
         {email ? (
-          `• ${email}`
+          `  |  ${email}`
         ) : (
           <span className="w-32 h-3 bg-gray-100 animate-pulse inline-block rounded" />
         )}
         {phone ? (
-          `• ${phone}`
+          `  |  ${phone}`
         ) : (
           <span className="w-24 h-3 bg-gray-100 animate-pulse inline-block rounded" />
         )}
