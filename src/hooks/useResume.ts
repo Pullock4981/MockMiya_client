@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { usePersonalInfo } from "@/context/ResumeContext/PersonalInfo";
 import { useSummary } from "@/context/ResumeContext/Summary";
 import { useWorkExperience } from "@/context/ResumeContext/WorkExperience";
@@ -18,11 +18,24 @@ import { saveResumeStep } from "@/utils/resumeActions";
 
 import { v4 as uuidv4 } from "uuid";
 
-export const useResume = () => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [resumeId] = useState(() => uuidv4());
+export const useResume = (initialData?: ResumeData) => {
   const { user } = useAuth();
 
+  const [currentStep, setCurrentStep] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const savedStep = localStorage.getItem("resumeCurrentStep");
+      return savedStep
+        ? Number(savedStep)
+        : initialData?.meta?.currentStep ?? 0;
+    }
+    return initialData?.meta?.currentStep ?? 0;
+  });
+
+  const [resumeId] = useState<string>(() => initialData?.id || uuidv4());
+
+  // -----------------------
+  // Context hooks
+  // -----------------------
   const { personalInfo, updatePersonalInfo } = usePersonalInfo();
   const { summary, updateSummary } = useSummary();
   const { workExperience, addWork, updateWork, removeWork } =
@@ -45,12 +58,15 @@ export const useResume = () => {
     useMeta();
   const { atsScore, calculateATSScore } = useATS();
 
+  // -----------------------
+  // Form Steps
+  // -----------------------
   const formSteps: FormStep[] = useMemo(
     () => [
       {
-        id: "personal",
+        id: "personalInfo",
         title: "Personal Info",
-        description: "Add your personal details",
+        description: "",
         component: "PersonalInfoForm",
         isCompleted: false,
         isRequired: true,
@@ -58,15 +74,15 @@ export const useResume = () => {
       {
         id: "summary",
         title: "Summary",
-        description: "Write a short summary",
+        description: "",
         component: "SummaryForm",
         isCompleted: false,
         isRequired: true,
       },
       {
-        id: "work",
+        id: "workExperience",
         title: "Work Experience",
-        description: "Add your work history",
+        description: "",
         component: "WorkExperienceForm",
         isCompleted: false,
         isRequired: true,
@@ -74,7 +90,7 @@ export const useResume = () => {
       {
         id: "education",
         title: "Education",
-        description: "Add your education",
+        description: "",
         component: "EducationForm",
         isCompleted: false,
         isRequired: true,
@@ -82,7 +98,7 @@ export const useResume = () => {
       {
         id: "skills",
         title: "Skills",
-        description: "Add your skills",
+        description: "",
         component: "SkillsForm",
         isCompleted: false,
         isRequired: true,
@@ -90,7 +106,7 @@ export const useResume = () => {
       {
         id: "projects",
         title: "Projects",
-        description: "Showcase projects",
+        description: "",
         component: "ProjectsForm",
         isCompleted: false,
         isRequired: false,
@@ -98,31 +114,31 @@ export const useResume = () => {
       {
         id: "certifications",
         title: "Certifications",
-        description: "List your certifications",
+        description: "",
         component: "CertificationsForm",
         isCompleted: false,
         isRequired: false,
       },
       {
-        id: "links",
+        id: "professionalLinks",
         title: "Professional Links",
-        description: "Add LinkedIn, GitHub etc",
+        description: "",
         component: "ProfessionalLinksForm",
         isCompleted: false,
         isRequired: false,
       },
       {
-        id: "additional",
+        id: "additionalInfo",
         title: "Additional Info",
-        description: "Languages, awards, etc.",
+        description: "",
         component: "AdditionalInfoForm",
         isCompleted: false,
         isRequired: false,
       },
       {
-        id: "ai",
+        id: "aiRetouch",
         title: "AI ReTouch",
-        description: "Get AI suggestions",
+        description: "",
         component: "AIReTouchForm",
         isCompleted: false,
         isRequired: false,
@@ -131,7 +147,9 @@ export const useResume = () => {
     []
   );
 
-  // Build safe resume data with defaults
+  // -----------------------
+  // Build ResumeData
+  // -----------------------
   const buildResumeData = useCallback(
     (): ResumeData => ({
       id: resumeId,
@@ -160,11 +178,8 @@ export const useResume = () => {
         backgroundColor: "#ffffff",
         fontFamily: "Inter",
       },
-      meta: {
-        currentStep,
-        completed: currentStep === formSteps.length - 1,
-      },
-      createdAt: new Date().toISOString(),
+      meta: { currentStep, completed: currentStep === formSteps.length - 1 },
+      createdAt: initialData?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }),
     [
@@ -183,30 +198,55 @@ export const useResume = () => {
       theme,
       currentStep,
       formSteps.length,
+      initialData?.createdAt,
     ]
   );
 
   const resumeData = useMemo(() => buildResumeData(), [buildResumeData]);
 
-  // Navigation
-  const nextStep = async () => {
+  // -----------------------
+  // LocalStorage Sync
+  // -----------------------
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("resumeCurrentStep", String(currentStep));
+    }
+  }, [currentStep]);
+
+  // -----------------------
+  // Step Navigation
+  // -----------------------
+  const nextStep = useCallback(async () => {
     try {
-      await saveResumeStep(resumeData.id, resumeData.userEmail, resumeData);
+      await saveResumeStep(resumeId, user?.email || "", resumeData);
       setCurrentStep((prev) => Math.min(prev + 1, formSteps.length - 1));
     } catch (err) {
       console.error("Failed to save resume step:", err);
     }
-  };
+  }, [resumeData, resumeId, user?.email, formSteps.length]);
 
-  const previousStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
-  const goToStep = (step: number) => setCurrentStep(step);
+  const previousStep = useCallback(() => {
+    setCurrentStep((prev) => Math.max(prev - 1, 0));
+  }, []);
 
-  // AI suggestions
-  const getAISuggestions = async (section: string) =>
-    aiSuggestions?.filter((s) => s.section === section) ?? [];
+  const goToStep = useCallback(
+    (step: number) => {
+      if (step >= 0 && step < formSteps.length) setCurrentStep(step);
+    },
+    [formSteps.length]
+  );
 
-  // Export resume as PDF
-  const exportResumeHandler = async () => {
+  // -----------------------
+  // AI & Export Handlers
+  // -----------------------
+  const getAISuggestions = useCallback(
+    (section: string) => {
+      return aiSuggestions?.filter((s) => s.section === section) ?? [];
+    },
+    [aiSuggestions]
+  );
+
+  const exportResumeHandler = useCallback(async () => {
     try {
       const html = document.getElementById("resume-preview")?.outerHTML;
       if (html) {
@@ -223,7 +263,7 @@ export const useResume = () => {
     } catch (err) {
       console.error("Export failed:", err);
     }
-  };
+  }, [resumeData.id, user?.email]);
 
   return {
     currentStep,
