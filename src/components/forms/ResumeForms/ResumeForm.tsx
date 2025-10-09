@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Import all form components
 import { PersonalInfoForm } from "@/components/forms/ResumeForms/PersonalInfoForm";
@@ -17,7 +18,8 @@ import { ProjectsForm } from "@/components/forms/ResumeForms/ProjectsForm";
 import { ProfessionalLinksForm } from "@/components/forms/ResumeForms/ProfessionalLinksForm";
 import { AdditionalInfoForm } from "@/components/forms/ResumeForms/AdditionalInfoForm";
 import { AIReTouchForm } from "@/components/forms/ResumeForms/AIReTouchForm";
-import { CertificationsForm } from "./CertificationsForm";
+import { CertificationsForm } from "@/components/forms/ResumeForms/CertificationsForm";
+
 import { saveResumeStep } from "@/utils/resumeActions";
 import { exportResumeHandler } from "@/utils/exportResume";
 
@@ -28,6 +30,10 @@ type FormStepType = {
 };
 
 export const ResumeForm: React.FC = () => {
+  const router = useRouter();
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const [isSaving, setIsSaving] = React.useState(false);
+
   const {
     currentStep,
     nextStep,
@@ -37,18 +43,15 @@ export const ResumeForm: React.FC = () => {
     resumeData,
   } = useResume();
 
-  const tabsRef = useRef<HTMLDivElement>(null);
-  const [isSaving, setIsSaving] = React.useState(false);
-
   const formSteps: FormStepType[] = [
     { id: "personalInfo", title: "Personal Info", component: PersonalInfoForm },
     { id: "professionalLinks", title: "Professional Links", component: ProfessionalLinksForm },
-    { id: "summary", title: "Summary", component: SummaryForm },
     { id: "skills", title: "Skills", component: SkillsForm },
-    { id: "education", title: "Education", component: EducationForm },
-    { id: "workExperience", title: "Work Experience", component: WorkExperienceForm },
-    { id: "projects", title: "Projects", component: ProjectsForm },
     { id: "certifications", title: "Certifications", component: CertificationsForm },
+    { id: "summary", title: "Summary", component: SummaryForm },
+    { id: "education", title: "Education", component: EducationForm },
+    { id: "projects", title: "Projects", component: ProjectsForm },
+    { id: "workExperience", title: "Work Experience", component: WorkExperienceForm },
     { id: "additionalInfo", title: "Additional Info", component: AdditionalInfoForm },
     { id: "aiRetouch", title: "AI Retouch", component: AIReTouchForm },
   ];
@@ -58,14 +61,6 @@ export const ResumeForm: React.FC = () => {
 
   const completedSteps = formSteps.filter((_, index) => index < currentStep).length;
   const progress = Math.round(((currentStep + 1) / formSteps.length) * 100);
-
-  const handleAISuggestion = async () => {
-    try {
-      await getAISuggestions(currentFormStep.id);
-    } catch (error) {
-      console.error("Failed to get AI suggestions:", error);
-    }
-  };
 
   // Scroll active tab into view
   useEffect(() => {
@@ -82,17 +77,25 @@ export const ResumeForm: React.FC = () => {
     }
   }, [currentStep]);
 
+  // -------------------------
+  // Step navigation handlers
+  // -------------------------
   const handleNextStep = async () => {
     try {
       setIsSaving(true);
-      await saveResumeStep(resumeData.id, resumeData.userEmail, {
-        ...resumeData,
-        meta: {
-          currentStep,
-          completed: false,
-        },
-      });
+
+      // Save current step data
+      await saveResumeStep(resumeData.id, resumeData.userEmail, resumeData);
+
+      // Increment step and update localStorage
+      const nextStepNumber = currentStep + 1;
       nextStep();
+      localStorage.setItem("resumeCurrentStep", String(nextStepNumber));
+
+      // Redirect after first step
+      if (currentStep === 0) {
+        router.push(`/resume/${resumeData.id}`);
+      }
     } catch (error) {
       console.error("Failed to save resume step:", error);
     } finally {
@@ -100,21 +103,30 @@ export const ResumeForm: React.FC = () => {
     }
   };
 
+  const handlePreviousStep = () => {
+    previousStep();
+  };
+
   const handleComplete = async () => {
     try {
       setIsSaving(true);
       await saveResumeStep(resumeData.id, resumeData.userEmail, {
         ...resumeData,
-        meta: {
-          currentStep,
-          completed: true,
-        },
+        meta: { currentStep, completed: true },
       });
       alert("Resume completed and saved!");
     } catch (error) {
       console.error("Failed to complete resume:", error);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleAISuggestion = async () => {
+    try {
+      await getAISuggestions(currentFormStep.id);
+    } catch (error) {
+      console.error("Failed to get AI suggestions:", error);
     }
   };
 
@@ -184,13 +196,7 @@ export const ResumeForm: React.FC = () => {
       {/* Body */}
       <div className="flex-1 overflow-y-auto p-4">
         <Card className="overflow-visible p-6 shadow-md border-border/50">
-          {FormComponent ? (
-            <FormComponent />
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              Form component not found
-            </div>
-          )}
+          {FormComponent ? <FormComponent /> : <div className="text-center py-8 text-muted-foreground">Form component not found</div>}
         </Card>
       </div>
 
@@ -207,13 +213,14 @@ export const ResumeForm: React.FC = () => {
         <div className="flex items-center justify-between">
           <Button
             variant="outline"
-            onClick={previousStep}
+            onClick={handlePreviousStep}
             disabled={currentStep === 0 || isSaving}
             className="flex items-center gap-2"
           >
             <ChevronLeft className="h-4 w-4" />
             Previous
           </Button>
+
           <div className="flex items-center gap-2">
             {currentStep < formSteps.length - 1 ? (
               <Button
