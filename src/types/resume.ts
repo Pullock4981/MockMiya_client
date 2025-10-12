@@ -1,3 +1,5 @@
+// src/types/resume.ts
+
 // ------------------------- Resume Builder TypeScript Definitions -------------------------
 
 // ---------- Personal Info ----------
@@ -179,7 +181,11 @@ export interface ResumeData {
   createdAt: string;
   updatedAt: string;
   meta?: ResumeMeta;
+
+  // ✅ NEW FIELD
+  resumeStatus?: "draft" | "complete";
 }
+
 
 // ---------- ATS Score ----------
 export interface ATSScore {

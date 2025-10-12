@@ -14,7 +14,7 @@ const ResumeHeader: React.FC = () => {
       {/* Name */}
       <h1
         style={{ color: getTextColor("heading") }}
-        className="font-bold text-2xl lg:text-5xl"
+        className="font-bold text-5xl"
       >
         {firstName || lastName ? (
           `${firstName} ${lastName}`

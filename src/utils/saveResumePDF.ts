@@ -1,4 +1,7 @@
-export const exportResumeHandler = async (resumeId: string) => {
+// src/utils/saveResumePDF.ts
+
+
+export const exportSaveResumeHandler = async (resumeId: string) => {
   const templateElement = document.getElementById("resume-template");
   if (!templateElement) return alert("Resume template not found");
 
@@ -44,21 +47,17 @@ export const exportResumeHandler = async (resumeId: string) => {
     </html>
   `;
 
-const response = await fetch("/resume/api/pdf/export-pdf", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ html, resumeId }), 
-});
-
+  // ✅ Send HTML + resumeId to backend for PDF generation & DB save
+  const response = await fetch("/resume/api/pdf/save-pdf", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ html, resumeId }),
+  });
 
   if (!response.ok) throw new Error("PDF export failed");
 
-  const blob = await response.blob();
-  const url = window.URL.createObjectURL(blob);
-
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "resume.pdf";
-  link.click();
-  window.URL.revokeObjectURL(url);
+  console.log("✅ PDF generated and saved in MongoDB!");
 };
+
+
+
