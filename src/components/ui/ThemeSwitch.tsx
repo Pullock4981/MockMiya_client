@@ -43,14 +43,15 @@ const ThemeSwitch: FC = () => {
         <div className="theme-switch__container">
           <div className="theme-switch__clouds" />
           <div className="theme-switch__stars-container">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 55" fill="none">
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M135.831 3.00688C135.055 3.85027..."
-                fill="currentColor"
-              />
-            </svg>
+           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 55" fill="none">
+  <path
+    fillRule="evenodd"
+    clipRule="evenodd"
+    d="M135.831 3.00688C135.055 3.85027 132.542 5.73177 129.456 6.48577C127.356 6.99777 125.104 7.12377 122.987 6.82977C117.891 6.11377 113.987 3.25477 110.888 1.57977C107.582 -0.202229 104.542 -0.003229 100.785 2.15177C96.949 4.34577 93.667 7.30677 90.567 10.8088C87.364 14.4238 83.347 18.3528 78.271 19.9078C72.951 21.5458 66.538 20.0468 61.865 17.6118C57.107 15.1398 53.726 11.1828 50.456 7.56377C47.03 3.75677 44.183 0.174771 40.485 -1.21923C36.434 -2.76523 31.733 -1.55323 27.738 1.61577C23.744 4.78577 20.453 9.15277 17.644 13.4788C14.918 17.6898 12.037 21.6928 8.522 24.7028C5.022 27.6998 0.971 29.5848 -2.978 29.6978C-6.977 29.8108 -10.587 28.2118 -12.819 26.3068L-12.819 54.9998L135.831 54.9998L135.831 3.00688Z"
+    fill="currentColor"
+  />
+</svg>
+
           </div>
           <div className="theme-switch__circle-container">
             <div className="theme-switch__sun-moon-container">

@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Copy, Check } from "lucide-react";
 
-// 🔹 জব টাইটেল অনুযায়ী summary templates
+// 🔹 Suggested summary templates based on job title
 const getSummaryTemplates = (jobTitle: string) => {
   const baseTemplates = [
     {
@@ -47,25 +47,22 @@ const getSummaryTemplates = (jobTitle: string) => {
 
   if (!jobTitle) return baseTemplates.slice(0, 5);
 
-  // filter & prioritize relevant templates
   const filtered = baseTemplates.filter((t) =>
     t.title.toLowerCase().includes(jobTitle.toLowerCase()) ||
     jobTitle.toLowerCase().includes(t.title.toLowerCase())
   );
 
-  if (filtered.length > 0) {
-    // relevant টেমপ্লেট আগে, তারপর অন্যগুলা থেকে বাকি পূরণ করবে
-    return [...filtered, ...baseTemplates.filter((t) => !filtered.includes(t))].slice(0, 5);
-  }
-
-  return baseTemplates.slice(0, 5);
+  return filtered.length
+    ? [...filtered, ...baseTemplates.filter((t) => !filtered.includes(t))].slice(0, 5)
+    : baseTemplates.slice(0, 5);
 };
 
-export const SummaryForm = () => {
+export const SummaryForm: React.FC = () => {
   const { summary, updateSummary } = useSummary();
   const { personalInfo } = usePersonalInfo();
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
+  // Suggested templates based on job title
   const templates = getSummaryTemplates(personalInfo.jobTitle);
 
   const handleTemplateUse = (content: string, index: number) => {
@@ -76,28 +73,28 @@ export const SummaryForm = () => {
 
   return (
     <div className="space-y-6">
-      {/* Input Section */}
-      <div className="space-y-3">
-        <Label className="text-sm font-medium">
+      {/* Summary Input */}
+      <Card className="p-4 bg-muted/20 border-border/50">
+        <Label className="text-sm font-medium mb-2">
           Professional Summary <span className="text-destructive">*</span>
         </Label>
         <Textarea
-          value={summary}
+          value={summary || ""}
           onChange={(e) => updateSummary(e.target.value)}
           placeholder="Write a compelling professional summary..."
           className="min-h-32 resize-none transition-all duration-200 focus:ring-primary/20"
           maxLength={600}
         />
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground mt-1">
           Ideal length: 200–300 characters. Max 600 characters.
         </p>
-      </div>
+      </Card>
 
-      {/* Templates */}
+      {/* Suggested Templates */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Suggested Templates</h3>
         <p className="text-sm text-muted-foreground">
-          Based on your job title (<span className="font-semibold">{personalInfo.jobTitle || "Not provided"}</span>)
+          Based on your job title: <span className="font-semibold">{personalInfo.jobTitle || "Not provided"}</span>
         </p>
         <div className="grid gap-4">
           {templates.map((template, index) => (

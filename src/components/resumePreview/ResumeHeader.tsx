@@ -14,7 +14,7 @@ const ResumeHeader: React.FC = () => {
       {/* Name */}
       <h1
         style={{ color: getTextColor("heading") }}
-        className="font-bold text-2xl lg:text-5xl"
+        className="font-bold text-5xl"
       >
         {firstName || lastName ? (
           `${firstName} ${lastName}`
@@ -43,12 +43,12 @@ const ResumeHeader: React.FC = () => {
           <span className="w-24 h-3 bg-gray-100 animate-pulse inline-block rounded" />
         )}
         {email ? (
-          `• ${email}`
+          `  |  ${email}`
         ) : (
           <span className="w-32 h-3 bg-gray-100 animate-pulse inline-block rounded" />
         )}
         {phone ? (
-          `• ${phone}`
+          `  |  ${phone}`
         ) : (
           <span className="w-24 h-3 bg-gray-100 animate-pulse inline-block rounded" />
         )}

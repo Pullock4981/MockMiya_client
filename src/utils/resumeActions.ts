@@ -30,7 +30,7 @@ export async function saveResumeStep(
   };
 
   try {
-    const response = await fetch("/api/saveResume", {
+    const response = await fetch("/resume/api/saveResume", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -40,31 +40,29 @@ export const EducationForm: React.FC = () => {
     <div className="space-y-6">
       {/* Existing Education */}
       {education.length > 0 && (
-        <div className="space-y-4">
+        <Card className="p-4 space-y-4 bg-muted/10 border-border/50">
           <h3 className="text-lg font-medium">Your Education</h3>
           {education.map((edu) => (
-            <Card key={edu.id} className="p-4 border-border/50">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <h4 className="font-semibold text-foreground">{edu.degree}</h4>
-                  <p className="text-sm text-muted-foreground">{edu.institution} • {edu.location}</p>
-                  <p className="text-xs text-muted-foreground">{edu.graduationDate}</p>
-                  {edu.gpa && <p className="text-xs text-muted-foreground">GPA: {edu.gpa}</p>}
-                  {edu.honors && <p className="text-xs text-muted-foreground">Honors: {edu.honors}</p>}
-                </div>
-                <Button variant="ghost" size="sm" onClick={() => removeEducation(edu.id)}>
-                  <X className="h-4 w-4" />
-                </Button>
+            <Card key={edu.id} className="p-4 border-border/50 flex justify-between items-start">
+              <div className="space-y-1">
+                <h4 className="font-semibold text-foreground">{edu.degree}</h4>
+                <p className="text-sm text-muted-foreground">{edu.institution} • {edu.location}</p>
+                <p className="text-xs text-muted-foreground">{edu.graduationDate}</p>
+                {edu.gpa && <p className="text-xs text-muted-foreground">GPA: {edu.gpa}</p>}
+                {edu.honors && <p className="text-xs text-muted-foreground">Honors: {edu.honors}</p>}
               </div>
+              <Button variant="destructive" size="sm" onClick={() => removeEducation(edu.id)}>
+                <X className="h-4 w-4" />
+              </Button>
             </Card>
           ))}
-        </div>
+        </Card>
       )}
 
       {/* Add New Education */}
-      <Card className="p-6 border-dashed border-2 border-border/50">
+      <Card className="p-6 border-dashed border-2 border-border/50 bg-muted/20">
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-2">
             <GraduationCap className="h-5 w-5 text-primary" />
             <h3 className="text-lg font-medium">Add Education</h3>
           </div>
@@ -128,11 +126,10 @@ export const EducationForm: React.FC = () => {
 
           <Button
             onClick={handleAddEducation}
-            className="w-full transition-all duration-300"
+            className="w-full flex items-center justify-center gap-2"
             disabled={!newEdu.degree || !newEdu.institution}
           >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Education
+            <Plus className="h-4 w-4" /> Add Education
           </Button>
         </div>
       </Card>

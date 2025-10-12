@@ -29,7 +29,7 @@ export const PersonalInfoProvider = ({ children, initialData }: Props) => {
   });
 
   useEffect(() => {
-    if (initialData) setPersonalInfo(initialData);
+    if (initialData) setPersonalInfo((prev) => ({ ...prev, ...initialData }));
   }, [initialData]);
 
   const updatePersonalInfo = (info: Partial<PersonalInfo>) => {

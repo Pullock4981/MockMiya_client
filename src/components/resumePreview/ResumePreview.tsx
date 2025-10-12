@@ -1,3 +1,5 @@
+// src/components/resumePreview/ResumePreview.tsx
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -88,8 +90,10 @@ const ResumePreview: React.FC = () => {
       <ResumeControls
         showATSDetails={showATSDetails}
         setShowATSDetails={setShowATSDetails}
-        userId={userId}
+        resumeId={resumeData.id || ""}
       />
+
+
 
       {showATSDetails && atsScore && <ATSDetails atsScore={atsScore} />}
 
@@ -102,8 +106,12 @@ const ResumePreview: React.FC = () => {
           fontFamily: currentTheme.fontFamily,
         }}
       >
-        {renderTemplate()}
+        {/* এই div শুধু wrapper */}
+        <div id="resume-template">
+          {renderTemplate()}
+        </div>
       </div>
+
     </div>
   );
 };
