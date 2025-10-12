@@ -103,7 +103,7 @@ export const AuthProvider = ({ children }: Props) => {
     signInUser,
     googleSignIn,
     logoutUser,
-    resetPassword, // 👈 add here
+    resetPassword, 
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -119,7 +119,6 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
-
 
 
 

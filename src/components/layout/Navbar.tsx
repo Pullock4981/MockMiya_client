@@ -7,8 +7,8 @@ import {
   Code2,
   ChevronDown,
   User,
-  Settings,
   LogOut,
+  LayoutDashboard,
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
@@ -28,10 +28,9 @@ const Navbar = () => {
 
   const navItems = [
     { name: "Features", href: "#features" },
-    { name: "Pricing", href: "#pricing" },
+    { name: "Resume", href: "/resume" },
     { name: "Blogs", href: "/blogs", isRoute: true },
     { name: "About", href: "/about", isRoute: true },
-    { name: "FAQ", href: "#faq" },
   ];
 
   // ✅ Handle Logout
@@ -127,9 +126,10 @@ const Navbar = () => {
                           <User className="w-4 h-4" />
                           Profile
                         </Link>
-                        <Link href={"/dashboard/settings"} className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors">
-                          <Settings className="w-4 h-4" />
-                          Settings
+                        <Link href={"/dashboard"} className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors">
+                          
+                          <LayoutDashboard className="w-4 h-4"  />
+                          Dashboard
                         </Link>
                         <div className="border-t border-border my-1" />
                         <button
