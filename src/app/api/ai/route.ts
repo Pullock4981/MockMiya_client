@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
 
     if (!text) return NextResponse.json({ error: 'No text provided' }, { status: 400 })
 
-    const apiKey = process.env.GOOGLE_API_KEY
+    const apiKey = process.env.VIDEO_INTERVIEW_API_KEY
     if (!apiKey) return NextResponse.json({ error: 'Missing API key' }, { status: 500 })
 
     const endpoint =
