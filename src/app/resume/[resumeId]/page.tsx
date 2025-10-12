@@ -3,7 +3,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { ResumeProvider } from "@/context/ResumeContext/ResumeProvider";
 import { ResumeData } from "@/types/resume";
 import PrivateRoute from "@/app/Routes/PrivateRoute";
@@ -21,7 +21,6 @@ import { useResumeThumbnail } from "@/hooks/useResumeThumbnail";
 
 const ResumePageById = () => {
   const params = useParams();
-  const router = useRouter();
   const resumeId = Array.isArray(params?.resumeId)
     ? params.resumeId[0]
     : (params?.resumeId as string);
