@@ -22,8 +22,6 @@ const ResumePreview: React.FC = () => {
   const { calculateATSScore } = useATS();
   const { template, theme, setATSScore, atsScore } = useMeta();
   const [showATSDetails, setShowATSDetails] = useState(false);
-  const { user } = useAuth();
-  const userId = user?.email || "";
 
   // Default template & theme fallback
   const currentTemplate = template ?? {

@@ -8,11 +8,65 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Download, Plus, Trash2, Edit3 } from "lucide-react";
+import { Plus, Trash2, Edit3, Printer } from "lucide-react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
+
+// PDF Overlay Component (reusable from ResumeControls)
+const ResumePrintOverlay = ({
+  pdfUrl,
+  onClose,
+}: {
+  pdfUrl: string;
+  onClose: () => void;
+}) => {
+  React.useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleEsc);
+
+    const timer = setTimeout(() => {
+      const iframe = document.getElementById("resume-iframe") as HTMLIFrameElement;
+      iframe?.contentWindow?.focus();
+      iframe?.contentWindow?.print();
+    }, 500);
+
+    return () => {
+      document.removeEventListener("keydown", handleEsc);
+      clearTimeout(timer);
+    };
+  }, [onClose]);
+
+  return (
+    <div style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      backgroundColor: "rgba(0,0,0,0.8)",
+      zIndex: 9999,
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center"
+    }}>
+      <iframe
+        id="resume-iframe"
+        src={pdfUrl}
+        style={{ width: "90%", height: "95%", border: "none", backgroundColor: "#fff" }}
+      />
+      <button
+        onClick={onClose}
+        className="fixed top-25 right-25 bg-muted/30 px-3 py-2 rounded-md cursor-pointer z-[10000] shadow-md hover:bg-muted/50 transition"
+      >
+        Close
+      </button>
+    </div>
+  );
+};
 
 interface ResumeTemplate { id?: string; name?: string; layout?: string; sections?: string[] }
 interface ResumeTheme { id?: string; name?: string; primaryColor?: string; accentColor?: string; textColor?: string; backgroundColor?: string; fontFamily?: string }
@@ -42,6 +96,8 @@ export default function DashboardResume() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "draft" | "complete">("all");
   const [sort, setSort] = useState<"updatedAt_desc" | "updatedAt_asc">("updatedAt_desc");
+
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null); // PDF Overlay state
 
   const fetchResumes = useCallback(async () => {
     if (!userEmail) return;
@@ -98,6 +154,20 @@ export default function DashboardResume() {
     }
   }, [userEmail]);
 
+  // Handle PDF Preview
+  const handlePdfPreview = async (id: string) => {
+    try {
+      const response = await fetch(`/resume/api/pdf/view-pdf?resumeId=${id}`);
+      if (!response.ok) throw new Error("Failed to fetch PDF");
+
+      const pdfBlob = await response.blob();
+      const url = URL.createObjectURL(pdfBlob);
+      setPdfUrl(url);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to open PDF preview");
+    }
+  };
 
   const filteredResumes = resumes
     .filter(r => filter === "all" ? true : (r.resumeStatus ?? "draft") === filter)
@@ -146,14 +216,17 @@ export default function DashboardResume() {
                   <p className="text-xs text-muted-foreground mt-1">Template: {r.template?.name || "Default"}</p>
                   <div className="flex justify-end gap-1 mt-3">
                     <Button variant="ghost" size="sm" onClick={() => router.push(`/resume/${r.id}`)} title="Edit"><Edit3 className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="sm" title="Download"><Download className="h-4 w-4" /></Button>
-                    <Button variant="destructive" size="sm" onClick={() => handleDelete(r.id)} title="Delete"><Trash2 className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => handlePdfPreview(r.id)} title="Preview"><Printer className="h-4 w-4" /></Button>
+                     <Button variant="destructive" size="sm" onClick={() => handleDelete(r.id)} title="Delete"><Trash2 className="h-4 w-4" /></Button>
                   </div>
                 </div>
               </Card>
             ))}
           </div>
       }
+
+      {/* PDF Overlay */}
+      {pdfUrl && <ResumePrintOverlay pdfUrl={pdfUrl} onClose={() => { URL.revokeObjectURL(pdfUrl); setPdfUrl(null); }} />}
     </div>
   );
 }
