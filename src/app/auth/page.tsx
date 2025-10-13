@@ -21,7 +21,7 @@ function AuthPageInner() {
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
 
   useEffect(() => {
-    const tab = searchParams.get('tab');
+    const tab = searchParams?.get('tab') ?? null;
     if (tab === 'signin' || tab === 'signup') setActiveTab(tab);
   }, [searchParams]);
 
