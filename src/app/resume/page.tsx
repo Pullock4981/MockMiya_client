@@ -1,109 +1,102 @@
+
+// src/app/resume/page.tsx
 "use client";
 
-import React, { useState } from "react";
-import { ResumeProvider } from "@/components/resumePreview/ResumeProvider";
-import PrivateRoute from "@/app/Routes/PrivateRoute";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Eye, Edit3, Menu, X, Download } from "lucide-react";
-import { ResumeForm } from "@/components/forms/ResumeForms/ResumeForm";
-import ResumePreview from "@/components/resumePreview/ResumePreview";
-
-import { exportResumeHandler } from "@/utils/exportResume";
+interface Resume {
+  id: string;
+  title: string;
+  thumbnailUrl?: string;
+}
 
 const ResumePage = () => {
-  const [isMobilePreviewMode, setIsMobilePreviewMode] = useState(false);
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
-  return (
-    <PrivateRoute>
-      <ResumeProvider>
-        <div className="min-h-screen bg-gradient-to-br from-background to-muted">
-          {/* Mobile Header */}
-          <div className="lg:hidden flex items-center justify-between p-4 bg-card border-b border-border sticky top-0 z-50">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-              >
-                {isMobileSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-              </Button>
-              <h1 className="text-lg font-semibold text-foreground">Resume Builder</h1>
-            </div>
+  useEffect(() => {
+    const fetchResumes = async () => {
+      try {
+        const userEmail = localStorage.getItem("userEmail");
+        if (!userEmail) {
+          await Swal.fire({
+            icon: "info",
+            title: "No resume found",
+            text: "You haven't created any resume yet. Redirecting to create one...",
+            timer: 2500,
+            showConfirmButton: false,
+          });
+          router.replace("/dashboard/resume");
+          return;
+        }
 
-            <div className="flex gap-2">
-              <Button
-                variant={isMobilePreviewMode ? "secondary" : "default"}
-                size="sm"
-                onClick={() => setIsMobilePreviewMode(!isMobilePreviewMode)}
-                className="flex items-center gap-2"
-              >
-                {isMobilePreviewMode ? (
-                  <>
-                    <Edit3 className="h-4 w-4" /> Edit
-                  </>
-                ) : (
-                  <>
-                    <Eye className="h-4 w-4" /> Preview
-                  </>
-                )}
-              </Button>
+        const res = await fetch(`/resume/api/list?userEmail=${userEmail}`);
+        const data = await res.json();
 
-              <Button
-                variant="default"
-                size="sm"
-                onClick={exportResumeHandler}
-                className="flex items-center gap-2"
-              >
-                <Download className="h-4 w-4" /> Export PDF
-              </Button>
-            </div>
-          </div>
+        if (!data.success || !data.resumes || data.resumes.length === 0) {
+          await Swal.fire({
+            icon: "info",
+            title: "No resume found",
+            text: "You haven't created any resume yet. Redirecting to create one...",
+            timer: 2500,
+            showConfirmButton: false,
+          });
+          router.replace("/dashboard/resume");
+          return;
+        }
 
-          {/* Main Layout */}
-          <div className="flex flex-col lg:flex-row h-screen">
-            {/* Form Panel */}
-            <div
-              className={`
-                flex-1 lg:flex-none lg:w-2/5 border-r border-border flex flex-col
-                ${isMobilePreviewMode ? "hidden" : "flex"}
-                ${isMobileSidebarOpen ? "flex" : "hidden lg:flex"}
-              `}
-            >
-              <ResumeForm />
-            </div>
+        if (data.resumes.length === 1) {
+          await Swal.fire({
+            icon: "success",
+            title: "Resume found",
+            text: `We found your saved resume "${data.resumes[0].title}". Redirecting you there...`,
+            timer: 2000,
+            showConfirmButton: false,
+          });
+          router.replace(`/resume/${data.resumes[0].id}`);
+          return;
+        }
 
-            {/* Preview Panel */}
-            <div
-              className={`
-                flex-1 lg:flex-none lg:w-3/5 flex flex-col
-                ${isMobilePreviewMode ? "flex" : "hidden lg:flex"}
-              `}
-            >
-              <Card className="h-full overflow-y-auto border-0 shadow-none lg:rounded-none">
-                <div className="sticky top-0 bg-card/95 backdrop-blur-sm border-b border-border p-4 z-10">
-                  <h2 className="text-lg font-semibold text-foreground">Live Preview</h2>
-                </div>
-                <div className="p-6">
-                  <ResumePreview />
-                </div>
-              </Card>
-            </div>
-          </div>
+        if (data.resumes.length > 1) {
+          const htmlContent = data.resumes
+            .map(
+              (r: Resume) =>
+                `<div class="p-2 cursor-pointer hover:bg-gray-100 rounded" onclick="window.location='/resume/${r.id}'">
+                  <img src="${r.thumbnailUrl}" alt="${r.title}" class="w-24 h-32 object-cover rounded mb-1"/>
+                  <p class="text-center text-sm font-medium">${r.title}</p>
+                </div>`
+            )
+            .join("");
 
-          {/* Mobile Backdrop */}
-          {isMobileSidebarOpen && (
-            <div
-              className="lg:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
-              onClick={() => setIsMobileSidebarOpen(false)}
-            />
-          )}
-        </div>
-      </ResumeProvider>
-    </PrivateRoute>
-  );
+          Swal.fire({
+            title: "Select Resume",
+            html: `<div class="grid grid-cols-2 gap-2">${htmlContent}</div>`,
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            width: "800px",
+          });
+        }
+      } catch (err) {
+        console.error(err);
+        await Swal.fire({
+          icon: "error",
+          title: "Something went wrong",
+          text: "Redirecting to dashboard.",
+          timer: 2500,
+          showConfirmButton: false,
+        });
+        router.replace("/dashboard/resume");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResumes();
+  }, [router]);
+
+  return <div>{loading && <p className="text-center mt-10">Loading...</p>}</div>;
 };
 
 export default ResumePage;

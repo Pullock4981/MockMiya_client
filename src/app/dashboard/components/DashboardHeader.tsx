@@ -5,10 +5,11 @@ import { motion } from 'framer-motion';
 import { ChevronDown, LogOut, Search, Settings, User } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import ThemeSwitch from './ThemeSwitch';
+
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
+import ThemeSwitch from '@/components/ui/ThemeSwitch';
 
 export function DashboardHeader() {
   const [searchQuery, setSearchQuery] = useState('');

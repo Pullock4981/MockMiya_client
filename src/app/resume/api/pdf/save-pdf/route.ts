@@ -1,11 +1,12 @@
-// /app/resume/api/export-pdf/route.ts
+// src/app/resume/api/pdf/save-pdf/route.ts
 import puppeteer from "puppeteer";
+import clientPromise from "@/context/MongoDB/mongodb"; // তোমার mongodb connection
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
-    const { html } = await req.json();
+    const { html, resumeId } = await req.json();
     if (!html) return new Response("HTML content is required", { status: 400 });
 
     const browser = await puppeteer.launch({
@@ -23,6 +24,17 @@ export async function POST(req: Request) {
     });
 
     await browser.close();
+
+    // ✅ MongoDB তে save করা
+    const client = await clientPromise;
+    const db = client.db("MockMiya");
+    const collection = db.collection("resumes");
+
+    await collection.updateOne(
+      { id: resumeId },
+      { $set: { pdf: pdfBuffer, pdfGeneratedAt: new Date() } },
+      { upsert: true }
+    );
 
     const arrayBuffer = pdfBuffer.buffer.slice(
       pdfBuffer.byteOffset,

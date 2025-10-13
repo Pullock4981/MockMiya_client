@@ -1,35 +1,33 @@
 "use client";
-
 import React from "react";
 import { useResume } from "@/hooks/useResume";
+import { useResumeTheme } from "../../context/ResumeContext/ResumeThemeContext";
 
-interface ResumeCertificationsProps {
-  fontSize?: string;
-  lineHeight?: string;
-}
-
-const ResumeCertifications: React.FC<ResumeCertificationsProps> = ({ lineHeight = "tight" }) => {
+const ResumeCertifications: React.FC = () => {
   const { resumeData } = useResume();
-  const certifications = Array.isArray(resumeData.certifications) ? resumeData.certifications : [];
-  if (certifications.length === 0) return null;
+  const { getTextColor } = useResumeTheme();
+  const hasCerts = Array.isArray(resumeData.certifications) && resumeData.certifications.length > 0;
 
   return (
-    <div className={`space-y-4 ${lineHeight}`}>
-      <h2 style={{ color: "#252525" }} className="text-xl font-semibold border-b border-gray-300 pb-1">
+    <section className="space-y-3">
+      <h2 style={{ color: getTextColor("heading"), fontSize: "1.25rem", fontWeight: 600, borderBottom: "1px solid #ccc", paddingBottom: "0.25rem" }}>
         Certifications
       </h2>
-      <div className="space-y-2">
-        {certifications.map((cert, index) => (
+
+      {hasCerts ? (
+        resumeData.certifications.map((cert, index) => (
           <div key={cert.id || index} className="space-y-1">
-            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center">
-              <h3 style={{ fontWeight: 600, color: "#343434" }}>{cert.name}</h3>
-              <span style={{ color: "#777", fontSize: "0.875rem" }}>{cert.dateEarned}</span>
+            <div className="flex justify-between">
+              <h3 style={{ fontWeight: 600, color: getTextColor("subHeading") }}>{cert.name}</h3>
+              <span style={{ color: getTextColor("subHeading"), fontSize: "0.875rem" }}>{cert.dateEarned}</span>
             </div>
-            <div style={{ color: "#34A853" }}>{cert.issuer}</div>
+            <div style={{ color: getTextColor("subHeading"), fontSize: "0.875rem" }}>{cert.issuer}</div>
           </div>
-        ))}
-      </div>
-    </div>
+        ))
+      ) : (
+        <div className="h-16 bg-gray-100 rounded animate-pulse mt-2" />
+      )}
+    </section>
   );
 };
 

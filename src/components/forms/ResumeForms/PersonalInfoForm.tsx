@@ -34,7 +34,7 @@ export const PersonalInfoForm: React.FC = () => {
       <Card className="p-4 bg-muted/30 border-border/50">
         <div className="flex items-center space-x-4">
           <Avatar className="h-20 w-20">
-            <AvatarImage src={personalInfo.profileImage} alt="Profile" />
+            <AvatarImage src={personalInfo.profileImage || ""} alt="Profile" />
             <AvatarFallback className="bg-primary/10 text-primary">
               <User className="h-8 w-8" />
             </AvatarFallback>
@@ -88,7 +88,7 @@ export const PersonalInfoForm: React.FC = () => {
           <Input
             id="firstName"
             placeholder="John"
-            value={personalInfo.firstName}
+            value={personalInfo.firstName || ""}
             onChange={(e) => handleInputChange("firstName", e.target.value)}
             className="transition-all duration-200 focus:ring-primary/20"
           />
@@ -101,7 +101,7 @@ export const PersonalInfoForm: React.FC = () => {
           <Input
             id="lastName"
             placeholder="Smith"
-            value={personalInfo.lastName}
+            value={personalInfo.lastName || ""}
             onChange={(e) => handleInputChange("lastName", e.target.value)}
             className="transition-all duration-200 focus:ring-primary/20"
           />
@@ -118,7 +118,7 @@ export const PersonalInfoForm: React.FC = () => {
             id="email"
             type="email"
             placeholder="john.smith@email.com"
-            value={personalInfo.email}
+            value={personalInfo.email || ""}
             onChange={(e) => handleInputChange("email", e.target.value)}
             className="transition-all duration-200 focus:ring-primary/20"
           />
@@ -132,7 +132,7 @@ export const PersonalInfoForm: React.FC = () => {
             id="phone"
             type="tel"
             placeholder="+1 (555) 123-4567"
-            value={personalInfo.phone}
+            value={personalInfo.phone || ""}
             onChange={(e) => handleInputChange("phone", e.target.value)}
             className="transition-all duration-200 focus:ring-primary/20"
           />
@@ -145,7 +145,7 @@ export const PersonalInfoForm: React.FC = () => {
           <Input
             id="location"
             placeholder="New York, NY"
-            value={personalInfo.location}
+            value={personalInfo.location || ""}
             onChange={(e) => handleInputChange("location", e.target.value)}
             className="transition-all duration-200 focus:ring-primary/20"
           />

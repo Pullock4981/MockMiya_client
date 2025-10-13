@@ -1,27 +1,23 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
-import { ResumeTemplate, ResumeTheme, ATSScore, AIsuggestion } from "@/types/resume";
-
-interface MetaContextType {
-  template: ResumeTemplate;
-  theme: ResumeTheme;
-  atsScore: ATSScore | null;
-  aiSuggestions: AIsuggestion[];
-  updateTemplate: (template: ResumeTemplate) => void;
-  updateTheme: (theme: ResumeTheme) => void;
-  setATSScore: (score: ATSScore) => void;
-  setAISuggestions: (suggestions: AIsuggestion[]) => void;
-}
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { MetaContextType, ResumeMeta, ResumeTemplate, ResumeTheme, ATSScore, AIsuggestion } from "@/types/resume";
 
 const MetaContext = createContext<MetaContextType | undefined>(undefined);
 
-export const MetaProvider = ({ children }: { children: React.ReactNode }) => {
+interface Props {
+  children: ReactNode;
+  initialData?: ResumeMeta;
+}
+
+export const MetaProvider = ({ children, initialData }: Props) => {
   const [template, setTemplate] = useState<ResumeTemplate>({
     id: "default",
-    name: "Modern",
-    layout: "modern",
-    sections: ["summary", "workExperience", "education", "skills", "projects", "certifications", "socialLinks", "additionalInfo"],
+    name: "classic",
+    layout: "classic",
+    sections: [
+      "summary","workExperience","education","skills","projects","certifications","socialLinks","additionalInfo",
+    ],
   });
 
   const [theme, setTheme] = useState<ResumeTheme>({
@@ -34,15 +30,31 @@ export const MetaProvider = ({ children }: { children: React.ReactNode }) => {
     fontFamily: "Inter",
   });
 
-  const [atsScore, setATSScore] = useState<ATSScore | null>(null);
+  const [atsScore, setATSScore] = useState<ATSScore | undefined>(undefined);
   const [aiSuggestions, setAISuggestions] = useState<AIsuggestion[]>([]);
 
-  const updateTemplate = (newTemplate: ResumeTemplate) => setTemplate(newTemplate);
-  const updateTheme = (newTheme: ResumeTheme) => setTheme(newTheme);
+  // Load initialData safely
+  useEffect(() => {
+    if (!initialData) return;
+    const meta = initialData as Partial<ResumeMeta> & Partial<MetaContextType>;
+    if (meta.template) setTemplate(meta.template);
+    if (meta.theme) setTheme(meta.theme);
+    if (meta.atsScore) setATSScore(meta.atsScore);
+    if (meta.aiSuggestions) setAISuggestions(meta.aiSuggestions);
+  }, [initialData]);
 
   return (
     <MetaContext.Provider
-      value={{ template, theme, atsScore, aiSuggestions, updateTemplate, updateTheme, setATSScore, setAISuggestions }}
+      value={{
+        template,
+        theme,
+        atsScore,
+        aiSuggestions,
+        updateTemplate: setTemplate,
+        updateTheme: setTheme,
+        setATSScore,
+        setAISuggestions,
+      }}
     >
       {children}
     </MetaContext.Provider>

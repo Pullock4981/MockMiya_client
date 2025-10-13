@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Plus, FolderOpen } from "lucide-react";
+import { Plus, X, FolderOpen } from "lucide-react";
 import { useProjects } from "@/context/ResumeContext/Projects";
 import { Project } from "@/types/resume";
 
@@ -20,12 +20,15 @@ export const ProjectsForm: React.FC = () => {
     url: "",
     startDate: "",
     endDate: "",
-    highlights: [],
+    highlights: [""],
   });
 
   const handleAddProject = () => {
     if (!newProject.name) return;
-    addProject(newProject);
+    addProject({
+      ...newProject,
+      highlights: newProject.highlights.filter(h => h.trim()),
+    });
     setNewProject({
       name: "",
       description: "",
@@ -33,16 +36,31 @@ export const ProjectsForm: React.FC = () => {
       url: "",
       startDate: "",
       endDate: "",
-      highlights: [],
+      highlights: [""],
     });
   };
+
+  const addHighlight = () =>
+    setNewProject(prev => ({ ...prev, highlights: [...prev.highlights, ""] }));
+
+  const updateHighlight = (index: number, value: string) =>
+    setNewProject(prev => ({
+      ...prev,
+      highlights: prev.highlights.map((h, i) => (i === index ? value : h)),
+    }));
+
+  const removeHighlight = (index: number) =>
+    setNewProject(prev => ({
+      ...prev,
+      highlights: prev.highlights.filter((_, i) => i !== index),
+    }));
 
   return (
     <div className="space-y-6">
       {/* Add Project Form */}
-      <Card className="p-6 border-dashed border-2 border-border/50">
+      <Card className="p-6 border-dashed border-2 border-border/50 bg-muted/20">
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-2">
             <FolderOpen className="h-5 w-5 text-primary" />
             <h3 className="text-lg font-medium">Add Project</h3>
           </div>
@@ -81,7 +99,6 @@ export const ProjectsForm: React.FC = () => {
                   }
                 />
               </div>
-
               <div className="space-y-2">
                 <Label>Project URL (Optional)</Label>
                 <Input
@@ -101,7 +118,6 @@ export const ProjectsForm: React.FC = () => {
                   onChange={(e) => setNewProject({ ...newProject, startDate: e.target.value })}
                 />
               </div>
-
               <div className="space-y-2">
                 <Label>End Date (Optional)</Label>
                 <Input
@@ -112,26 +128,36 @@ export const ProjectsForm: React.FC = () => {
               </div>
             </div>
 
+            {/* Highlights */}
             <div className="space-y-2">
-              <Label>Highlights (comma separated)</Label>
-              <Input
-                placeholder="Implemented user authentication, Integrated payment gateway"
-                value={newProject.highlights.join(", ")}
-                onChange={(e) =>
-                  setNewProject({
-                    ...newProject,
-                    highlights: e.target.value.split(",").map(h => h.trim()),
-                  })
-                }
-              />
+              <div className="flex items-center justify-between">
+                <Label>Highlights</Label>
+                <Button variant="outline" size="sm" onClick={addHighlight}>
+                  <Plus className="h-4 w-4 mr-1" /> Add
+                </Button>
+              </div>
+              {newProject.highlights.map((highlight, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <Input
+                    placeholder="Implemented user authentication"
+                    value={highlight}
+                    onChange={(e) => updateHighlight(idx, e.target.value)}
+                  />
+                  {newProject.highlights.length > 1 && (
+                    <Button variant="ghost" size="sm" onClick={() => removeHighlight(idx)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
             </div>
 
             <Button
-              className="w-full bg-gradient-primary hover:shadow-paper transition-all duration-300"
+              className="w-full transition-all duration-300"
               onClick={handleAddProject}
+              disabled={!newProject.name}
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Project
+              <Plus className="h-4 w-4 mr-2" /> Add Project
             </Button>
           </div>
         </div>
@@ -139,16 +165,21 @@ export const ProjectsForm: React.FC = () => {
 
       {/* Project List */}
       <div className="space-y-2">
-        {projects.map((project) => (
-          <Card key={project.id} className="p-4 flex justify-between items-center border-dashed border-2 border-border/50">
-            <div>
+        {projects.map(project => (
+          <Card key={project.id} className="p-4 flex justify-between items-start border-dashed border-2 border-border/50">
+            <div className="space-y-1">
               <h4 className="font-medium">{project.name}</h4>
               {project.description && <p className="text-sm text-muted-foreground">{project.description}</p>}
-              {project.technologies.length > 0 && (
-                <p className="text-xs text-muted-foreground">Tech: {project.technologies.join(", ")}</p>
-              )}
+              {project.technologies.length > 0 && <p className="text-xs text-muted-foreground">Tech: {project.technologies.join(", ")}</p>}
               {project.url && (
                 <a href={project.url} target="_blank" className="text-primary text-xs underline">{project.url}</a>
+              )}
+              {project.highlights.length > 0 && (
+                <ul className="text-xs text-muted-foreground list-disc pl-4">
+                  {project.highlights.map((h, idx) => (
+                    <li key={idx}>{h}</li>
+                  ))}
+                </ul>
               )}
             </div>
             <Button variant="destructive" size="sm" onClick={() => removeProject(project.id)}>

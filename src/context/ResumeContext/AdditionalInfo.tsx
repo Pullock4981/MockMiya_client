@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { AdditionalInfo, Language } from "@/types/resume";
 
 interface AdditionalInfoContextType {
@@ -12,7 +12,12 @@ interface AdditionalInfoContextType {
 
 const AdditionalInfoContext = createContext<AdditionalInfoContextType | undefined>(undefined);
 
-export const AdditionalInfoProvider = ({ children }: { children: React.ReactNode }) => {
+interface Props {
+  children: React.ReactNode;
+  initialData?: AdditionalInfo;
+}
+
+export const AdditionalInfoProvider = ({ children, initialData }: Props) => {
   const [additionalInfo, setAdditionalInfo] = useState<AdditionalInfo>({
     languages: [],
     hobbies: [],
@@ -20,12 +25,20 @@ export const AdditionalInfoProvider = ({ children }: { children: React.ReactNode
     awards: [],
   });
 
+  // ✅ Load initial data from resume
+  useEffect(() => {
+    if (initialData) setAdditionalInfo(initialData);
+  }, [initialData]);
+
   const updateAdditionalInfo = (info: Partial<AdditionalInfo>) => {
     setAdditionalInfo((prev) => ({ ...prev, ...info }));
   };
 
   const addLanguage = (language: Language) => {
-    setAdditionalInfo((prev) => ({ ...prev, languages: [...prev.languages, language] }));
+    setAdditionalInfo((prev) => ({
+      ...prev,
+      languages: [...prev.languages, language],
+    }));
   };
 
   const removeLanguage = (id: string) => {
@@ -51,6 +64,7 @@ export const AdditionalInfoProvider = ({ children }: { children: React.ReactNode
 
 export const useAdditionalInfo = () => {
   const context = useContext(AdditionalInfoContext);
-  if (!context) throw new Error("useAdditionalInfo must be used within AdditionalInfoProvider");
+  if (!context)
+    throw new Error("useAdditionalInfo must be used within AdditionalInfoProvider");
   return context;
 };
