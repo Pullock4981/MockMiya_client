@@ -20,15 +20,13 @@ const GoogleAuth = () => {
         position: 'top-center',
       });
 
-      const from = searchParams.get('from') ?? '/';
+      // ✅ Safe fallback in case searchParams is null
+      const from = searchParams?.get('from') ?? '/';
       router.push(from);
     } catch (error: unknown) {
-      // Fully type-safe error handling
+      // ✅ Fully type-safe error handling
       let message = 'Google Sign In failed';
-
-      if (error instanceof Error) {
-        message = error.message;
-      }
+      if (error instanceof Error) message = error.message;
 
       console.error('Google Sign In Error:', message);
       toast.error(message, { position: 'top-center' });
