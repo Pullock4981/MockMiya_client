@@ -871,7 +871,7 @@ export default function CodingChallenges() {
                       )}
                       {quizState.timeRemaining <= 0 && !completedBeforeTimeLimit() && (
                         <p className="text-yellow-600 font-semibold">
-                          ⏰ Time's up! Your quiz was automatically submitted.
+                          ⏰ Times up! Your quiz was automatically submitted.
                         </p>
                       )}
                     </motion.div>
