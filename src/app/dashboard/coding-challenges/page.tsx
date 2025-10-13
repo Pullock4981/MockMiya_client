@@ -63,10 +63,11 @@ const progressVariants = {
 export default function CodingChallenges() {
   const pathname = usePathname();
   const [config, setConfig] = useState<QuizConfig>({
-    roleId: '',
-    duration: 5,
-    questionCount: 10,
-  });
+  role: '', // was roleId
+  duration: 5,
+  questionCount: 10,
+});
+
   const [quizState, setQuizState] = useState<QuizState | null>(null);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [isCustomizing, setIsCustomizing] = useState(false);
