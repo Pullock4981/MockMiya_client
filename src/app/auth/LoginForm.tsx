@@ -42,7 +42,7 @@ export default function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      const from = searchParams.get('from') || '/dashboard';
+      const from = searchParams?.get('from') ?? '/dashboard';
       const userCredential = await signInUser(data.email, data.password);
 
       if (userCredential.user) {
