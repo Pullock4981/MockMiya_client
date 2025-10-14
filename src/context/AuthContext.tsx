@@ -1,131 +1,262 @@
+// 'use client';
+
+// import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+// import {
+//   createUserWithEmailAndPassword,
+//   GoogleAuthProvider,
+//   onAuthStateChanged,
+//   signInWithEmailAndPassword,
+//   signInWithPopup,
+//   signOut,
+//   updateProfile,
+//   User,
+//   UserCredential,
+//   sendPasswordResetEmail,
+// } from 'firebase/auth';
+// import { auth } from './Firebase/firebase.init';
+
+// // =======================
+// // TypeScript type
+// // =======================
+// interface AuthContextType {
+//   user: User | null;
+//   loading: boolean;
+//   createUser: (email: string, password: string) => Promise<UserCredential>;
+//   updateUser: (profile: { displayName?: string; photoURL?: string }) => Promise<void>;
+//   signInUser: (email: string, password: string) => Promise<UserCredential>;
+//   googleSignIn: () => Promise<UserCredential>;
+//   logoutUser: () => Promise<void>;
+//   resetPassword: (email: string) => Promise<void>; // 👈 NEW
+// }
+
+// // =======================
+// // Create Context
+// // =======================
+// export const AuthContext = createContext<AuthContextType | undefined>(undefined); // <-- export added ✅
+
+// // =======================
+// // Provider
+// // =======================
+// interface Props {
+//   children: ReactNode;
+// }
+
+// const googleProvider = new GoogleAuthProvider();
+
+// export const AuthProvider = ({ children }: Props) => {
+//   const [user, setUser] = useState<User | null>(null);
+//   const [loading, setLoading] = useState<boolean>(true);
+
+//   const createUser = (email: string, password: string): Promise<UserCredential> => {
+//     setLoading(true);
+//     return createUserWithEmailAndPassword(auth, email, password);
+//   };
+
+//   const updateUser = (profile: { displayName?: string; photoURL?: string }): Promise<void> => {
+//     if (!auth.currentUser) {
+//       return Promise.reject(new Error('No user logged in'));
+//     }
+//     return updateProfile(auth.currentUser, profile);
+//   };
+
+//   const signInUser = (email: string, password: string): Promise<UserCredential> => {
+//     setLoading(true);
+//     return signInWithEmailAndPassword(auth, email, password);
+//   };
+
+//   const googleSignIn = (): Promise<UserCredential> => {
+//     setLoading(true);
+//     return signInWithPopup(auth, googleProvider);
+//   };
+
+//   const logoutUser = async (): Promise<void> => {
+//     setLoading(true);
+//     try {
+//       await signOut(auth);
+//       setUser(null);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+//   const resetPassword = async (email: string): Promise<void> => {
+//     setLoading(true);
+//     try {
+//       await sendPasswordResetEmail(auth, email);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+//       setUser(currentUser);
+//       setLoading(false);
+//     });
+//     return () => unsubscribe();
+//   }, []);
+
+//   const value: AuthContextType = {
+//     user,
+//     loading,
+//     createUser,
+//     updateUser,
+//     signInUser,
+//     googleSignIn,
+//     logoutUser,
+//     resetPassword, // 👈 add here
+//   };
+
+//   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+// };
+
+// // =======================
+// // Custom Hook
+// // =======================
+// export const useAuth = (): AuthContextType => {
+//   const context = useContext(AuthContext);
+//   if (!context) {
+//     throw new Error('useAuth must be used within an AuthProvider');
+//   }
+//   return context;
+// };
+
+
+
+
+
 'use client';
 
-import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import {
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-  updateProfile,
-  User,
-  UserCredential,
-  sendPasswordResetEmail,
-} from 'firebase/auth';
-import { auth } from './Firebase/firebase.init';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { SessionProvider, useSession, signIn, signOut, getSession } from "next-auth/react";
+import { Session } from "next-auth";
+import { canAttemptLogin, recordLoginAttempt } from "@/lib/loginRateLimiter";
 
-// =======================
-// TypeScript type
-// =======================
-interface AuthContextType {
-  user: User | null;
+type AuthContextType = {
+  user: {
+    id: string;
+    name?: string;
+    email: string;
+    role: string;
+  } | null;
   loading: boolean;
-  createUser: (email: string, password: string) => Promise<UserCredential>;
-  updateUser: (profile: { displayName?: string; photoURL?: string }) => Promise<void>;
-  signInUser: (email: string, password: string) => Promise<UserCredential>;
-  googleSignIn: () => Promise<UserCredential>;
-  logoutUser: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>; // 👈 NEW
-}
+  login: (email: string, password: string) => Promise<void>;
+  googleLogin: () => Promise<void>;
+  logout: () => Promise<void>;
+};
 
-// =======================
-// Create Context
-// =======================
-export const AuthContext = createContext<AuthContextType | undefined>(undefined); // <-- export added ✅
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// =======================
-// Provider
-// =======================
-interface Props {
+export const AuthProvider = ({
+  children,
+  session,
+}: {
   children: ReactNode;
-}
+  session?: Session | null;
+}) => (
+  <SessionProvider session={session}>
+    <AuthInner>{children}</AuthInner>
+  </SessionProvider>
+);
 
-const googleProvider = new GoogleAuthProvider();
+const AuthInner = ({ children }: { children: ReactNode }) => {
+  const { data: session, status } = useSession();
+  const [user, setUser] = useState<AuthContextType["user"]>(null);
+  const [loading, setLoading] = useState(true);
 
-export const AuthProvider = ({ children }: Props) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  const createUser = (email: string, password: string): Promise<UserCredential> => {
-    setLoading(true);
-    return createUserWithEmailAndPassword(auth, email, password);
-  };
-
-  const updateUser = (profile: { displayName?: string; photoURL?: string }): Promise<void> => {
-    if (!auth.currentUser) {
-      return Promise.reject(new Error('No user logged in'));
-    }
-    return updateProfile(auth.currentUser, profile);
-  };
-
-  const signInUser = (email: string, password: string): Promise<UserCredential> => {
-    setLoading(true);
-    return signInWithEmailAndPassword(auth, email, password);
-  };
-
-  const googleSignIn = (): Promise<UserCredential> => {
-    setLoading(true);
-    return signInWithPopup(auth, googleProvider);
-  };
-
-  const logoutUser = async (): Promise<void> => {
-    setLoading(true);
-    try {
-      await signOut(auth);
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-  const resetPassword = async (email: string): Promise<void> => {
-    setLoading(true);
-    try {
-      await sendPasswordResetEmail(auth, email);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // ---------------- Sync user with session ----------------
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
+    if (status === "loading") {
+      setLoading(true);
+      return;
+    }
 
-  const value: AuthContextType = {
-    user,
-    loading,
-    createUser,
-    updateUser,
-    signInUser,
-    googleSignIn,
-    logoutUser,
-    resetPassword, // 👈 add here
+    if (session?.user) {
+      setUser({
+        id: session.user.id!,
+        name: session.user.name!,
+        email: session.user.email!,
+        role: session.user.role!,
+      });
+    } else {
+      setUser(null);
+    }
+
+    setLoading(false);
+  }, [session, status]);
+
+  // ---------------- Login ----------------
+
+
+const login = async (email: string, password: string) => {
+  setLoading(true);
+
+  try {
+    if (!canAttemptLogin(email)) {
+      throw new Error("Too many failed attempts. Try again in 2 minutes.");
+    }
+
+    const res = await signIn("credentials", { redirect: false, email, password });
+
+    if (!res) {
+      recordLoginAttempt(email, false);
+      throw new Error("Login failed");
+    }
+
+    if (res.error) {
+      recordLoginAttempt(email, false);
+      throw new Error(res.error);
+    }
+
+    // Successful login → reset attempts
+    recordLoginAttempt(email, true);
+
+    const updatedSession = await getSession();
+    if (updatedSession?.user) {
+      setUser({
+        id: updatedSession.user.id!,
+        name: updatedSession.user.name!,
+        email: updatedSession.user.email!,
+        role: updatedSession.user.role!,
+      });
+    }
+
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  // ---------------- Google login ----------------
+  const googleLogin = async (): Promise<void> => {
+    setLoading(true);
+    await signIn("google", { redirect: false });
+    const updatedSession = await getSession();
+    if (updatedSession?.user) {
+      setUser({
+        id: updatedSession.user.id!,
+        name: updatedSession.user.name!,
+        email: updatedSession.user.email!,
+        role: updatedSession.user.role!,
+      });
+    }
+    setLoading(false);
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  // ---------------- Logout ----------------
+  const logout = async (): Promise<void> => {
+    await signOut({ redirect: false });
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, loading, login, googleLogin, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
-// =======================
-// Custom Hook
-// =======================
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
 };
-
-
-
-
-
-
-
-
-
-

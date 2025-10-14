@@ -12,19 +12,16 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
-
 import Link from "next/link";
 import ThemeSwitch from "../ui/ThemeSwitch";
 import { useAuth } from "@/context/AuthContext";
-import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const router = useRouter();
-  const { user, logoutUser } = useAuth();
+  const { user, logout } = useAuth();
 
   const navItems = [
     { name: "Features", href: "#features" },
@@ -35,14 +32,36 @@ const Navbar = () => {
   ];
 
   // ✅ Handle Logout
-  const handleLogout = async () => {
-    try {
-      await logoutUser();
-      toast.success("Logged out successfully");
-      router.push("/auth");
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to logout");
+const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You will be logged out from your account!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Logout",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await logout();
+        await Swal.fire({
+          title: "Logged Out!",
+          text: "You have been logged out successfully.",
+          icon: "success",
+          timer: 1800,
+          showConfirmButton: false,
+        });
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Logout failed');
+        console.error(error);
+        Swal.fire({
+          title: "Failed!",
+          text: error.message,
+          icon: "error",
+        });
+      }
     }
   };
 
@@ -94,7 +113,7 @@ const Navbar = () => {
                   >
                     <div className="text-right hidden md:block">
                       <div className="text-sm font-medium">
-                        {user?.displayName ?? "User"}
+                        {user?.name ?? "User"}
                       </div>
                       {/* <div className="text-xs text-foreground-muted">{user?.role ?? 'Member'}</div> */}
                     </div>
@@ -115,7 +134,7 @@ const Navbar = () => {
                     >
                       <div className="p-3 border-b border-border">
                         <div className="font-medium">
-                          {user?.displayName ?? "User"}
+                          {user?.name ?? "User"}
                         </div>
                         <div className="text-sm text-foreground-muted">
                           {user?.email ?? "example@email.com"}

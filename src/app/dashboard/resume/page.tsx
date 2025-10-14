@@ -88,6 +88,7 @@ const MySwal = withReactContent(Swal);
 export default function DashboardResume() {
   const router = useRouter();
   const { user } = useAuth();
+  console.log("user cosole from dashboard/resume/page.tsx",user)
   const userEmail = user?.email ?? "";
 
   const [resumes, setResumes] = useState<ResumeItem[]>([]);

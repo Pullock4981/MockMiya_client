@@ -7,12 +7,11 @@ import { useResumeThumbnail } from "@/hooks/useResumeThumbnail";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ChevronLeft, ChevronRight, Sparkles, CheckCircle2, FileDown, Printer } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, CheckCircle2, Printer } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import axios from "axios";
-import { exportResumeHandler } from "@/utils/exportResume";
 import { exportSaveResumeHandler } from "@/utils/saveResumePDF";
 
 import { PersonalInfoForm } from "./PersonalInfoForm";

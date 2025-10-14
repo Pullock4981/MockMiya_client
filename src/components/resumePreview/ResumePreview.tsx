@@ -15,7 +15,6 @@ import ModernTemplate from "../templates/ModernTemplate";
 import ClassicTemplate from "../templates/ClassicTemplate";
 
 import { useMeta } from "@/context/ResumeContext/MetaContext";
-import { useAuth } from "@/context/AuthContext";
 
 const ResumePreview: React.FC = () => {
   const { resumeData } = useResume();

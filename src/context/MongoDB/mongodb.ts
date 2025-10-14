@@ -25,16 +25,3 @@ const clientPromise: Promise<MongoClient> =
 global._mongoClientPromise = clientPromise;
 
 export default clientPromise;
-
-// Optional test helper
-export const testMongoConnection = async (): Promise<void> => {
-  try {
-    const client = await clientPromise;
-    const db = client.db("resumeDB");
-    await db.command({ ping: 1 });
-    console.log("✅ MongoDB connected successfully!");
-  } catch (err: unknown) {
-    console.error("❌ MongoDB connection error:", err);
-    throw err;
-  }
-};

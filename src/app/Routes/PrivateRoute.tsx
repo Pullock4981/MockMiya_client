@@ -1,8 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
-import { useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { LoadingSpinner } from "../dashboard/components/Loading";
 import { useAuth } from "@/context/AuthContext";
 
@@ -13,13 +12,26 @@ interface PrivateRouteProps {
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    if (!loading && !user) router.push("/auth");
-  }, [loading, user, router]);
+    if (!loading) {
+      if (!user) {
+        const timeout = setTimeout(() => {
+          router.replace(`/auth?redirect=${encodeURIComponent(pathname)}`);
+        }, 400);
+        return () => clearTimeout(timeout);
+      } else {
+        setChecking(false);
+      }
+    }
+  }, [loading, user, pathname, router]);
 
-  if (loading) return <LoadingSpinner />;
-  if (!user) return null;
+  if (loading || checking) {
+
+    return <LoadingSpinner />;
+  }
 
   return <>{children}</>;
 };
