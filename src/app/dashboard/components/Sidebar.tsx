@@ -26,8 +26,7 @@ import { useActiveTab } from '../dashcontext/ActiveTabContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -35,8 +34,7 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: SidebarProps) => {
-  const { logoutUser } = useAuth();
-  const router = useRouter();
+  const { user, logout } = useAuth();
   const { activeTab, setActiveTab } = useActiveTab();
 
   const sidebarItems = [
@@ -198,17 +196,39 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
     return acc;
   }, {} as Record<string, typeof sidebarItems>);
 
-  // ✅ Handle Logout
+
   const handleLogout = async () => {
-    try {
-      await logoutUser();
-      toast.success("Logged out successfully");
-      router.push("/auth");
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to logout");
-    }
-  };
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "You will be logged out from your account!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, Logout",
+      });
+  
+      if (result.isConfirmed) {
+        try {
+          await logout();
+          await Swal.fire({
+            title: "Logged Out!",
+            text: "You have been logged out successfully.",
+            icon: "success",
+            timer: 1800,
+            showConfirmButton: false,
+          });
+        } catch (err) {
+          const error = err instanceof Error ? err : new Error('Logout failed');
+          console.error(error);
+          Swal.fire({
+            title: "Failed!",
+            text: error.message,
+            icon: "error",
+          });
+        }
+      }
+    };
 
   return (
     <aside
@@ -271,8 +291,8 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-medium text-sm">John Doe</p>
-              <p className="text-xs text-muted-foreground">john@example.com</p>
+              <p className="font-medium text-sm">{user?.name}</p>
+              <p className="text-xs text-muted-foreground">{user?.email}</p>
             </div>
           </div>
         )}

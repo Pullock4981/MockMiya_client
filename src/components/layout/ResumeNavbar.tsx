@@ -5,18 +5,13 @@ import { motion } from 'framer-motion';
 import { ChevronDown, LogOut, Settings, User } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-
 import { Button } from '@/components/ui/button';
-import { toast } from 'react-toastify';
-import { useRouter } from 'next/navigation';
 import ThemeSwitch from '../ui/ThemeSwitch';
-
+import Swal from 'sweetalert2';
 export function ResumeNavbar() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
-  const { user, logoutUser } = useAuth();
-
+  const { user, logout } = useAuth();
   // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -28,14 +23,36 @@ export function ResumeNavbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await logoutUser();
-      toast.success('Logged out successfully');
-      router.push('/auth');
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to logout');
+const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You will be logged out from your account!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Logout",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await logout();
+        await Swal.fire({
+          title: "Logged Out!",
+          text: "You have been logged out successfully.",
+          icon: "success",
+          timer: 1800,
+          showConfirmButton: false,
+        });
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Logout failed');
+        console.error(error);
+        Swal.fire({
+          title: "Failed!",
+          text: error.message,
+          icon: "error",
+        });
+      }
     }
   };
 
@@ -66,11 +83,11 @@ export function ResumeNavbar() {
                        rounded-lg p-2 transition"
           >
             <div className="text-right hidden md:block">
-              <div className="text-sm font-medium">{user?.displayName ?? 'User'}</div>
+              <div className="text-sm font-medium">{user?.name}</div>
             </div>
             <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
               <span className="text-sm font-medium text-white">
-                {user?.displayName?.charAt(0).toUpperCase() ?? 'U'}
+                {user?.name?.charAt(0).toUpperCase() ?? 'U'}
               </span>
             </div>
             <ChevronDown className="w-4 h-4 text-foreground-muted" />
@@ -85,7 +102,7 @@ export function ResumeNavbar() {
                          rounded-lg shadow-lg z-50"
             >
               <div className="p-3 border-b border-border">
-                <div className="font-medium">{user?.displayName ?? 'User'}</div>
+                <div className="font-medium">{user?.name}</div>
                 <div className="text-sm text-foreground-muted">
                   {user?.email ?? 'example@email.com'}
                 </div>
@@ -103,7 +120,7 @@ export function ResumeNavbar() {
                 <div className="border-t border-border my-1" />
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-error hover:bg-error/10 rounded-md transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-error hover:bg-warning/50 rounded-md transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                   Logout

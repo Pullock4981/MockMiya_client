@@ -1,29 +1,36 @@
-import { MongoClient } from "mongodb";
+import mongoose from "mongoose";
 
-const uri: string = `mongodb://${process.env.USER_NAME}:${process.env.PASSWORD}@ac-fqtaxvg-shard-00-00.1twtybw.mongodb.net:27017,ac-fqtaxvg-shard-00-01.1twtybw.mongodb.net:27017,ac-fqtaxvg-shard-00-02.1twtybw.mongodb.net:27017/?ssl=true&replicaSet=atlas-zw5wdw-shard-0&authSource=admin&retryWrites=true&w=majority&appName=Cluster0`;
+const MONGODB_URI = process.env.MONGODB_URI as string;
 
-if (!uri) throw new Error("Please add MONGODB_URI to your .env.local");
-
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
-
-// Extend NodeJS.Global type to include our cached MongoClient
-declare global {
-  
-  var _mongoClientPromise: Promise<MongoClient> | undefined;
+if (!MONGODB_URI) {
+  throw new Error("⚠️ Please add your MongoDB URI in .env");
 }
 
-if (process.env.NODE_ENV === "development") {
-  // In development, use a global variable so HMR/restarts don't create new connections
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(uri);
-    global._mongoClientPromise = client.connect();
+let isConnected = false;
+
+export const connectDB = async (): Promise<void> => {
+  if (isConnected) {
+    console.log("🔄 Using existing MongoDB connection");
+    return;
   }
-  clientPromise = global._mongoClientPromise;
-} else {
-  // In production, create a new client (server process is stable there)
-  client = new MongoClient(uri);
-  clientPromise = client.connect();
-}
 
-export default clientPromise;
+  try {
+    console.log("⏳ Connecting to MongoDB...");
+    await mongoose.connect(MONGODB_URI, {
+      dbName: "MockMiya",
+      serverSelectionTimeoutMS: 10000,
+    });
+
+    isConnected = true;
+    console.log("✅ MongoDB connected successfully");
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("❌ MongoDB connection failed");
+      console.error("Error message:", error.message);
+      throw new Error("MongoDB connection error: " + error.message);
+    } else {
+      console.error("❌ MongoDB connection failed with unknown error:", error);
+      throw new Error("MongoDB connection error: Unknown error");
+    }
+  }
+};

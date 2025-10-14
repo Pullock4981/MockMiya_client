@@ -1,0 +1,63 @@
+import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import User from "@/models/User";
+import { connectDB } from "@/lib/mongodb";
+import { sendOTP } from "@/utils/sendOTP";
+
+interface RegisterBody {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export async function POST(req: Request) {
+  try {
+    const body: RegisterBody = await req.json();
+    const { name, email, password } = body;
+
+    // 🔍 Debug: log incoming request data
+    console.log("Register API received:", { name, email, password });
+
+    if (!name?.trim() || !email?.trim() || !password) {
+      return NextResponse.json(
+        { error: "Name, email and password are required" },
+        { status: 400 }
+      );
+    }
+
+    await connectDB();
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "User already exists" },
+        { status: 400 }
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const newUser = new User({
+      name: name.trim(),
+      email: email.trim(),
+      password: hashedPassword,
+      role: "user",
+      membershipType: "",
+      otp,
+      otpExpires: new Date(Date.now() + 10 * 60 * 1000),
+      isVerified: false,
+    });
+
+    await newUser.save();
+    await sendOTP(email, otp);
+
+    return NextResponse.json({
+      message: "User registered successfully. OTP sent to email.",
+    });
+  } catch (error) {
+    const err = error instanceof Error ? error : new Error("Unknown error");
+    console.error("❌ Register error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
