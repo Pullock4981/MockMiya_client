@@ -3,82 +3,48 @@
 import { useState, useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { QuizConfig, QuizState, QuizQuestion, QuestionCategory } from '../../dashboard/coding-challenges/types/quiz';
+import { QuizConfig, QuizState, Question, QuestionCategory, Role } from '../../dashboard/coding-challenges/types/quiz';
 import { quizRoles, defaultQuizConfigs, questionCategories } from '../../dashboard/coding-challenges/data/quizData';
 
-// Animation variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
+interface IncorrectAnswer {
+  question: Question;
+  userAnswer: number;
+  correctAnswer: number;
+  questionNumber: number;
+}
 
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      type: "spring",
-      stiffness: 100
-    }
-  }
-};
-
-const cardVariants = {
-  hidden: { scale: 0.9, opacity: 0 },
-  visible: {
-    scale: 1,
-    opacity: 1,
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 30
-    }
-  },
-  exit: {
-    scale: 0.9,
-    opacity: 0,
-    transition: {
-      duration: 0.2
-    }
-  }
-};
-
-const progressVariants = {
-  initial: { width: 0 },
-  animate: (width: number) => ({
-    width: `${width}%`,
-    transition: {
-      duration: 0.5,
-      ease: "easeOut"
-    }
-  })
-};
+interface AnswerReview {
+  question: Question;
+  userAnswer: number;
+  correctAnswer: number;
+  isCorrect: boolean;
+  questionNumber: number;
+}
 
 export default function CodingChallenges() {
   const pathname = usePathname();
   const [config, setConfig] = useState<QuizConfig>({
-  role: '', // was roleId
-  duration: 5,
-  questionCount: 10,
-});
-
+    role: '',
+    duration: 5,
+    questionCount: 10,
+  });
   const [quizState, setQuizState] = useState<QuizState | null>(null);
-  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [isCustomizing, setIsCustomizing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [showLeftPanel, setShowLeftPanel] = useState(true);
 
-  const selectedRole = quizRoles.find(role => role.id === config.roleId);
+  const selectedRole = quizRoles.find(role => role.id === config.role);
   const selectedCategory = questionCategories.find(cat => cat.id === config.category);
 
-  const generateRandomQuestions = useCallback((roleId: string, count: number, category?: QuestionCategory): QuizQuestion[] => {
+  // Calculate progress percentage
+  const getProgressPercentage = () => {
+    if (!quizState || questions.length === 0) return 0;
+    return ((quizState.currentQuestion + 1) / questions.length) * 100;
+  };
+
+  const generateRandomQuestions = useCallback((roleId: string, count: number, category?: QuestionCategory): Question[] => {
     const role = quizRoles.find(r => r.id === roleId);
     if (!role) return [];
     
@@ -99,7 +65,7 @@ export default function CodingChallenges() {
   }, []);
 
   const startQuiz = async () => {
-    if (!config.roleId) {
+    if (!config.role) {
       alert('Please select a role');
       return;
     }
@@ -109,7 +75,7 @@ export default function CodingChallenges() {
     // Simulate loading for better UX
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    const generatedQuestions = generateRandomQuestions(config.roleId, config.questionCount, config.category);
+    const generatedQuestions = generateRandomQuestions(config.role, config.questionCount, config.category);
     if (generatedQuestions.length === 0) {
       alert('No questions available for this role and category combination');
       setIsLoading(false);
@@ -128,7 +94,7 @@ export default function CodingChallenges() {
       score: 0,
     });
     setShowReview(false);
-    setShowLeftPanel(false); // Hide left panel when quiz starts
+    setShowLeftPanel(false);
     setIsLoading(false);
   };
 
@@ -136,7 +102,7 @@ export default function CodingChallenges() {
     setQuizState(null);
     setQuestions([]);
     setShowReview(false);
-    setShowLeftPanel(true); // Show left panel when quiz is reset
+    setShowLeftPanel(true);
   };
 
   const handleAnswerSelect = (answerIndex: number) => {
@@ -167,7 +133,7 @@ export default function CodingChallenges() {
         endTime: new Date(),
         score,
       });
-      setShowLeftPanel(true); // Show left panel when quiz is completed
+      setShowLeftPanel(true);
     }
   };
 
@@ -190,7 +156,7 @@ export default function CodingChallenges() {
         
         if (prev.timeRemaining === 1) {
           const score = calculateScore();
-          setShowLeftPanel(true); // Show left panel when time runs out
+          setShowLeftPanel(true);
           return { 
             ...prev, 
             timeRemaining: 0, 
@@ -237,7 +203,7 @@ export default function CodingChallenges() {
   const calculateTimeSaved = (): string => {
     if (!quizState || !quizState.startTime) return '0:00';
     
-    const totalAllowedSeconds = config.duration * 60;
+    const totalAllowedSeconds = quizState.config.duration * 60;
     const endTime = quizState.endTime || new Date();
     const timeTakenSeconds = Math.floor((endTime.getTime() - quizState.startTime.getTime()) / 1000);
     
@@ -254,7 +220,7 @@ export default function CodingChallenges() {
   const completedBeforeTimeLimit = (): boolean => {
     if (!quizState || !quizState.startTime || !quizState.endTime) return false;
     
-    const totalAllowedSeconds = config.duration * 60;
+    const totalAllowedSeconds = quizState.config.duration * 60;
     const timeTakenSeconds = Math.floor((quizState.endTime.getTime() - quizState.startTime.getTime()) / 1000);
     
     return timeTakenSeconds < totalAllowedSeconds;
@@ -270,7 +236,7 @@ export default function CodingChallenges() {
   };
 
   // Get incorrect answers for review
-  const getIncorrectAnswers = () => {
+  const getIncorrectAnswers = (): IncorrectAnswer[] => {
     if (!quizState) return [];
     
     return questions.map((question, index) => {
@@ -286,11 +252,11 @@ export default function CodingChallenges() {
         };
       }
       return null;
-    }).filter(Boolean);
+    }).filter((item): item is IncorrectAnswer => item !== null);
   };
 
   // Get all answers for full review
-  const getAllAnswers = () => {
+  const getAllAnswers = (): AnswerReview[] => {
     if (!quizState) return [];
     
     return questions.map((question, index) => {
@@ -333,10 +299,10 @@ export default function CodingChallenges() {
             {showLeftPanel && (
               <motion.div
                 key="left-panel"
-                variants={cardVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0, transition: { duration: 0.2 } }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border-white/20 p-6 lg:p-8"
               >
                 <motion.h2 
@@ -348,16 +314,21 @@ export default function CodingChallenges() {
                   Quiz Configuration
                 </motion.h2>
                 
-                <motion.div variants={containerVariants} className="space-y-6">
+                <div className="space-y-6">
                   {/* Role Selection */}
-                  <motion.div variants={itemVariants} className="space-y-3">
+                  <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 100, delay: 0.1 }}
+                    className="space-y-3"
+                  >
                     <label className="block text-sm font-semibold text-gray-700">
                       Select Your Role
                     </label>
                     <div className="relative">
                       <select
-                        value={config.roleId}
-                        onChange={(e) => setConfig({ ...config, roleId: e.target.value })}
+                        value={config.role}
+                        onChange={(e) => setConfig({ ...config, role: e.target.value })}
                         className="w-full px-4 py-3.5 bg-white/50 border-2 border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none cursor-pointer"
                         disabled={!!quizState}
                       >
@@ -384,7 +355,12 @@ export default function CodingChallenges() {
                   </motion.div>
 
                   {/* Question Category Selection */}
-                  <motion.div variants={itemVariants} className="space-y-3">
+                  <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 100, delay: 0.2 }}
+                    className="space-y-3"
+                  >
                     <label className="block text-sm font-semibold text-gray-700">
                       Questions Category
                     </label>
@@ -430,7 +406,12 @@ export default function CodingChallenges() {
                   </motion.div>
 
                   {/* Timer and Questions Selection */}
-                  <motion.div variants={itemVariants} className="space-y-3">
+                  <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 100, delay: 0.3 }}
+                    className="space-y-3"
+                  >
                     <label className="block text-sm font-semibold text-gray-700">
                       Quiz Settings
                     </label>
@@ -527,7 +508,9 @@ export default function CodingChallenges() {
 
                   {/* Selected Configuration Summary */}
                   <motion.div 
-                    variants={itemVariants}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 100, delay: 0.4 }}
                     className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-5 text-white"
                   >
                     <h3 className="font-bold text-lg mb-3">Ready to Start</h3>
@@ -557,12 +540,17 @@ export default function CodingChallenges() {
                   </motion.div>
 
                   {/* Action Buttons */}
-                  <motion.div variants={itemVariants} className="flex gap-4">
+                  <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 100, delay: 0.5 }}
+                    className="flex gap-4"
+                  >
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={startQuiz}
-                      disabled={!!quizState || !config.roleId || isLoading}
+                      disabled={!!quizState || !config.role || isLoading}
                       className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-2xl font-bold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center"
                     >
                       {isLoading ? (
@@ -587,7 +575,7 @@ export default function CodingChallenges() {
                       Reset
                     </motion.button>
                   </motion.div>
-                </motion.div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -595,9 +583,9 @@ export default function CodingChallenges() {
           {/* Right Side - Quiz Interface */}
           <motion.div
             layout
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className={`bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6 lg:p-8 ${
               !showLeftPanel ? 'lg:col-span-2' : ''
             }`}
@@ -798,14 +786,11 @@ export default function CodingChallenges() {
                     </motion.div>
 
                     {/* Stats Grid */}
-                    <motion.div
-                      variants={containerVariants}
-                      initial="hidden"
-                      animate="visible"
-                      className="grid grid-cols-2 gap-4 mb-8 max-w-md mx-auto"
-                    >
+                    <div className="grid grid-cols-2 gap-4 mb-8 max-w-md mx-auto">
                       <motion.div
-                        variants={itemVariants}
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.4, type: "spring", stiffness: 100 }}
                         className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-4 text-white"
                       >
                         <div className="text-2xl font-bold">{quizState.score}/{questions.length}</div>
@@ -813,7 +798,9 @@ export default function CodingChallenges() {
                       </motion.div>
                       
                       <motion.div
-                        variants={itemVariants}
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.5, type: "spring", stiffness: 100 }}
                         className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl p-4 text-white"
                       >
                         <div className="text-2xl font-bold">{((quizState.score / questions.length) * 100).toFixed(1)}%</div>
@@ -821,7 +808,9 @@ export default function CodingChallenges() {
                       </motion.div>
                       
                       <motion.div
-                        variants={itemVariants}
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.6, type: "spring", stiffness: 100 }}
                         className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-4 text-white"
                       >
                         <div className="text-2xl font-bold">{calculateTimeTaken()}</div>
@@ -829,7 +818,9 @@ export default function CodingChallenges() {
                       </motion.div>
                       
                       <motion.div
-                        variants={itemVariants}
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.7, type: "spring", stiffness: 100 }}
                         className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-4 text-white"
                       >
                         <div className="text-2xl font-bold">
@@ -837,14 +828,14 @@ export default function CodingChallenges() {
                         </div>
                         <div className="text-sm opacity-90">Time Saved</div>
                       </motion.div>
-                    </motion.div>
+                    </div>
 
                     {/* Incorrect Answers Summary */}
                     {incorrectAnswers.length > 0 && (
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ delay: 0.6 }}
+                        transition={{ delay: 0.8 }}
                         className="mb-6 p-4 bg-red-50 rounded-2xl border border-red-200"
                       >
                         <div className="flex items-center justify-center mb-2">
@@ -862,7 +853,7 @@ export default function CodingChallenges() {
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      transition={{ delay: 0.8 }}
+                      transition={{ delay: 0.9 }}
                       className="space-y-3 text-sm text-gray-600 mb-8"
                     >
                       {completedBeforeTimeLimit() && (
@@ -934,10 +925,9 @@ export default function CodingChallenges() {
                   <div className="w-full bg-gray-200 rounded-full h-3">
                     <motion.div
                       className="bg-gradient-to-r from-green-500 to-blue-500 h-3 rounded-full shadow-inner"
-                      variants={progressVariants}
-                      initial="initial"
-                      animate="animate"
-                      custom={((quizState.currentQuestion + 1) / questions.length) * 100}
+                      initial={{ width: "0%" }}
+                      animate={{ width: `${getProgressPercentage()}%` }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
                     />
                   </div>
 
@@ -964,7 +954,6 @@ export default function CodingChallenges() {
                     <div className="grid gap-3">
                       {questions[quizState.currentQuestion]?.options.map((option, index) => {
                         const isSelected = quizState.answers[quizState.currentQuestion] === index;
-                        const isCorrect = index === questions[quizState.currentQuestion]?.correctAnswer;
                         
                         return (
                           <motion.button
