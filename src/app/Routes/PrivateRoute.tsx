@@ -15,16 +15,13 @@ export default function PrivateRoute({ children }: PrivateRouteProps) {
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    // ✅ Use const since we’re not reassigning
+    const timer = setTimeout(() => {
+      if (status === "loading") {
+        setCheckingAuth(true);
+        return;
+      }
 
-    // Wait for session to stabilize
-    if (status === "loading") {
-      setCheckingAuth(true);
-      return;
-    }
-
-    // Small delay before deciding
-    timer = setTimeout(() => {
       if (status === "unauthenticated") {
         router.replace("/auth");
       } else {
