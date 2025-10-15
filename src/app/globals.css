@@ -78,10 +78,10 @@
   --radius: 0.625rem;
 
   /* Light Theme Backgrounds */
-  --background: rgb(255, 255, 255);
+  --background: rgb(255, 255, 255); /* White */
   --background-secondary: rgb(250, 250, 250);
   --background-tertiary: rgb(245, 245, 245);
-  --foreground: rgb(37, 37, 37);
+  --foreground: rgb(37, 37, 37); /* Dark text */
   --foreground-secondary: rgb(108, 122, 137);
   --foreground-muted: rgb(128, 140, 156);
 
@@ -90,17 +90,18 @@
   --card-secondary: rgb(250, 250, 250);
   --card-foreground: rgb(37, 37, 37);
 
-  /* Brand */
-  --primary: rgb(52, 52, 52);
-  --primary-dark: rgb(0, 128, 64);
-  --primary-light: rgb(64, 255, 128);
-  --primary-foreground: rgb(250, 250, 250);
+  /* Brand / Primary Colors (Orange) */
+  --primary: rgb(255, 140, 0); /* Orange */
+  --primary-dark: rgb(204, 112, 0); /* Darker Orange */
+  --primary-light: rgb(255, 180, 80); /* Lighter Orange */
+  --primary-foreground: rgb(255, 255, 255); /* Text on orange */
 
-  --secondary: rgb(247, 247, 247);
-  --secondary-foreground: rgb(52, 52, 52);
+  --secondary: rgb(245, 245, 245); /* Light Gray */
+  --secondary-foreground: rgb(37, 37, 37); /* Dark text */
 
-  --accent: rgb(247, 247, 247);
-  --accent-foreground: rgb(52, 52, 52);
+  --accent: rgb(255, 140, 0); /* Accent matches primary */
+  --accent-foreground: rgb(255, 255, 255);
+  --accent-glow: rgba(255, 140, 0, 0.3);
 
   /* Status */
   --destructive: rgb(190, 48, 48);
@@ -112,29 +113,32 @@
   --border: rgb(235, 235, 235);
   --border-light: rgb(210, 220, 235);
   --input: rgb(235, 235, 235);
-  --ring: rgb(180, 180, 180);
+  --ring: rgb(255, 140, 0);
+
+  /* Popovers / Muted */
   --popover: rgb(255, 255, 255);
   --popover-foreground: rgb(37, 37, 37);
   --muted: rgb(247, 247, 247);
   --muted-foreground: rgb(128, 128, 128);
 
-  /* Charts */
-  --chart-1: rgb(235, 85, 52);
-  --chart-2: rgb(52, 152, 219);
-  --chart-3: rgb(80, 52, 235);
-  --chart-4: rgb(255, 205, 86);
-  --chart-5: rgb(240, 180, 60);
+  /* Charts (Optional) */
+  --chart-1: rgb(255, 140, 0); /* Orange */
+  --chart-2: rgb(255, 200, 100);
+  --chart-3: rgb(255, 160, 50);
+  --chart-4: rgb(255, 180, 80);
+  --chart-5: rgb(255, 120, 0);
 
   /* Sidebar */
-  --sidebar: rgb(250, 250, 250);
+  --sidebar: rgb(255, 255, 255);
   --sidebar-foreground: rgb(37, 37, 37);
-  --sidebar-primary: rgb(52, 52, 52);
-  --sidebar-primary-foreground: rgb(250, 250, 250);
-  --sidebar-accent: rgb(247, 247, 247);
-  --sidebar-accent-foreground: rgb(52, 52, 52);
+  --sidebar-primary: rgb(255, 140, 0);
+  --sidebar-primary-foreground: rgb(255, 255, 255);
+  --sidebar-accent: rgb(255, 140, 0);
+  --sidebar-accent-foreground: rgb(255, 255, 255);
   --sidebar-border: rgb(235, 235, 235);
-  --sidebar-ring: rgb(180, 180, 180);
+  --sidebar-ring: rgb(255, 140, 0);
 }
+
 
 /* ===============================
    Dark Theme Variables

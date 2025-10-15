@@ -1,39 +1,29 @@
-"use client";
+'use client';
 
-import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { LoadingSpinner } from "../dashboard/components/Loading";
-import { useAuth } from "@/context/AuthContext";
 
-interface PrivateRouteProps {
-  children: React.ReactNode;
-}
-
-const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { user, loading } = useAuth();
+export default function PrivateRoute({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const pathname = usePathname();
-  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        const timeout = setTimeout(() => {
-          router.replace(`/auth?redirect=${encodeURIComponent(pathname)}`);
-        }, 400);
-        return () => clearTimeout(timeout);
-      } else {
-        setChecking(false);
-      }
+    if (status === "loading") return;
+
+    if (status === "unauthenticated" || !session) {
+      router.replace("/auth"); 
     }
-  }, [loading, user, pathname, router]);
+  }, [status, session, router]);
 
-  if (loading || checking) {
-
-    return <LoadingSpinner />;
+  if (status === "loading") {
+    return (
+      <div className="flex justify-center items-center h-screen text-green-400 text-lg">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   return <>{children}</>;
-};
-
-export default PrivateRoute;
+}
