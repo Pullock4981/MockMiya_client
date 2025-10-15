@@ -1,7 +1,20 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { useSession, signIn, signOut, getSession } from "next-auth/react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from 'react';
+import {
+  useSession,
+  signIn,
+  signOut,
+  getSession,
+  SignInResponse,
+} from 'next-auth/react';
+import type { Session } from 'next-auth';
 
 export type User = {
   id: string;
@@ -11,63 +24,84 @@ export type User = {
 };
 
 type AuthContextType = {
-  user: User | null | undefined; // undefined = loading
-  loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
+  readonly user: User | null | undefined; // undefined = loading
+  readonly loading: boolean;
+  readonly login: (email: string, password: string) => Promise<void>;
+  readonly logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+interface AuthProviderProps {
+  readonly children: ReactNode;
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
   const { data: session, status } = useSession();
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
-  // Sync next-auth session -> user state
+  // Map NextAuth session -> local user
   useEffect(() => {
-    const syncUser = async () => {
+    async function syncUser() {
       setLoading(true);
+
       if (status === 'authenticated' && session?.user) {
+        const typedUser = session.user as Session['user'] & {
+          id?: string;
+          role?: string;
+        };
+
         setUser({
-          id: (session.user as any).id ?? '',
-          name: session.user.name ?? null,
-          email: session.user.email ?? '',
-          role: (session.user as any).role ?? 'user',
+          id: typedUser.id ?? '',
+          name: typedUser.name ?? null,
+          email: typedUser.email ?? '',
+          role: typedUser.role ?? 'user',
         });
       } else if (status === 'unauthenticated') {
         setUser(null);
       } else {
         setUser(undefined);
       }
+
       setLoading(false);
-    };
+    }
 
     syncUser();
   }, [status, session]);
 
-  // Login (credentials)
-  const login = async (email: string, password: string) => {
+  // Login with credentials provider
+  const login = async (email: string, password: string): Promise<void> => {
     setLoading(true);
     try {
-      const res = await signIn('credentials', { redirect: false, email, password });
-      if (!res || (res as any).error) throw new Error((res as any)?.error || 'Login failed');
+      const result: SignInResponse | undefined = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
+      });
 
-      // Poll session for short time
-      let s: any = null;
-      for (let i = 0; i < 20; i++) {
-        s = await getSession();
-        if (s?.user) break;
-        await new Promise(r => setTimeout(r, 150));
+      if (!result || result.error) {
+        throw new Error(result?.error ?? 'Login failed');
       }
 
-      if (s?.user) {
-        setUser({
-          id: s.user.id ?? '',
-          name: s.user.name ?? null,
-          email: s.user.email ?? '',
-          role: s.user.role ?? 'user',
-        });
+      // Wait briefly for session to refresh
+      for (let i = 0; i < 20; i++) {
+        const refreshed = await getSession();
+        if (refreshed?.user) {
+          const refreshedUser = refreshed.user as Session['user'] & {
+            id?: string;
+            role?: string;
+          };
+
+          setUser({
+            id: refreshedUser.id ?? '',
+            name: refreshedUser.name ?? null,
+            email: refreshedUser.email ?? '',
+            role: refreshedUser.role ?? 'user',
+          });
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 150));
       }
     } finally {
       setLoading(false);
@@ -75,7 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Logout
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     setLoading(true);
     try {
       await signOut({ redirect: false });
@@ -90,10 +124,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
-};
+export function useAuth(): AuthContextType {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+}

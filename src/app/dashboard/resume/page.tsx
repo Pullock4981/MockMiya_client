@@ -137,7 +137,7 @@ export default function DashboardResume() {
     try {
       const res = await axios.get<ApiResponse>(`/resume/api/list?userEmail=${encodeURIComponent(userEmail)}`);
       setResumes(res.data.success ? res.data.resumes : []);
-    } catch (err: unknown) {
+    } catch (err) {
       console.error("❌ Failed to fetch resumes:", err);
       setResumes([]);
     } finally { setLoading(false); }
@@ -164,7 +164,7 @@ export default function DashboardResume() {
       localStorage.setItem("resume_draft_id", newId);
       localStorage.setItem("resumeCurrentStep", "0");
       router.push(`/resume/${newId}`);
-    } catch (err: unknown) {
+    } catch (err) {
       console.error("❌ Failed to create resume:", err);
       const message = err instanceof Error ? err.message : "Could not create resume";
       await MySwal.fire("Error", message, "error");
@@ -178,7 +178,7 @@ export default function DashboardResume() {
       await axios.delete(`/resume/api/delete?id=${encodeURIComponent(id)}&userEmail=${encodeURIComponent(userEmail)}`);
       setResumes(prev => prev.filter(r => r.id !== id));
       await MySwal.fire("Deleted", "Resume removed.", "success");
-    } catch (err: unknown) {
+    } catch (err) {
       console.error("❌ Failed to delete resume:", err);
       const message = err instanceof Error ? err.message : "Failed to delete";
       await MySwal.fire("Error", message, "error");
@@ -192,7 +192,7 @@ export default function DashboardResume() {
       const pdfBlob = await response.blob();
       const url = URL.createObjectURL(pdfBlob);
       setPdfUrl(url);
-    } catch (err: unknown) {
+    } catch (err) {
       console.error(err);
       const message = err instanceof Error ? err.message : "Failed to open PDF preview";
       await MySwal.fire("Error", message, "error");
@@ -207,7 +207,7 @@ export default function DashboardResume() {
       form.append("file", file);
       form.append("userEmail", userEmail);
 
-      const res = await axios.post<{ success: boolean; message?: string }>("/resume/api/upload", form, {
+      const res = await axios.post("/resume/api/upload", form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -217,7 +217,7 @@ export default function DashboardResume() {
       } else {
         throw new Error(res.data.message ?? "Upload failed");
       }
-    } catch (err: unknown) {
+    } catch (err) {
       const message = err instanceof Error ? err.message : "Could not upload file";
       console.error("Upload failed:", message);
       await MySwal.fire("Upload failed", message, "error");
@@ -244,12 +244,12 @@ export default function DashboardResume() {
 
           <div className="flex items-center gap-3">
             <Input placeholder="Search..." value={query} onChange={e => setQuery(e.target.value)} className="w-48 sm:w-64" />
-            <select value={filter} onChange={e => setFilter(e.target.value as any)} className="border rounded px-3 py-2 text-sm">
+            <select value={filter} onChange={e => setFilter(e.target.value as "all" | "draft" | "complete")} className="border rounded px-3 py-2 text-sm">
               <option value="all">All</option>
               <option value="draft">Draft</option>
               <option value="complete">Complete</option>
             </select>
-            <select value={sort} onChange={e => setSort(e.target.value as any)} className="border rounded px-3 py-2 text-sm">
+            <select value={sort} onChange={e => setSort(e.target.value as "updatedAt_desc" | "updatedAt_asc")} className="border rounded px-3 py-2 text-sm">
               <option value="updatedAt_desc">Newest</option>
               <option value="updatedAt_asc">Oldest</option>
             </select>
