@@ -1,48 +1,23 @@
 'use client';
 
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { LoadingSpinner } from "../dashboard/components/Loading";
+import { useAuth } from '@/context/AuthContext';
+import { useRouter, usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+import { LoadingSpinner } from '../dashboard/components/Loading';
 
-interface PrivateRouteProps {
-  children: React.ReactNode;
-}
-
-export default function PrivateRoute({ children }: PrivateRouteProps) {
-  const { data: session, status } = useSession();
+export default function PrivateRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
   const router = useRouter();
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  const pathname = usePathname(); // Current path
 
   useEffect(() => {
-    // ✅ এক লাইনে declare + assign → no lint error
-    const timer = setTimeout(() => {
-      if (status === "loading") {
-        setCheckingAuth(true);
-        return;
-      }
+    if (!loading && user === null) {
+      // Redirect to login page with redirect query
+      router.replace(`/auth?redirect=${encodeURIComponent(pathname)}`);
+    }
+  }, [user, loading, router, pathname]);
 
-      if (status === "unauthenticated") {
-        router.replace("/auth");
-      } else {
-        setCheckingAuth(false);
-      }
-    }, 400);
+  if (loading || user === undefined) return <LoadingSpinner />;
 
-    return () => clearTimeout(timer);
-  }, [status, router]);
-
-  if (checkingAuth || status === "loading") {
-    return (
-      <div className="flex justify-center items-center h-screen text-green-400 text-lg">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  if (status === "authenticated" && session) {
-    return <>{children}</>;
-  }
-
-  return null;
+  return <>{user ? children : null}</>;
 }

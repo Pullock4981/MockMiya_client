@@ -234,7 +234,113 @@ export default function DashboardResume() {
   return (
     <PrivateRoute>
       <div className="p-4 sm:p-6 space-y-6">
-        {/* UI code remains same */}
+
+        {/* TOP ROW: Search + Controls */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold">Your Resumes</h1>
+            <p className="text-sm text-muted-foreground">Manage, upload, and create resumes quickly.</p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Input placeholder="Search..." value={query} onChange={e => setQuery(e.target.value)} className="w-48 sm:w-64" />
+            <select value={filter} onChange={e => setFilter(e.target.value as any)} className="border rounded px-3 py-2 text-sm">
+              <option value="all">All</option>
+              <option value="draft">Draft</option>
+              <option value="complete">Complete</option>
+            </select>
+            <select value={sort} onChange={e => setSort(e.target.value as any)} className="border rounded px-3 py-2 text-sm">
+              <option value="updatedAt_desc">Newest</option>
+              <option value="updatedAt_asc">Oldest</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Upload Banner */}
+        <Card className="p-4">
+          <UploadBanner onFileUpload={handleFileUpload} uploading={uploading} />
+        </Card>
+
+        {/* Create Resume Banner */}
+        <Card className="p-4 flex flex-col md:flex-row items-center justify-between gap-4 rounded-xl">
+          <div>
+            <h2 className="font-semibold text-lg">Start a New Resume</h2>
+            <p className="text-sm text-muted-foreground">Create a resume from scratch using templates and our editor.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button size="lg" onClick={handleCreateResume} disabled={creating} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" /> {creating ? "Creating..." : "Create Resume"}
+            </Button>
+          </div>
+        </Card>
+
+        {/* Resume List */}
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="animate-pulse border rounded-2xl overflow-hidden">
+                <div className="bg-gray-200 h-40 w-full"></div>
+                <div className="p-4">
+                  <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2 mb-1"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredResumes.length === 0 ? (
+          <div className="text-center py-20 text-muted-foreground">
+            <p className="mb-4">No resumes found.</p>
+            <Button onClick={handleCreateResume} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" /> Create your first resume
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredResumes.map((r) => (
+              <Card key={r.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border rounded-2xl">
+                <div className="relative h-40 bg-gray-100">
+                  <Image
+                    src={r.thumbnailUrl || "/assets/default-thumbnail.jpg"}
+                    alt={r.title || r.id}
+                    width={800}
+                    height={400}
+                    className="w-full h-full object-cover"
+                  />
+                  <Badge
+                    className={`absolute top-3 left-3 ${r.resumeStatus === "complete" ? "bg-green-600" : "bg-blue-600"} text-white`}
+                  >
+                    {r.resumeStatus || "draft"}
+                  </Badge>
+                </div>
+                <div className="p-4">
+                  <h3 className="font-semibold text-lg truncate">{r.title}</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Updated: {r.updatedAt ? new Date(r.updatedAt).toLocaleString() : "-"}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Template: {r.template?.name || "Default"}
+                  </p>
+                  <div className="flex justify-end gap-1 mt-3">
+                    <Button variant="ghost" size="sm" onClick={() => router.push(`/resume/${r.id}`)} title="Edit">
+                      <Edit3 className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handlePdfPreview(r.id)} title="Preview">
+                      <Printer className="h-4 w-4" />
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => handleDelete(r.id)} title="Delete">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* PDF Overlay */}
+        {pdfUrl && <ResumePrintOverlay pdfUrl={pdfUrl} onClose={() => { URL.revokeObjectURL(pdfUrl); setPdfUrl(null); }} />}
+
       </div>
     </PrivateRoute>
   );

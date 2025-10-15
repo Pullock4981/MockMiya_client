@@ -1,132 +1,92 @@
-
-
-
 'use client';
 
-import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { SessionProvider, useSession, signIn, signOut, getSession } from "next-auth/react";
-import { Session } from "next-auth";
-import { canAttemptLogin, recordLoginAttempt } from "@/lib/loginRateLimiter";
+import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { useSession, signIn, signOut, getSession } from "next-auth/react";
+
+export type User = {
+  id: string;
+  name?: string | null;
+  email: string;
+  role: string;
+};
 
 type AuthContextType = {
-  user: {
-    id: string;
-    name?: string;
-    email: string;
-    role: string;
-  } | null;
+  user: User | null | undefined; // undefined = loading
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  googleLogin: () => Promise<void>;
   logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({
-  children,
-  session,
-}: {
-  children: ReactNode;
-  session?: Session | null;
-}) => (
-  <SessionProvider session={session}>
-    <AuthInner>{children}</AuthInner>
-  </SessionProvider>
-);
-
-const AuthInner = ({ children }: { children: ReactNode }) => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { data: session, status } = useSession();
-  const [user, setUser] = useState<AuthContextType["user"]>(null);
+  const [user, setUser] = useState<User | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
-  // ---------------- Sync user with session ----------------
+  // Sync next-auth session -> user state
   useEffect(() => {
-    if (status === "loading") {
+    const syncUser = async () => {
       setLoading(true);
-      return;
-    }
+      if (status === 'authenticated' && session?.user) {
+        setUser({
+          id: (session.user as any).id ?? '',
+          name: session.user.name ?? null,
+          email: session.user.email ?? '',
+          role: (session.user as any).role ?? 'user',
+        });
+      } else if (status === 'unauthenticated') {
+        setUser(null);
+      } else {
+        setUser(undefined);
+      }
+      setLoading(false);
+    };
 
-    if (session?.user) {
-      setUser({
-        id: session.user.id!,
-        name: session.user.name!,
-        email: session.user.email!,
-        role: session.user.role!,
-      });
-    } else {
-      setUser(null);
-    }
+    syncUser();
+  }, [status, session]);
 
-    setLoading(false);
-  }, [session, status]);
-
-  // ---------------- Login ----------------
-
-
-const login = async (email: string, password: string) => {
-  setLoading(true);
-
-  try {
-    if (!canAttemptLogin(email)) {
-      throw new Error("Too many failed attempts. Try again in 2 minutes.");
-    }
-
-    const res = await signIn("credentials", { redirect: false, email, password });
-
-    if (!res) {
-      recordLoginAttempt(email, false);
-      throw new Error("Login failed");
-    }
-
-    if (res.error) {
-      recordLoginAttempt(email, false);
-      throw new Error(res.error);
-    }
-
-    // Successful login → reset attempts
-    recordLoginAttempt(email, true);
-
-    const updatedSession = await getSession();
-    if (updatedSession?.user) {
-      setUser({
-        id: updatedSession.user.id!,
-        name: updatedSession.user.name!,
-        email: updatedSession.user.email!,
-        role: updatedSession.user.role!,
-      });
-    }
-
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-  // ---------------- Google login ----------------
-  const googleLogin = async (): Promise<void> => {
+  // Login (credentials)
+  const login = async (email: string, password: string) => {
     setLoading(true);
-    await signIn("google", { redirect: false });
-    const updatedSession = await getSession();
-    if (updatedSession?.user) {
-      setUser({
-        id: updatedSession.user.id!,
-        name: updatedSession.user.name!,
-        email: updatedSession.user.email!,
-        role: updatedSession.user.role!,
-      });
+    try {
+      const res = await signIn('credentials', { redirect: false, email, password });
+      if (!res || (res as any).error) throw new Error((res as any)?.error || 'Login failed');
+
+      // Poll session for short time
+      let s: any = null;
+      for (let i = 0; i < 20; i++) {
+        s = await getSession();
+        if (s?.user) break;
+        await new Promise(r => setTimeout(r, 150));
+      }
+
+      if (s?.user) {
+        setUser({
+          id: s.user.id ?? '',
+          name: s.user.name ?? null,
+          email: s.user.email ?? '',
+          role: s.user.role ?? 'user',
+        });
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  // ---------------- Logout ----------------
-  const logout = async (): Promise<void> => {
-    await signOut({ redirect: false });
-    setUser(null);
+  // Logout
+  const logout = async () => {
+    setLoading(true);
+    try {
+      await signOut({ redirect: false });
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, googleLogin, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

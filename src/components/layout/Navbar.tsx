@@ -23,6 +23,8 @@ const Navbar = () => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const { user, logout } = useAuth();
 
+  console.log("user in navbar" ,user)
+
   const navItems = [
     { name: "Features", href: "#features" },
     { name: "Pricing", href: "#pricing" },

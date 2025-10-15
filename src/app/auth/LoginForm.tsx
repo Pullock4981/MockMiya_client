@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { toast } from 'react-toastify';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn, useSession, getSession } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 
 import { canAttemptLogin, getBlockedUntil, recordLoginAttempt } from "@/lib/loginRateLimiter";
 
@@ -30,7 +30,7 @@ export default function LoginForm() {
   const [step, setStep] = useState<'login' | 'forgot' | 'otp' | 'reset' | 'success'>('login');
   const [emailForOTP, setEmailForOTP] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
 
@@ -83,6 +83,11 @@ export default function LoginForm() {
     }
   }, [blockedUntil, watchEmail]);
 
+  // ----------------- Track session loading -----------------
+  useEffect(() => {
+    if (status !== 'loading') setLoading(false);
+  }, [status]);
+
   // ----------------- Login submission -----------------
   const onSubmitLogin = async (data: LoginFormData) => {
     if (blockedUntil && blockedUntil > Date.now()) return;
@@ -112,23 +117,9 @@ export default function LoginForm() {
       if (data.remember) localStorage.setItem('rememberedEmail', data.email);
       else localStorage.removeItem('rememberedEmail');
 
-      toast.info("Signing in... Please wait");
-
-      // ✅ Wait until session becomes 'authenticated'
-      let attempts = 0;
-      while (attempts < 20) { // ~2 seconds max wait
-        const freshSession = await getSession();
-        if (freshSession?.user) {
-          toast.success(`Welcome ${freshSession.user.email}!`);
-          setStep('success');
-          router.push(redirectPath);
-          return;
-        }
-        await new Promise(res => setTimeout(res, 100));
-        attempts++;
-      }
-
-      toast.error("Login successful but session not synced. Please reload.");
+      toast.success(`Welcome ${data.email}!`);
+      setStep('success');
+      setTimeout(() => router.push(redirectPath), 1500);
 
     } catch (err: unknown) {
       recordLoginAttempt(data.email, false);
@@ -245,10 +236,10 @@ export default function LoginForm() {
         {/* Submit */}
         <motion.input
           type="submit"
-          value={loading ? 'Signing in...' : 'Sign in'}
-          disabled={loading}
-          whileHover={{ scale: loading ? 1 : 1.03 }}
-          whileTap={{ scale: loading ? 1 : 0.97 }}
+          value={loading || status === 'loading' ? 'Signing in...' : 'Sign in'}
+          disabled={loading || status === 'loading'}
+          whileHover={{ scale: loading || status === 'loading' ? 1 : 1.03 }}
+          whileTap={{ scale: loading || status === 'loading' ? 1 : 0.97 }}
           className="w-full rounded-xl py-3 text-green-50 font-bold uppercase transition-all duration-300 shadow-[0_0_5px_rgba(0,255,100,0.5)] hover:shadow-[0_0_10px_rgba(0,255,100,0.7)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         />
       </form>
