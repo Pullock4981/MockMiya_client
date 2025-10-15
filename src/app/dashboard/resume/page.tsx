@@ -13,6 +13,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
+import PrivateRoute from "@/app/Routes/PrivateRoute";
 
 // PDF Overlay Component (reusable from ResumeControls)
 const ResumePrintOverlay = ({
@@ -88,7 +89,7 @@ const MySwal = withReactContent(Swal);
 export default function DashboardResume() {
   const router = useRouter();
   const { user } = useAuth();
-  console.log("user cosole from dashboard/resume/page.tsx",user)
+  console.log("user cosole from dashboard/resume/page.tsx", user)
   const userEmail = user?.email ?? "";
 
   const [resumes, setResumes] = useState<ResumeItem[]>([]);
@@ -176,58 +177,60 @@ export default function DashboardResume() {
     .sort((a, b) => sort === "updatedAt_desc" ? (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "") : (a.updatedAt ?? "").localeCompare(b.updatedAt ?? ""));
 
   return (
-    <div className="p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Your Resumes</h1>
-          <p className="text-sm text-muted-foreground">Manage, edit, and create your resumes easily.</p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <Input placeholder="Search..." value={query} onChange={e => setQuery(e.target.value)} className="w-48 sm:w-64" />
-          <select value={filter} onChange={e => setFilter(e.target.value as "all" | "draft" | "complete")} className="border rounded px-3 py-2 text-sm">
-            <option value="all">All</option>
-            <option value="draft">Draft</option>
-            <option value="complete">Complete</option>
-          </select>
-          <select value={sort} onChange={e => setSort(e.target.value as "updatedAt_desc" | "updatedAt_asc")} className="border rounded px-3 py-2 text-sm">
-            <option value="updatedAt_desc">Newest</option>
-            <option value="updatedAt_asc">Oldest</option>
-          </select>
-          <Button onClick={handleCreateResume} disabled={creating}><Plus className="h-4 w-4 mr-1" /> Create Resume</Button>
-        </div>
-      </div>
-
-      {loading ? <div className="text-center py-20 text-muted-foreground">Loading resumes...</div>
-        : filteredResumes.length === 0
-          ? <div className="text-center py-20 text-muted-foreground">
-            <p className="mb-4">No resumes found.</p>
-            <Button onClick={handleCreateResume}><Plus className="h-4 w-4 mr-1" /> Create your first resume</Button>
+    <PrivateRoute>
+      <div className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-3xl font-bold">Your Resumes</h1>
+            <p className="text-sm text-muted-foreground">Manage, edit, and create your resumes easily.</p>
           </div>
-          : <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredResumes.map(r => (
-              <Card key={r.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border rounded-2xl">
-                <div className="relative h-40 bg-gray-100">
-                  <Image src={r.thumbnailUrl || "/assets/default-thumbnail.jpg"} alt={r.title || r.id} width={800} height={400} className="w-full h-full object-cover" />
-                  <Badge className={`absolute top-3 left-3 ${r.resumeStatus === "complete" ? "bg-green-600" : "bg-blue-600"} text-white`}>{r.resumeStatus || "draft"}</Badge>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg truncate">{r.title}</h3>
-                  <p className="text-xs text-muted-foreground">Updated: {r.updatedAt ? new Date(r.updatedAt).toLocaleString() : "-"}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Template: {r.template?.name || "Default"}</p>
-                  <div className="flex justify-end gap-1 mt-3">
-                    <Button variant="ghost" size="sm" onClick={() => router.push(`/resume/${r.id}`)} title="Edit"><Edit3 className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="sm" onClick={() => handlePdfPreview(r.id)} title="Preview"><Printer className="h-4 w-4" /></Button>
-                     <Button variant="destructive" size="sm" onClick={() => handleDelete(r.id)} title="Delete"><Trash2 className="h-4 w-4" /></Button>
+
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <Input placeholder="Search..." value={query} onChange={e => setQuery(e.target.value)} className="w-48 sm:w-64" />
+            <select value={filter} onChange={e => setFilter(e.target.value as "all" | "draft" | "complete")} className="border rounded px-3 py-2 text-sm">
+              <option value="all">All</option>
+              <option value="draft">Draft</option>
+              <option value="complete">Complete</option>
+            </select>
+            <select value={sort} onChange={e => setSort(e.target.value as "updatedAt_desc" | "updatedAt_asc")} className="border rounded px-3 py-2 text-sm">
+              <option value="updatedAt_desc">Newest</option>
+              <option value="updatedAt_asc">Oldest</option>
+            </select>
+            <Button onClick={handleCreateResume} disabled={creating}><Plus className="h-4 w-4 mr-1" /> Create Resume</Button>
+          </div>
+        </div>
+
+        {loading ? <div className="text-center py-20 text-muted-foreground">Loading resumes...</div>
+          : filteredResumes.length === 0
+            ? <div className="text-center py-20 text-muted-foreground">
+              <p className="mb-4">No resumes found.</p>
+              <Button onClick={handleCreateResume}><Plus className="h-4 w-4 mr-1" /> Create your first resume</Button>
+            </div>
+            : <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredResumes.map(r => (
+                <Card key={r.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border rounded-2xl">
+                  <div className="relative h-40 bg-gray-100">
+                    <Image src={r.thumbnailUrl || "/assets/default-thumbnail.jpg"} alt={r.title || r.id} width={800} height={400} className="w-full h-full object-cover" />
+                    <Badge className={`absolute top-3 left-3 ${r.resumeStatus === "complete" ? "bg-green-600" : "bg-blue-600"} text-white`}>{r.resumeStatus || "draft"}</Badge>
                   </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-      }
+                  <div className="p-4">
+                    <h3 className="font-semibold text-lg truncate">{r.title}</h3>
+                    <p className="text-xs text-muted-foreground">Updated: {r.updatedAt ? new Date(r.updatedAt).toLocaleString() : "-"}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Template: {r.template?.name || "Default"}</p>
+                    <div className="flex justify-end gap-1 mt-3">
+                      <Button variant="ghost" size="sm" onClick={() => router.push(`/resume/${r.id}`)} title="Edit"><Edit3 className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => handlePdfPreview(r.id)} title="Preview"><Printer className="h-4 w-4" /></Button>
+                      <Button variant="destructive" size="sm" onClick={() => handleDelete(r.id)} title="Delete"><Trash2 className="h-4 w-4" /></Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+        }
 
-      {/* PDF Overlay */}
-      {pdfUrl && <ResumePrintOverlay pdfUrl={pdfUrl} onClose={() => { URL.revokeObjectURL(pdfUrl); setPdfUrl(null); }} />}
-    </div>
+        {/* PDF Overlay */}
+        {pdfUrl && <ResumePrintOverlay pdfUrl={pdfUrl} onClose={() => { URL.revokeObjectURL(pdfUrl); setPdfUrl(null); }} />}
+      </div>
+    </PrivateRoute>
   );
 }
