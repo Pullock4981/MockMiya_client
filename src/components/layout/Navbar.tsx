@@ -25,10 +25,9 @@ const Navbar = () => {
 
   const navItems = [
     { name: "Features", href: "#features" },
-    { name: "Pricing", href: "#pricing" },
+    { name: "Resume", href: "/resume" },
     { name: "Blogs", href: "/blogs", isRoute: true },
     { name: "About", href: "/about", isRoute: true },
-    { name: "FAQ", href: "#faq" },
   ];
 
   // ✅ Handle Logout

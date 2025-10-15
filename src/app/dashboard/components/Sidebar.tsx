@@ -85,14 +85,14 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
       name: 'Video Interview',
       icon: Video,
       section: 'interviews',
-      path: '/dashboard/video-interview',
+      path: '/dashboard/live-interview',
     },
     {
       id: 'coding',
       name: 'Coding Challenges',
       icon: Code,
       section: 'practice',
-      path: '/dashboard/coding',
+      path: '/dashboard/coding-challenges',
     },
     {
       id: 'analytics',
@@ -101,7 +101,12 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
       section: 'insights',
       path: '/dashboard/analytics',
     },
-    { id: 'admin', name: 'Admin', icon: Shield, section: 'admin', path: '/dashboard/admin' },
+    { id: 'admin', 
+      name: 'Admin', 
+      icon: Shield, 
+      section: 'admin', 
+      path: '/dashboard/admin' 
+    },
     {
       id: 'admin-console',
       name: 'Admin Console',

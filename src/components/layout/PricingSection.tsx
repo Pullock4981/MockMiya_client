@@ -1,7 +1,25 @@
+
+
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Check, Zap, Crown, Rocket } from "lucide-react";
+import { useRouter } from "next/navigation";
+import React from "react";
 
-const plans = [
+// ✅ Define types for plans
+interface Plan {
+  name: string;
+  price: string; // Example: "$19"
+  period: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  features: string[];
+  cta: string;
+  popular: boolean;
+}
+
+const plans: Plan[] = [
   {
     name: "Free",
     price: "$0",
@@ -13,15 +31,15 @@ const plans = [
       "Basic mock interviews",
       "5 AI feedback sessions",
       "PDF export",
-      "Community support"
+      "Community support",
     ],
     cta: "Get Started",
-    popular: false
+    popular: false,
   },
   {
     name: "Pro",
     price: "$19",
-    period: "per month", 
+    period: "per month",
     description: "Everything you need to succeed",
     icon: Crown,
     features: [
@@ -32,10 +50,10 @@ const plans = [
       "Advanced analytics",
       "Custom coding challenges",
       "PDF & DOCX export",
-      "Role-based dashboards"
+      "Role-based dashboards",
     ],
-    cta: "Start Pro Trial",
-    popular: true
+    cta: "Get Started",
+    popular: true,
   },
   {
     name: "Enterprise",
@@ -51,14 +69,53 @@ const plans = [
       "White-label options",
       "Advanced security",
       "Dedicated support",
-      "Custom training data"
+      "Custom training data",
     ],
-    cta: "Contact Sales",
-    popular: false
-  }
+    cta: "Get Started",
+    popular: false,
+  },
 ];
 
-const PricingSection = () => {
+const PricingSection: React.FC = () => {
+  const router = useRouter();
+
+  // ✅ Typed parameter (no 'any')
+  const handlePlanClick = async (plan: Plan) => {
+    // Free plan → direct dashboard
+    if (plan.price === "$0") {
+      router.push("/dashboard");
+      return;
+    }
+
+    // Convert "$19" → 19
+    const priceValue = parseFloat(plan.price.replace("$", ""));
+
+    try {
+      const res = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          plan: {
+            name: plan.name,
+            description: plan.description,
+            price: priceValue,
+          },
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Payment initialization failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error starting payment:", error);
+      alert("Something went wrong during payment initialization.");
+    }
+  };
+
   return (
     <section className="py-24 bg-background-secondary relative overflow-hidden">
       {/* Background decorations */}
@@ -68,22 +125,23 @@ const PricingSection = () => {
       <div className="container mx-auto px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-            Choose Your 
-            <span className="text-gradient">Success Plan</span>
+            Choose Your <span className="text-gradient">Success Plan</span>
           </h2>
           <p className="text-xl text-foreground-secondary max-w-2xl mx-auto">
-            Flexible pricing designed to grow with your career. Start free, upgrade when ready.
+            Flexible pricing designed to grow with your career. Start free,
+            upgrade when ready.
           </p>
         </div>
 
+        {/* Pricing Cards */}
         <div className="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {plans.map((plan, index) => (
-            <div 
+            <div
               key={index}
               className={`relative p-8 rounded-3xl border transition-all duration-300 hover:-translate-y-2 ${
-                plan.popular 
-                  ? 'bg-card-gradient border-primary/50 shadow-glow scale-105' 
-                  : 'bg-card border-border hover:border-primary/30 hover:shadow-md'
+                plan.popular
+                  ? "bg-card-gradient border-primary/50 shadow-glow scale-105"
+                  : "bg-card border-border hover:border-primary/30 hover:shadow-md"
               }`}
             >
               {/* Popular badge */}
@@ -95,20 +153,19 @@ const PricingSection = () => {
                 </div>
               )}
 
-              {/* Plan header */}
+              {/* Plan Header */}
               <div className="text-center mb-8">
                 <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <plan.icon className="h-8 w-8 text-primary" />
                 </div>
-                
+
                 <h3 className="text-2xl font-bold text-foreground mb-2">
                   {plan.name}
                 </h3>
-                
                 <p className="text-foreground-secondary mb-4">
                   {plan.description}
                 </p>
-                
+
                 <div className="flex items-baseline justify-center">
                   <span className="text-5xl font-bold text-foreground">
                     {plan.price}
@@ -124,19 +181,18 @@ const PricingSection = () => {
                 {plan.features.map((feature, featureIndex) => (
                   <div key={featureIndex} className="flex items-start">
                     <Check className="h-5 w-5 text-primary mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-foreground-secondary">
-                      {feature}
-                    </span>
+                    <span className="text-foreground-secondary">{feature}</span>
                   </div>
                 ))}
               </div>
 
               {/* CTA Button */}
-              <Button 
+              <Button
+                onClick={() => handlePlanClick(plan)}
                 className={`w-full py-3 rounded-xl font-semibold transition-all duration-300 ${
                   plan.popular
-                    ? 'bg-primary hover:bg-primary-dark text-primary-foreground glow-effect'
-                    : 'bg-secondary hover:bg-secondary/80 text-secondary-foreground'
+                    ? "bg-primary hover:bg-primary-dark text-primary-foreground glow-effect"
+                    : "bg-secondary hover:bg-secondary/80 text-secondary-foreground"
                 }`}
                 size="lg"
               >
@@ -146,7 +202,7 @@ const PricingSection = () => {
           ))}
         </div>
 
-        {/* Bottom guarantee */}
+        {/* Bottom Guarantee */}
         <div className="text-center mt-16">
           <div className="inline-flex items-center px-6 py-3 rounded-full bg-card border border-border text-foreground-secondary">
             <Check className="h-4 w-4 mr-2 text-primary" />
@@ -159,3 +215,4 @@ const PricingSection = () => {
 };
 
 export default PricingSection;
+
