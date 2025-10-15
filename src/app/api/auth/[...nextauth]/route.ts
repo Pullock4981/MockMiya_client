@@ -5,9 +5,7 @@ import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongodb";
 import {
-  canAttemptLogin,
   recordLoginAttempt,
-  getBlockedUntil,
 } from "@/lib/loginRateLimiter";
 
 interface GoogleProfile {

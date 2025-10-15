@@ -193,37 +193,37 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
 
 
   const handleLogout = async () => {
-      const result = await Swal.fire({
-        title: "Are you sure?",
-        text: "You will be logged out from your account!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, Logout",
-      });
-  
-      if (result.isConfirmed) {
-        try {
-          await logout();
-          await Swal.fire({
-            title: "Logged Out!",
-            text: "You have been logged out successfully.",
-            icon: "success",
-            timer: 1800,
-            showConfirmButton: false,
-          });
-        } catch (err) {
-          const error = err instanceof Error ? err : new Error('Logout failed');
-          console.error(error);
-          Swal.fire({
-            title: "Failed!",
-            text: error.message,
-            icon: "error",
-          });
-        }
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You will be logged out from your account!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Logout",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await logout();
+        await Swal.fire({
+          title: "Logged Out!",
+          text: "You have been logged out successfully.",
+          icon: "success",
+          timer: 1800,
+          showConfirmButton: false,
+        });
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Logout failed');
+        console.error(error);
+        Swal.fire({
+          title: "Failed!",
+          text: error.message,
+          icon: "error",
+        });
       }
-    };
+    }
+  };
 
   return (
     <aside
@@ -232,15 +232,21 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
       style={{ width: `${width}px`, flexShrink: 0 }}
     >
       {/* Logo + Toggle */}
-      <div className="flex items-center h-[78px] px-4 border-b border-border justify-between flex-shrink-0">
-        <div className="flex items-center">
+      <div className="flex items-center justify-between h-[75px] px-4 border-b border-border relative">
+        <div className="flex items-center ">
           <div className="w-8 h-8 bg-gradient-to-r from-green-primary to-green-accent rounded-lg flex items-center justify-center">
             <Bot className="h-5 w-5 text-primary-foreground" />
           </div>
-          {!collapsed && <span className="ml-2 text-xl font-bold gradient-text">MockMiya</span>}
+          {!collapsed && <Link href="/"><span className="ml-2 text-xl font-bold gradient-text">MockMiya</span></Link>}
         </div>
 
-        <button onClick={toggleCollapsed} className="p-2 rounded-md hover:bg-muted transition">
+        <button
+          onClick={toggleCollapsed}
+          className={`p-2 rounded-md hover:bg-muted/30 transition ${collapsed
+              ? 'absolute top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2'
+              : ''
+            }`}
+        >
           {collapsed ? (
             <PanelLeftOpen className="h-5 w-5" />
           ) : (
@@ -248,6 +254,7 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
           )}
         </button>
       </div>
+
 
       {/* Navigation */}
       <nav className="flex-1 px-2 py-4 space-y-6 overflow-y-auto custom-scroll">
@@ -263,8 +270,8 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
                 <button
                   onClick={() => setActiveTab(item.id)}
                   className={`w-full sidebar-button flex items-center rounded-lg px-3 py-2 text-sm transition-colors ${activeTab === item.id
-                    ? 'active-button'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                    ? ' bg-primary text-black'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-primary/30'
                     } ${collapsed ? 'justify-center' : ''}`}
                 >
                   <item.icon className="h-4 w-4" />
@@ -291,7 +298,7 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
             </div>
           </div>
         )}
-        <Button variant="outline" size="sm" className="w-full" onClick={handleLogout}>
+        <Button variant="outline" size="sm" className="w-full hover:scale-105 transition-transform" onClick={handleLogout}>
           <LogOut className="h-3 w-3 mr-2" />
           {!collapsed && 'Sign Out'}
         </Button>

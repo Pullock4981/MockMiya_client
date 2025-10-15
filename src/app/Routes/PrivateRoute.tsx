@@ -2,22 +2,41 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { LoadingSpinner } from "../dashboard/components/Loading";
 
-export default function PrivateRoute({ children }: { children: React.ReactNode }) {
+interface PrivateRouteProps {
+  children: React.ReactNode;
+}
+
+export default function PrivateRoute({ children }: PrivateRouteProps) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    if (status === "loading") return;
+    let timer: NodeJS.Timeout;
 
-    if (status === "unauthenticated" || !session) {
-      router.replace("/auth"); 
+    // Wait for session to stabilize
+    if (status === "loading") {
+      setCheckingAuth(true);
+      return;
     }
-  }, [status, session, router]);
 
-  if (status === "loading") {
+    // Small delay before deciding
+    timer = setTimeout(() => {
+      if (status === "unauthenticated") {
+        router.replace("/auth");
+      } else {
+        setCheckingAuth(false);
+      }
+    }, 400); // delay to let session update
+
+    return () => clearTimeout(timer);
+  }, [status, router]);
+
+  // While checking session → show loader
+  if (checkingAuth || status === "loading") {
     return (
       <div className="flex justify-center items-center h-screen text-green-400 text-lg">
         <LoadingSpinner />
@@ -25,5 +44,9 @@ export default function PrivateRoute({ children }: { children: React.ReactNode }
     );
   }
 
-  return <>{children}</>;
+  if (status === "authenticated" && session) {
+    return <>{children}</>;
+  }
+
+  return null;
 }
