@@ -15,7 +15,7 @@ export default function PrivateRoute({ children }: PrivateRouteProps) {
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    // ✅ Use const since we’re not reassigning
+    // ✅ এক লাইনে declare + assign → no lint error
     const timer = setTimeout(() => {
       if (status === "loading") {
         setCheckingAuth(true);
@@ -27,12 +27,11 @@ export default function PrivateRoute({ children }: PrivateRouteProps) {
       } else {
         setCheckingAuth(false);
       }
-    }, 400); // delay to let session update
+    }, 400);
 
     return () => clearTimeout(timer);
   }, [status, router]);
 
-  // While checking session → show loader
   if (checkingAuth || status === "loading") {
     return (
       <div className="flex justify-center items-center h-screen text-green-400 text-lg">
