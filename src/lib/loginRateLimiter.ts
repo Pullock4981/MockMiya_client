@@ -1,4 +1,3 @@
-// src/lib/loginRateLimiter.ts
 interface BlockedUser {
   attempts: number;
   lastAttempt: number;
@@ -13,9 +12,10 @@ export function canAttemptLogin(email: string): boolean {
 
   if (!user) return true;
 
+  // Still blocked?
   if (user.blockedUntil && now < user.blockedUntil) return false;
 
-  // Reset attempts after 2 mins from last attempt
+  // Reset if 2 minutes passed since last attempt
   if (now - user.lastAttempt > 2 * 60 * 1000) {
     blockedUsers[email] = { attempts: 0, lastAttempt: now };
     return true;
@@ -31,7 +31,7 @@ export function recordLoginAttempt(email: string, success: boolean) {
   const user = blockedUsers[email];
 
   if (success) {
-    delete blockedUsers[email]; // reset on successful login
+    delete blockedUsers[email];
     return;
   }
 
@@ -39,13 +39,14 @@ export function recordLoginAttempt(email: string, success: boolean) {
   user.lastAttempt = now;
 
   if (user.attempts >= 5) {
-    user.blockedUntil = now + 2 * 60 * 1000; // block 2 mins
+    user.blockedUntil = now + 2 * 60 * 1000; // 2 min lock
   }
 }
 
-// ----------------- NEW HELPER -----------------
 export function getBlockedUntil(email: string): number | null {
   const user = blockedUsers[email];
-  if (user && user.blockedUntil) return user.blockedUntil;
+  if (user?.blockedUntil && Date.now() < user.blockedUntil) {
+    return user.blockedUntil;
+  }
   return null;
 }

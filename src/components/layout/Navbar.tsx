@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,8 +10,8 @@ import {
   LogOut,
   LayoutDashboard,
 } from "lucide-react";
-import { useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { useRef, useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import ThemeSwitch from "../ui/ThemeSwitch";
 import { useAuth } from "@/context/AuthContext";
@@ -23,6 +23,8 @@ const Navbar = () => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const { user, logout } = useAuth();
 
+  console.log("user in navbar" ,user)
+
   const navItems = [
     { name: "Features", href: "#features" },
     { name: "Resume", href: "/resume" },
@@ -31,7 +33,7 @@ const Navbar = () => {
   ];
 
   // ✅ Handle Logout
-const handleLogout = async () => {
+  const handleLogout = async () => {
     const result = await Swal.fire({
       title: "Are you sure?",
       text: "You will be logged out from your account!",
@@ -63,6 +65,17 @@ const handleLogout = async () => {
       }
     }
   };
+
+  // ✅ Close profile dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowProfileDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
@@ -104,26 +117,20 @@ const handleLogout = async () => {
             <ThemeSwitch />
 
             {user ? (
-              <>
-                <div className="relative ml-3" ref={dropdownRef}>
-                  <button
-                    onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                    className="flex items-center gap-3 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg p-2 transition"
-                  >
-                    <div className="text-right hidden md:block">
-                      <div className="text-sm font-medium">
-                        {user?.name ?? "User"}
-                      </div>
-                      {/* <div className="text-xs text-foreground-muted">{user?.role ?? 'Member'}</div> */}
-                    </div>
-                    <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
-                      {/* <span className="text-sm font-medium text-white">
-                        {user?.displayName?.charAt(0).toUpperCase() ?? "U"}
-                      </span> */}
-                    </div>
-                    <ChevronDown className="w-4 h-4 text-foreground-muted" />
-                  </button>
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                  className="flex items-center gap-3 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg p-2 transition"
+                  aria-expanded={showProfileDropdown}
+                  aria-label="Profile Menu"
+                >
+                  <div className="text-right hidden md:block">
+                    <div className="text-sm font-medium">{user?.name ?? "User"}</div>
+                  </div>
+                  <ChevronDown className="w-4 h-4 text-foreground-muted" />
+                </button>
 
+                <AnimatePresence>
                   {showProfileDropdown && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
@@ -132,28 +139,35 @@ const handleLogout = async () => {
                       className="absolute top-full right-0 mt-2 w-56 bg-card border border-card-border rounded-lg shadow-lg z-50"
                     >
                       <div className="p-3 border-b border-border">
-                        <div className="font-medium">
-                          {user?.name ?? "User"}
-                        </div>
-                        <div className="text-sm text-foreground-muted">
-                          {user?.email ?? "example@email.com"}
-                        </div>
+                        <div className="font-medium">{user?.name ?? "User"}</div>
+                        <div className="text-sm text-foreground-muted">{user?.email ?? "example@email.com"}</div>
                       </div>
 
                       <div className="p-1">
-                        <Link href={"/dashboard/profile"} className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors">
+                        <Link
+                          href="/dashboard/profile"
+                          className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors"
+                        >
                           <User className="w-4 h-4" />
                           Profile
                         </Link>
+<<<<<<< HEAD
                         <Link href={"/dashboard"} className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors">
                           
                           <LayoutDashboard className="w-4 h-4"  />
+=======
+                        <Link
+                          href="/dashboard"
+                          className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors"
+                        >
+                          <LayoutDashboard className="w-4 h-4" />
+>>>>>>> Jahid
                           Dashboard
                         </Link>
                         <div className="border-t border-border my-1" />
                         <button
                           onClick={handleLogout}
-                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-error hover:bg-error/10 rounded-md transition-colors"
+                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-error hover:bg-warning/50 rounded-md hover:scale-105 transition-transform"
                         >
                           <LogOut className="w-4 h-4" />
                           Logout
@@ -161,18 +175,10 @@ const handleLogout = async () => {
                       </div>
                     </motion.div>
                   )}
-                </div>
-              </>
+                </AnimatePresence>
+              </div>
             ) : (
               <>
-                {" "}
-                <Button
-                  variant="outline"
-                  className="border-border-light hover:bg-card-secondary"
-                  asChild
-                >
-                  <Link href="/auth">Sign In</Link>
-                </Button>
                 <Button
                   className="bg-primary hover:bg-primary-dark text-primary-foreground glow-effect"
                   asChild
@@ -190,62 +196,66 @@ const handleLogout = async () => {
               size="sm"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="border-border-light"
+              aria-label="Toggle menu"
             >
-              {isMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
+              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
 
         {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border">
-            <div className="flex flex-col space-y-4">
-              {navItems.map((item) =>
-                item.isRoute ? (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className="text-foreground-secondary hover:text-primary transition-colors font-medium"
-                    onClick={() => setIsMenuOpen(false)}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden py-4 border-t border-border overflow-hidden"
+            >
+              <div className="flex flex-col space-y-4">
+                {navItems.map((item) =>
+                  item.isRoute ? (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="text-foreground-secondary hover:text-primary transition-colors font-medium"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.name}
+                    </Link>
+                  ) : (
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      className="text-foreground-secondary hover:text-primary transition-colors font-medium"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.name}
+                    </a>
+                  )
+                )}
+                <div className="flex flex-col space-y-2 pt-4 border-t border-border">
+                  <div className="flex justify-center pb-2">
+                    <ThemeSwitch />
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="border-border-light hover:bg-card-secondary"
+                    asChild
                   >
-                    {item.name}
-                  </Link>
-                ) : (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    className="text-foreground-secondary hover:text-primary transition-colors font-medium"
-                    onClick={() => setIsMenuOpen(false)}
+                    <Link href="/auth">Sign In</Link>
+                  </Button>
+                  <Button
+                    className="bg-primary hover:bg-primary-dark text-primary-foreground"
+                    asChild
                   >
-                    {item.name}
-                  </a>
-                )
-              )}
-              <div className="flex flex-col space-y-2 pt-4 border-t border-border">
-                <div className="flex justify-center pb-2">
-                  <ThemeSwitch />
+                    <Link href="/auth">Get Started Free</Link>
+                  </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  className="border-border-light hover:bg-card-secondary"
-                  asChild
-                >
-                  <Link href="/auth">Sign In</Link>
-                </Button>
-                <Button
-                  className="bg-primary hover:bg-primary-dark text-primary-foreground"
-                  asChild
-                >
-                  <Link href="/auth">Get Started Free</Link>
-                </Button>
               </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </nav>
   );

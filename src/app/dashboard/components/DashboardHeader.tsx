@@ -143,7 +143,7 @@ export function DashboardHeader() {
                 <div className="border-t border-border my-1" />
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-error hover:bg-warning/50 rounded-md transition-colors "
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-error hover:bg-warning/50 rounded-md transition-transform hover:scale-105"
                 >
                   <LogOut className="w-4 h-4" />
                   Logout

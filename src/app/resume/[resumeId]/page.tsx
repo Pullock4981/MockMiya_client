@@ -14,7 +14,7 @@ import { Card } from "@/components/ui/card";
 import { Eye, Edit3, Menu, X, Download } from "lucide-react";
 import ResumePreview from "@/components/resumePreview/ResumePreview";
 import { exportResumeHandler } from "@/utils/exportResume";
-import { ResumeNavbar } from "@/components/layout/ResumeNavbar";
+import { ResumeNavbar } from "@/components/resumePreview/ResumeNavbar";
 import { ResumeForm } from "@/components/forms/ResumeForms/ResumeForm";
 import { useAuth } from "@/context/AuthContext";
 import { useResumeThumbnail } from "@/hooks/useResumeThumbnail";

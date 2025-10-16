@@ -1,262 +1,135 @@
-// 'use client';
-
-// import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-// import {
-//   createUserWithEmailAndPassword,
-//   GoogleAuthProvider,
-//   onAuthStateChanged,
-//   signInWithEmailAndPassword,
-//   signInWithPopup,
-//   signOut,
-//   updateProfile,
-//   User,
-//   UserCredential,
-//   sendPasswordResetEmail,
-// } from 'firebase/auth';
-// import { auth } from './Firebase/firebase.init';
-
-// // =======================
-// // TypeScript type
-// // =======================
-// interface AuthContextType {
-//   user: User | null;
-//   loading: boolean;
-//   createUser: (email: string, password: string) => Promise<UserCredential>;
-//   updateUser: (profile: { displayName?: string; photoURL?: string }) => Promise<void>;
-//   signInUser: (email: string, password: string) => Promise<UserCredential>;
-//   googleSignIn: () => Promise<UserCredential>;
-//   logoutUser: () => Promise<void>;
-//   resetPassword: (email: string) => Promise<void>; // 👈 NEW
-// }
-
-// // =======================
-// // Create Context
-// // =======================
-// export const AuthContext = createContext<AuthContextType | undefined>(undefined); // <-- export added ✅
-
-// // =======================
-// // Provider
-// // =======================
-// interface Props {
-//   children: ReactNode;
-// }
-
-// const googleProvider = new GoogleAuthProvider();
-
-// export const AuthProvider = ({ children }: Props) => {
-//   const [user, setUser] = useState<User | null>(null);
-//   const [loading, setLoading] = useState<boolean>(true);
-
-//   const createUser = (email: string, password: string): Promise<UserCredential> => {
-//     setLoading(true);
-//     return createUserWithEmailAndPassword(auth, email, password);
-//   };
-
-//   const updateUser = (profile: { displayName?: string; photoURL?: string }): Promise<void> => {
-//     if (!auth.currentUser) {
-//       return Promise.reject(new Error('No user logged in'));
-//     }
-//     return updateProfile(auth.currentUser, profile);
-//   };
-
-//   const signInUser = (email: string, password: string): Promise<UserCredential> => {
-//     setLoading(true);
-//     return signInWithEmailAndPassword(auth, email, password);
-//   };
-
-//   const googleSignIn = (): Promise<UserCredential> => {
-//     setLoading(true);
-//     return signInWithPopup(auth, googleProvider);
-//   };
-
-//   const logoutUser = async (): Promise<void> => {
-//     setLoading(true);
-//     try {
-//       await signOut(auth);
-//       setUser(null);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-//   const resetPassword = async (email: string): Promise<void> => {
-//     setLoading(true);
-//     try {
-//       await sendPasswordResetEmail(auth, email);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-//       setUser(currentUser);
-//       setLoading(false);
-//     });
-//     return () => unsubscribe();
-//   }, []);
-
-//   const value: AuthContextType = {
-//     user,
-//     loading,
-//     createUser,
-//     updateUser,
-//     signInUser,
-//     googleSignIn,
-//     logoutUser,
-//     resetPassword, // 👈 add here
-//   };
-
-//   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-// };
-
-// // =======================
-// // Custom Hook
-// // =======================
-// export const useAuth = (): AuthContextType => {
-//   const context = useContext(AuthContext);
-//   if (!context) {
-//     throw new Error('useAuth must be used within an AuthProvider');
-//   }
-//   return context;
-// };
-
-
-
-
-
 'use client';
 
-import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { SessionProvider, useSession, signIn, signOut, getSession } from "next-auth/react";
-import { Session } from "next-auth";
-import { canAttemptLogin, recordLoginAttempt } from "@/lib/loginRateLimiter";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from 'react';
+import {
+  useSession,
+  signIn,
+  signOut,
+  getSession,
+  SignInResponse,
+} from 'next-auth/react';
+import type { Session } from 'next-auth';
+
+export type User = {
+  id: string;
+  name?: string | null;
+  email: string;
+  role: string;
+};
 
 type AuthContextType = {
-  user: {
-    id: string;
-    name?: string;
-    email: string;
-    role: string;
-  } | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  googleLogin: () => Promise<void>;
-  logout: () => Promise<void>;
+  readonly user: User | null | undefined; // undefined = loading
+  readonly loading: boolean;
+  readonly login: (email: string, password: string) => Promise<void>;
+  readonly logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({
-  children,
-  session,
-}: {
-  children: ReactNode;
-  session?: Session | null;
-}) => (
-  <SessionProvider session={session}>
-    <AuthInner>{children}</AuthInner>
-  </SessionProvider>
-);
+interface AuthProviderProps {
+  readonly children: ReactNode;
+}
 
-const AuthInner = ({ children }: { children: ReactNode }) => {
+export function AuthProvider({ children }: AuthProviderProps) {
   const { data: session, status } = useSession();
-  const [user, setUser] = useState<AuthContextType["user"]>(null);
+  const [user, setUser] = useState<User | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
-  // ---------------- Sync user with session ----------------
+  // Map NextAuth session -> local user
   useEffect(() => {
-    if (status === "loading") {
+    async function syncUser() {
       setLoading(true);
-      return;
+
+      if (status === 'authenticated' && session?.user) {
+        const typedUser = session.user as Session['user'] & {
+          id?: string;
+          role?: string;
+        };
+
+        setUser({
+          id: typedUser.id ?? '',
+          name: typedUser.name ?? null,
+          email: typedUser.email ?? '',
+          role: typedUser.role ?? 'user',
+        });
+      } else if (status === 'unauthenticated') {
+        setUser(null);
+      } else {
+        setUser(undefined);
+      }
+
+      setLoading(false);
     }
 
-    if (session?.user) {
-      setUser({
-        id: session.user.id!,
-        name: session.user.name!,
-        email: session.user.email!,
-        role: session.user.role!,
-      });
-    } else {
-      setUser(null);
-    }
+    syncUser();
+  }, [status, session]);
 
-    setLoading(false);
-  }, [session, status]);
-
-  // ---------------- Login ----------------
-
-
-const login = async (email: string, password: string) => {
-  setLoading(true);
-
-  try {
-    if (!canAttemptLogin(email)) {
-      throw new Error("Too many failed attempts. Try again in 2 minutes.");
-    }
-
-    const res = await signIn("credentials", { redirect: false, email, password });
-
-    if (!res) {
-      recordLoginAttempt(email, false);
-      throw new Error("Login failed");
-    }
-
-    if (res.error) {
-      recordLoginAttempt(email, false);
-      throw new Error(res.error);
-    }
-
-    // Successful login → reset attempts
-    recordLoginAttempt(email, true);
-
-    const updatedSession = await getSession();
-    if (updatedSession?.user) {
-      setUser({
-        id: updatedSession.user.id!,
-        name: updatedSession.user.name!,
-        email: updatedSession.user.email!,
-        role: updatedSession.user.role!,
-      });
-    }
-
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-  // ---------------- Google login ----------------
-  const googleLogin = async (): Promise<void> => {
+  // Login with credentials provider
+  const login = async (email: string, password: string): Promise<void> => {
     setLoading(true);
-    await signIn("google", { redirect: false });
-    const updatedSession = await getSession();
-    if (updatedSession?.user) {
-      setUser({
-        id: updatedSession.user.id!,
-        name: updatedSession.user.name!,
-        email: updatedSession.user.email!,
-        role: updatedSession.user.role!,
+    try {
+      const result: SignInResponse | undefined = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
       });
+
+      if (!result || result.error) {
+        throw new Error(result?.error ?? 'Login failed');
+      }
+
+      // Wait briefly for session to refresh
+      for (let i = 0; i < 20; i++) {
+        const refreshed = await getSession();
+        if (refreshed?.user) {
+          const refreshedUser = refreshed.user as Session['user'] & {
+            id?: string;
+            role?: string;
+          };
+
+          setUser({
+            id: refreshedUser.id ?? '',
+            name: refreshedUser.name ?? null,
+            email: refreshedUser.email ?? '',
+            role: refreshedUser.role ?? 'user',
+          });
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 150));
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  // ---------------- Logout ----------------
+  // Logout
   const logout = async (): Promise<void> => {
-    await signOut({ redirect: false });
-    setUser(null);
+    setLoading(true);
+    try {
+      await signOut({ redirect: false });
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, googleLogin, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
-};
+export function useAuth(): AuthContextType {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+}
