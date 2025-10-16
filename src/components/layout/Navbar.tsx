@@ -151,17 +151,11 @@ const Navbar = () => {
                           <User className="w-4 h-4" />
                           Profile
                         </Link>
-<<<<<<< HEAD
-                        <Link href={"/dashboard"} className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors">
-                          
-                          <LayoutDashboard className="w-4 h-4"  />
-=======
                         <Link
                           href="/dashboard"
                           className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors"
                         >
                           <LayoutDashboard className="w-4 h-4" />
->>>>>>> Jahid
                           Dashboard
                         </Link>
                         <div className="border-t border-border my-1" />
