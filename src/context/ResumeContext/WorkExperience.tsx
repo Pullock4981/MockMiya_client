@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { WorkExperience } from "@/types/resume";
 import { v4 as uuidv4 } from "uuid";
 
@@ -13,8 +13,17 @@ interface WorkExperienceContextType {
 
 const WorkExperienceContext = createContext<WorkExperienceContextType | undefined>(undefined);
 
-export const WorkExperienceProvider = ({ children }: { children: React.ReactNode }) => {
+interface Props {
+  children: React.ReactNode;
+  initialData?: WorkExperience[];
+}
+
+export const WorkExperienceProvider = ({ children, initialData }: Props) => {
   const [workExperience, setWorkExperience] = useState<WorkExperience[]>([]);
+
+  useEffect(() => {
+    if (initialData) setWorkExperience(initialData);
+  }, [initialData]);
 
   const addWork = (exp: Omit<WorkExperience, "id">) => {
     setWorkExperience((prev) => [...prev, { id: uuidv4(), ...exp }]);

@@ -1,130 +1,135 @@
 'use client';
 
-import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from 'react';
 import {
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signInWithPopup,
+  useSession,
+  signIn,
   signOut,
-  updateProfile,
-  User,
-  UserCredential,
-  sendPasswordResetEmail,
-} from 'firebase/auth';
-import { auth } from './Firebase/firebase.init';
+  getSession,
+  SignInResponse,
+} from 'next-auth/react';
+import type { Session } from 'next-auth';
 
-// =======================
-// TypeScript type
-// =======================
-interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  createUser: (email: string, password: string) => Promise<UserCredential>;
-  updateUser: (profile: { displayName?: string; photoURL?: string }) => Promise<void>;
-  signInUser: (email: string, password: string) => Promise<UserCredential>;
-  googleSignIn: () => Promise<UserCredential>;
-  logoutUser: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>; // 👈 NEW
+export type User = {
+  id: string;
+  name?: string | null;
+  email: string;
+  role: string;
+};
+
+type AuthContextType = {
+  readonly user: User | null | undefined; // undefined = loading
+  readonly loading: boolean;
+  readonly login: (email: string, password: string) => Promise<void>;
+  readonly logout: () => Promise<void>;
+};
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+interface AuthProviderProps {
+  readonly children: ReactNode;
 }
 
-// =======================
-// Create Context
-// =======================
-export const AuthContext = createContext<AuthContextType | undefined>(undefined); // <-- export added ✅
+export function AuthProvider({ children }: AuthProviderProps) {
+  const { data: session, status } = useSession();
+  const [user, setUser] = useState<User | null | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
 
-// =======================
-// Provider
-// =======================
-interface Props {
-  children: ReactNode;
-}
+  // Map NextAuth session -> local user
+  useEffect(() => {
+    async function syncUser() {
+      setLoading(true);
 
-const googleProvider = new GoogleAuthProvider();
+      if (status === 'authenticated' && session?.user) {
+        const typedUser = session.user as Session['user'] & {
+          id?: string;
+          role?: string;
+        };
 
-export const AuthProvider = ({ children }: Props) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+        setUser({
+          id: typedUser.id ?? '',
+          name: typedUser.name ?? null,
+          email: typedUser.email ?? '',
+          role: typedUser.role ?? 'user',
+        });
+      } else if (status === 'unauthenticated') {
+        setUser(null);
+      } else {
+        setUser(undefined);
+      }
 
-  const createUser = (email: string, password: string): Promise<UserCredential> => {
-    setLoading(true);
-    return createUserWithEmailAndPassword(auth, email, password);
-  };
-
-  const updateUser = (profile: { displayName?: string; photoURL?: string }): Promise<void> => {
-    if (!auth.currentUser) {
-      return Promise.reject(new Error('No user logged in'));
+      setLoading(false);
     }
-    return updateProfile(auth.currentUser, profile);
-  };
 
-  const signInUser = (email: string, password: string): Promise<UserCredential> => {
-    setLoading(true);
-    return signInWithEmailAndPassword(auth, email, password);
-  };
+    syncUser();
+  }, [status, session]);
 
-  const googleSignIn = (): Promise<UserCredential> => {
-    setLoading(true);
-    return signInWithPopup(auth, googleProvider);
-  };
-
-  const logoutUser = async (): Promise<void> => {
+  // Login with credentials provider
+  const login = async (email: string, password: string): Promise<void> => {
     setLoading(true);
     try {
-      await signOut(auth);
+      const result: SignInResponse | undefined = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
+      });
+
+      if (!result || result.error) {
+        throw new Error(result?.error ?? 'Login failed');
+      }
+
+      // Wait briefly for session to refresh
+      for (let i = 0; i < 20; i++) {
+        const refreshed = await getSession();
+        if (refreshed?.user) {
+          const refreshedUser = refreshed.user as Session['user'] & {
+            id?: string;
+            role?: string;
+          };
+
+          setUser({
+            id: refreshedUser.id ?? '',
+            name: refreshedUser.name ?? null,
+            email: refreshedUser.email ?? '',
+            role: refreshedUser.role ?? 'user',
+          });
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 150));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Logout
+  const logout = async (): Promise<void> => {
+    setLoading(true);
+    try {
+      await signOut({ redirect: false });
       setUser(null);
     } finally {
       setLoading(false);
     }
   };
-  const resetPassword = async (email: string): Promise<void> => {
-    setLoading(true);
-    try {
-      await sendPasswordResetEmail(auth, email);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
+  return (
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
 
-  const value: AuthContextType = {
-    user,
-    loading,
-    createUser,
-    updateUser,
-    signInUser,
-    googleSignIn,
-    logoutUser,
-    resetPassword, 
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-// =======================
-// Custom Hook
-// =======================
-export const useAuth = (): AuthContextType => {
+export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth must be used within AuthProvider');
   }
   return context;
-};
-
-
-
-
-
-
-
-
-
+}

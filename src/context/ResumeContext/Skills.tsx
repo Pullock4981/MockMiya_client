@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { Skill } from "@/types/resume";
 import { v4 as uuidv4 } from "uuid";
 
@@ -13,17 +13,24 @@ interface SkillsContextType {
 
 const SkillsContext = createContext<SkillsContextType | undefined>(undefined);
 
-export const SkillsProvider = ({ children }: { children: React.ReactNode }) => {
+interface Props {
+  children: React.ReactNode;
+  initialData?: Skill[];
+}
+
+export const SkillsProvider = ({ children, initialData }: Props) => {
   const [skills, setSkills] = useState<Skill[]>([]);
+
+  useEffect(() => {
+    if (initialData) setSkills(initialData);
+  }, [initialData]);
 
   const addSkill = (skill: Omit<Skill, "id">) => {
     setSkills((prev) => [...prev, { id: uuidv4(), ...skill }]);
   };
 
   const updateSkill = (id: string, skill: Partial<Skill>) => {
-    setSkills((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, ...skill } : s))
-    );
+    setSkills((prev) => prev.map((s) => (s.id === id ? { ...s, ...skill } : s)));
   };
 
   const removeSkill = (id: string) => {

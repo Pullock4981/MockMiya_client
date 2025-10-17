@@ -2,20 +2,18 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
-import { ChevronDown, LogOut, Search, Settings, User } from 'lucide-react';
+import { ChevronDown, LogOut, Search, LayoutDashboard, User } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import ThemeSwitch from './ThemeSwitch';
 import { Button } from '@/components/ui/button';
-import { toast } from 'react-toastify';
-import { useRouter } from 'next/navigation';
+import ThemeSwitch from '@/components/ui/ThemeSwitch';
+import Swal from 'sweetalert2';
 
 export function DashboardHeader() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
-  const { user, logoutUser } = useAuth();
+  const { user, logout } = useAuth();
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -36,13 +34,35 @@ export function DashboardHeader() {
   };
 
   const handleLogout = async () => {
-    try {
-      await logoutUser();
-      toast.success('Logged out successfully');
-      router.push('/auth');
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to logout');
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You will be logged out from your account!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Logout",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await logout();
+        await Swal.fire({
+          title: "Logged Out!",
+          text: "You have been logged out successfully.",
+          icon: "success",
+          timer: 1800,
+          showConfirmButton: false,
+        });
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Logout failed');
+        console.error(error);
+        Swal.fire({
+          title: "Failed!",
+          text: error.message,
+          icon: "error",
+        });
+      }
     }
   };
 
@@ -52,6 +72,7 @@ export function DashboardHeader() {
       animate={{ y: 0, opacity: 1 }}
       className="sticky top-0 z-40 bg-card/80 backdrop-blur-sm border-b border-card-border px-6 py-4 flex items-center justify-between"
     >
+      {/* Left: Home Button */}
       <div>
         <Link href="/">
           <Button variant="secondary">Home</Button>
@@ -76,8 +97,7 @@ export function DashboardHeader() {
 
       {/* Right: Actions */}
       <div className="flex items-center gap-3">
-        {/* Theme Switch */}
-        <div className="-mr-12 -ml-7">
+        <div className="-mr-5 -ml-7">
           <ThemeSwitch />
         </div>
 
@@ -88,12 +108,7 @@ export function DashboardHeader() {
             className="flex items-center gap-3 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg p-2 transition"
           >
             <div className="text-right hidden md:block">
-              <div className="text-sm font-medium">{user?.displayName ?? 'User'}</div>
-            </div>
-            <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
-              <span className="text-sm font-medium text-white">
-                {user?.displayName?.charAt(0).toUpperCase() ?? 'U'}
-              </span>
+              <div className="text-sm font-medium">{user?.name ?? 'User'}</div>
             </div>
             <ChevronDown className="w-4 h-4 text-foreground-muted" />
           </button>
@@ -106,25 +121,29 @@ export function DashboardHeader() {
               className="absolute top-full right-0 mt-2 w-56 bg-card border border-card-border rounded-lg shadow-lg z-50"
             >
               <div className="p-3 border-b border-border">
-                <div className="font-medium">{user?.displayName ?? 'User'}</div>
+                <div className="font-medium">{user?.name ?? 'User'}</div>
                 <div className="text-sm text-foreground-muted">
                   {user?.email ?? 'example@email.com'}
                 </div>
               </div>
 
               <div className="p-1">
-                <button className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors">
-                  <User className="w-4 h-4" />
-                  Profile
-                </button>
-                <button className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors">
-                  <Settings className="w-4 h-4" />
-                  Settings
-                </button>
+                <Link href="/dashboard/profile">
+                  <button className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors">
+                    <User className="w-4 h-4" />
+                    Profile
+                  </button>
+                </Link>
+                <Link href="/dashboard">
+                  <button className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors">
+                    <LayoutDashboard className="w-4 h-4" />
+                    Dashboard
+                  </button>
+                </Link>
                 <div className="border-t border-border my-1" />
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-error hover:bg-error/10 rounded-md transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-error hover:bg-warning/50 rounded-md transition-transform hover:scale-105"
                 >
                   <LogOut className="w-4 h-4" />
                   Logout

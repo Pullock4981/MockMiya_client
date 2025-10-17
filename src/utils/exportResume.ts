@@ -1,8 +1,6 @@
-
-// /utils/exportResume.ts
-export const exportResumeHandler = async () => {
-  const resumeElement = document.getElementById("resume-preview");
-  if (!resumeElement) return alert("Resume preview not found");
+export const exportResumeHandler = async (resumeId: string) => {
+  const templateElement = document.getElementById("resume-template");
+  if (!templateElement) return alert("Resume template not found");
 
   // Get all computed styles
   const styles = Array.from(document.styleSheets)
@@ -25,24 +23,12 @@ export const exportResumeHandler = async () => {
           ${styles}
 
           /* Force flex/grid layout for PDF */
-          .flex {
-            display: flex !important;
-          }
-          .flex-col {
-            flex-direction: column !important;
-          }
-          .flex-row {
-            flex-direction: row !important;
-          }
-          .justify-between {
-            justify-content: space-between !important;
-          }
-          .items-center {
-            align-items: center !important;
-          }
-          .flex-wrap {
-            flex-wrap: wrap !important;
-          }
+          .flex { display: flex !important; }
+          .flex-col { flex-direction: column !important; }
+          .flex-row { flex-direction: row !important; }
+          .justify-between { justify-content: space-between !important; }
+          .items-center { align-items: center !important; }
+          .flex-wrap { flex-wrap: wrap !important; }
           .gap-1 { gap: 4px !important; }
           .gap-2 { gap: 8px !important; }
           .gap-4 { gap: 16px !important; }
@@ -52,15 +38,18 @@ export const exportResumeHandler = async () => {
           .space-y-6 > * + * { margin-top: 24px !important; }
         </style>
       </head>
-      <body>${resumeElement.outerHTML}</body>
+      <body>
+        ${templateElement.outerHTML}
+      </body>
     </html>
   `;
 
-  const response = await fetch("/resume/api/export-pdf", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ html }),
-  });
+const response = await fetch("/resume/api/pdf/export-pdf", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ html, resumeId }), 
+});
+
 
   if (!response.ok) throw new Error("PDF export failed");
 

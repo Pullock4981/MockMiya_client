@@ -1,3 +1,5 @@
+// src/types/resume.ts
+
 // ------------------------- Resume Builder TypeScript Definitions -------------------------
 
 // ---------- Personal Info ----------
@@ -24,9 +26,8 @@ export interface WorkExperience {
   current: boolean;
   responsibilities: string[];
   achievements: string[];
-  description?: string; 
+  description?: string;
 }
-
 
 // ---------- Education ----------
 export interface Education {
@@ -147,6 +148,11 @@ export interface ResumeTheme {
   fontFamily: string;
 }
 
+export interface ResumeMeta {
+  currentStep: number;
+  completed: boolean;
+}
+
 export type SectionOrder =
   | "summary"
   | "workExperience"
@@ -160,6 +166,7 @@ export type SectionOrder =
 // ---------- Resume Data ----------
 export interface ResumeData {
   id: string;
+  userEmail: string;
   personalInfo: PersonalInfo;
   summary: string;
   workExperience: WorkExperience[];
@@ -173,7 +180,12 @@ export interface ResumeData {
   theme: ResumeTheme;
   createdAt: string;
   updatedAt: string;
+  meta?: ResumeMeta;
+
+  // ✅ NEW FIELD
+  resumeStatus?: "draft" | "complete";
 }
+
 
 // ---------- ATS Score ----------
 export interface ATSScore {
@@ -222,7 +234,10 @@ export interface ResumeContextType {
   updatePersonalInfo: (info: Partial<PersonalInfo>) => void;
   updateSummary: (summary: string) => void;
   addWorkExperience: (experience: Omit<WorkExperience, "id">) => void;
-  updateWorkExperience: (id: string, experience: Partial<WorkExperience>) => void;
+  updateWorkExperience: (
+    id: string,
+    experience: Partial<WorkExperience>
+  ) => void;
   removeWorkExperience: (id: string) => void;
   addEducation: (education: Omit<Education, "id">) => void;
   updateEducation: (id: string, education: Partial<Education>) => void;
@@ -249,10 +264,11 @@ export interface ResumeContextType {
 
 // ------------------------- Meta Context -------------------------
 export interface MetaContextType {
-  template: ResumeTemplate;
-  theme: ResumeTheme;
-  atsScore: ATSScore | null;
-  aiSuggestions: AIsuggestion[];
+  template?: ResumeTemplate;
+  theme?: ResumeTheme;
+  atsScore?: ATSScore;
+  aiSuggestions?: AIsuggestion[];
+
 
   updateTemplate: (template: ResumeTemplate) => void;
   updateTheme: (theme: ResumeTheme) => void;

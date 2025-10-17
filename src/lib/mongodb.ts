@@ -1,103 +1,36 @@
-// import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-// const MONGODB_URI = process.env.MONGODB_URI as string;
-
-// if (!MONGODB_URI) {
-//   throw new Error('⚠️ Please add your MongoDB URI in .env');
-// }
-
-// interface MongooseCache {
-//   conn: typeof mongoose | null;
-//   promise: Promise<typeof mongoose> | null;
-// }
-
-// declare global {
-//   var mongoose: MongooseCache | undefined;
-// }
-
-// const cached: MongooseCache = global.mongoose || {
-//   conn: null,
-//   promise: null,
-// };
-
-// if (!global.mongoose) {
-//   global.mongoose = cached;
-// }
-
-// export const connectDB = async (): Promise<typeof mongoose> => {
-//   if (cached.conn) {
-//     return cached.conn;
-//   }
-
-//   if (!cached.promise) {
-//     const opts = {
-//       bufferCommands: false,
-//       dbName: "MockMiya",
-//     };
-
-//     cached.promise = mongoose.connect(MONGODB_URI, opts);
-//   }
-
-//   try {
-//     cached.conn = await cached.promise;
-//   } catch (e) {
-//     cached.promise = null;
-//     throw e;
-//   }
-
-//   return cached.conn;
-// };
-
-
-
-
-import mongoose from 'mongoose';
-
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/quiz-app';
+const MONGODB_URI = process.env.MONGODB_URI as string;
 
 if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable');
+  throw new Error("⚠️ Please add your MongoDB URI in .env");
 }
 
-interface MongooseCache {
-  conn: typeof mongoose | null;
-  promise: Promise<typeof mongoose> | null;
-}
+let isConnected = false;
 
-declare global {
-  var mongoose: MongooseCache | undefined;
-}
-
-const cached: MongooseCache = global.mongoose || {
-  conn: null,
-  promise: null,
-};
-
-if (!global.mongoose) {
-  global.mongoose = cached;
-}
-
-async function connectDB() {
-  if (cached.conn) {
-    return cached.conn;
-  }
-
-  if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
-    };
-
-    cached.promise = mongoose.connect(MONGODB_URI, opts);
+export const connectDB = async (): Promise<void> => {
+  if (isConnected) {
+    console.log("🔄 Using existing MongoDB connection");
+    return;
   }
 
   try {
-    cached.conn = await cached.promise;
-  } catch (e) {
-    cached.promise = null;
-    throw e;
+    console.log("⏳ Connecting to MongoDB...");
+    await mongoose.connect(MONGODB_URI, {
+      dbName: "MockMiya",
+      serverSelectionTimeoutMS: 10000,
+    });
+
+    isConnected = true;
+    console.log("✅ MongoDB connected successfully");
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("❌ MongoDB connection failed");
+      console.error("Error message:", error.message);
+      throw new Error("MongoDB connection error: " + error.message);
+    } else {
+      console.error("❌ MongoDB connection failed with unknown error:", error);
+      throw new Error("MongoDB connection error: Unknown error");
+    }
   }
-
-  return cached.conn;
-}
-
-export default connectDB;
+};

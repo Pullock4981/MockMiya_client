@@ -1,27 +1,23 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
+import { useAuth } from '@/context/AuthContext';
+import { useRouter, usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+import { LoadingSpinner } from '../dashboard/components/Loading';
 
-import { useEffect } from "react";
-import { LoadingSpinner } from "../dashboard/components/Loading";
-import { useAuth } from "@/context/AuthContext";
-
-interface PrivateRouteProps {
-  children: React.ReactNode;
-}
-
-const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
+export default function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname(); // Current path
 
   useEffect(() => {
-    if (!loading && !user) router.push("/auth");
-  }, [loading, user, router]);
+    if (!loading && user === null) {
+      // Redirect to login page with redirect query
+      router.replace(`/auth?redirect=${encodeURIComponent(pathname)}`);
+    }
+  }, [user, loading, router, pathname]);
 
-  if (loading) return <LoadingSpinner />;
-  if (!user) return null;
+  if (loading || user === undefined) return <LoadingSpinner />;
 
-  return <>{children}</>;
-};
-
-export default PrivateRoute;
+  return <>{user ? children : null}</>;
+}
