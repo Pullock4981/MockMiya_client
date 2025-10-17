@@ -1,29 +1,103 @@
-import { MongoClient } from "mongodb";
+// import mongoose from 'mongoose';
 
-const uri: string = `mongodb://${process.env.USER_NAME}:${process.env.PASSWORD}@ac-fqtaxvg-shard-00-00.1twtybw.mongodb.net:27017,ac-fqtaxvg-shard-00-01.1twtybw.mongodb.net:27017,ac-fqtaxvg-shard-00-02.1twtybw.mongodb.net:27017/?ssl=true&replicaSet=atlas-zw5wdw-shard-0&authSource=admin&retryWrites=true&w=majority&appName=Cluster0`;
+// const MONGODB_URI = process.env.MONGODB_URI as string;
 
-if (!uri) throw new Error("Please add MONGODB_URI to your .env.local");
+// if (!MONGODB_URI) {
+//   throw new Error('⚠️ Please add your MongoDB URI in .env');
+// }
 
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
+// interface MongooseCache {
+//   conn: typeof mongoose | null;
+//   promise: Promise<typeof mongoose> | null;
+// }
 
-// Extend NodeJS.Global type to include our cached MongoClient
+// declare global {
+//   var mongoose: MongooseCache | undefined;
+// }
+
+// const cached: MongooseCache = global.mongoose || {
+//   conn: null,
+//   promise: null,
+// };
+
+// if (!global.mongoose) {
+//   global.mongoose = cached;
+// }
+
+// export const connectDB = async (): Promise<typeof mongoose> => {
+//   if (cached.conn) {
+//     return cached.conn;
+//   }
+
+//   if (!cached.promise) {
+//     const opts = {
+//       bufferCommands: false,
+//       dbName: "MockMiya",
+//     };
+
+//     cached.promise = mongoose.connect(MONGODB_URI, opts);
+//   }
+
+//   try {
+//     cached.conn = await cached.promise;
+//   } catch (e) {
+//     cached.promise = null;
+//     throw e;
+//   }
+
+//   return cached.conn;
+// };
+
+
+
+
+import mongoose from 'mongoose';
+
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/quiz-app';
+
+if (!MONGODB_URI) {
+  throw new Error('Please define the MONGODB_URI environment variable');
+}
+
+interface MongooseCache {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+}
+
 declare global {
-  
-  var _mongoClientPromise: Promise<MongoClient> | undefined;
+  var mongoose: MongooseCache | undefined;
 }
 
-if (process.env.NODE_ENV === "development") {
-  // In development, use a global variable so HMR/restarts don't create new connections
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(uri);
-    global._mongoClientPromise = client.connect();
+const cached: MongooseCache = global.mongoose || {
+  conn: null,
+  promise: null,
+};
+
+if (!global.mongoose) {
+  global.mongoose = cached;
+}
+
+async function connectDB() {
+  if (cached.conn) {
+    return cached.conn;
   }
-  clientPromise = global._mongoClientPromise;
-} else {
-  // In production, create a new client (server process is stable there)
-  client = new MongoClient(uri);
-  clientPromise = client.connect();
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+    };
+
+    cached.promise = mongoose.connect(MONGODB_URI, opts);
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+
+  return cached.conn;
 }
 
-export default clientPromise;
+export default connectDB;

@@ -1,6 +1,6 @@
-import { QuizRole, QuestionCategory } from '@/app/dashboard/coding-challenges/types/quiz';
+import { Role, QuestionCategory } from '@/app/dashboard/coding-challenges/types/quiz';
 
-export const quizRoles: QuizRole[] = [
+export const quizRoles: Role[] = [
  {
   id: 'software-engineer',
   name: 'Software Engineer',
