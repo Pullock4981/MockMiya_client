@@ -4,17 +4,14 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongodb";
-import {
-  canAttemptLogin,
-  recordLoginAttempt,
-  getBlockedUntil,
-} from "@/lib/loginRateLimiter";
+import { recordLoginAttempt } from "@/lib/loginRateLimiter";
 
 interface GoogleProfile {
   email?: string;
   name?: string;
   given_name?: string;
   family_name?: string;
+  sub?: string; // Google ID
 }
 
 interface AuthUser {
@@ -32,27 +29,22 @@ const handler = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
 
-    // ---------- CREDENTIAL LOGIN ----------
+    // ---------- EMAIL/PASSWORD LOGIN ----------
     CredentialsProvider({
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Missing credentials");
         }
 
         const email = credentials.email.trim().toLowerCase();
-
-        // 🔗 connect to MongoDB
         await connectDB();
 
-        // 🔍 Find user
         const user = await User.findOne({ email });
-
         if (!user) {
           recordLoginAttempt(email, false);
           throw new Error("Email not found");
@@ -63,18 +55,17 @@ const handler = NextAuth({
           throw new Error("Please verify your email first");
         }
 
-        // 🔐 Compare password
-        const isPasswordCorrect = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
+        if (!user.password) {
+          // Google-only account
+          throw new Error("This account uses Google login. Please login with Google.");
+        }
 
+        const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
         if (!isPasswordCorrect) {
           recordLoginAttempt(email, false);
           throw new Error("Password is incorrect");
         }
 
-        // ✅ Success: Reset failed attempts
         recordLoginAttempt(email, true);
 
         return {
@@ -87,18 +78,16 @@ const handler = NextAuth({
     }),
   ],
 
-  // ---------- SESSION ----------
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 
-  // ---------- CALLBACKS ----------
   callbacks: {
+    // ---------- SIGN IN CALLBACK ----------
     async signIn({ account, profile }) {
       await connectDB();
 
-      // 🟢 GOOGLE SIGN-IN LOGIC
       if (account?.provider === "google") {
         const googleProfile = profile as GoogleProfile;
         const email = googleProfile.email;
@@ -107,19 +96,19 @@ const handler = NextAuth({
         let dbUser = await User.findOne({ email });
 
         if (!dbUser) {
+          // Create new Google user WITHOUT password
           dbUser = new User({
             email,
             name:
               googleProfile.name ||
-              `${googleProfile.given_name || ""} ${
-                googleProfile.family_name || ""
-              }`.trim(),
+              `${googleProfile.given_name || ""} ${googleProfile.family_name || ""}`.trim(),
             role: "user",
             isVerified: true,
-            password: "",
+            googleId: googleProfile.sub, // Save Google ID
           });
           await dbUser.save();
         } else if (!dbUser.isVerified) {
+          // If existing user, mark verified
           dbUser.isVerified = true;
           await dbUser.save();
         }
@@ -128,6 +117,7 @@ const handler = NextAuth({
       return true;
     },
 
+    // ---------- JWT CALLBACK ----------
     async jwt({ token, user }) {
       if (user) {
         const authUser = user as AuthUser;
@@ -139,6 +129,7 @@ const handler = NextAuth({
       return token;
     },
 
+    // ---------- SESSION CALLBACK ----------
     async session({ session, token }) {
       session.user = {
         id: token.id as string,
@@ -150,7 +141,6 @@ const handler = NextAuth({
     },
   },
 
-  // ---------- CUSTOM PAGES ----------
   pages: {
     signIn: "/auth",
   },
