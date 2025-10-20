@@ -4,8 +4,9 @@
 import { useState } from 'react'
 import InterviewSetup from '@/components/interviewComponents/InterviewSetup'
 import InterviewAppClient from '@/components/interviewComponents/InterviewAppClient'
+import PrivateRoute from '@/app/Routes/PrivateRoute'
 
-export default function LiveInterview () {
+export default function LiveInterview() {
   const [started, setStarted] = useState(false)
   const [config, setConfig] = useState<{ name: string; jobRole: string; duration: 10 | 15 | 30 } | null>(null)
 
@@ -21,10 +22,12 @@ export default function LiveInterview () {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      {!started && <InterviewSetup onStart={handleStart} />}
-      {/* {started && config && <VoiceChat config={config} onEnd={handleEnd} />} */}
-      {started && config && <InterviewAppClient config={config} onEnd={handleEnd} />}
-    </div>
+    <PrivateRoute>
+      <div className="min-h-screen flex items-center justify-center p-6">
+        {!started && <InterviewSetup onStart={handleStart} />}
+        {/* {started && config && <VoiceChat config={config} onEnd={handleEnd} />} */}
+        {started && config && <InterviewAppClient config={config} onEnd={handleEnd} />}
+      </div>
+    </PrivateRoute>
   )
 }
