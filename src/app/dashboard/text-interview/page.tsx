@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from "react";
 import { LoadingSpinner } from "../components/Loading";
+import PrivateRoute from "@/app/Routes/PrivateRoute";
 
 type Role = {
   id: string;
@@ -308,9 +309,11 @@ export default function TextInterview() {
 
   // Loading
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <p className="text-gray-600 font-medium mb-2">Please wait...</p>
-      <LoadingSpinner />
-    </div>
+    <PrivateRoute>
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <p className="text-gray-600 font-medium mb-2">Please wait...</p>
+        <LoadingSpinner />
+      </div>
+    </PrivateRoute>
   );
 }
