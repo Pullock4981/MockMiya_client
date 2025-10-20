@@ -24,10 +24,10 @@ const Navbar = () => {
   const { user, logout } = useAuth();
 
   const navItems = [
-    { name: "Features", href: "#features" },
-    { name: "Resume", href: "/resume" },
+    { name: "Home", href: "/" },
     { name: "Blogs", href: "/blogs", isRoute: true },
     { name: "About", href: "/about", isRoute: true },
+    { name: "Contact", href: "/contact" },
   ];
 
   // ✅ Handle Logout

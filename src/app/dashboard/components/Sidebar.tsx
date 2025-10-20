@@ -43,7 +43,7 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
       name: 'Dashboard',
       icon: BarChart3,
       section: 'main',
-      path: '/dashboard/overview',
+      path: '/dashboard',
     },
     {
       id: 'resume',
