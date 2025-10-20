@@ -28,7 +28,7 @@ export const AIReTouchForm: React.FC = () => {
       await getAISuggestions(section);
       setCompletedActions((prev) => [...prev, `improve-${section}`]);
     } catch (error) {
-      console.error("Error improving section:", error);
+      // console.error("Error improving section:", error);
     } finally {
       setIsProcessing(null);
     }
@@ -42,7 +42,7 @@ export const AIReTouchForm: React.FC = () => {
       await calculateATSScore();
       setCompletedActions((prev) => [...prev, "ats-optimize"]);
     } catch (error) {
-      console.error("Error calculating ATS score:", error);
+      // console.error("Error calculating ATS score:", error);
     } finally {
       setIsProcessing(null);
     }
@@ -55,7 +55,7 @@ export const AIReTouchForm: React.FC = () => {
       await getAISuggestions(section);
       setCompletedActions((prev) => [...prev, `summarize-${section}`]);
     } catch (error) {
-      console.error("Error summarizing section:", error);
+      // console.error("Error summarizing section:", error);
     } finally {
       setIsProcessing(null);
     }

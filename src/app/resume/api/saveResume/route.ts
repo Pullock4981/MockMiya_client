@@ -42,7 +42,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : "Unknown server error";
-    console.error("❌ Failed to save resume:", errorMessage);
+    // console.error("❌ Failed to save resume:", errorMessage);
 
     return NextResponse.json(
       { success: false, message: "Failed to save resume", error: errorMessage },

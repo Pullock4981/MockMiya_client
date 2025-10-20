@@ -97,7 +97,7 @@ const ResumeControls: React.FC<ResumeControlsProps> = ({
     try {
       await exportResumeHandler(resumeId);
     } catch (error) {
-      console.error("PDF Export failed:", error);
+      // console.error("PDF Export failed:", error);
     }
   };
 
@@ -113,7 +113,7 @@ const ResumeControls: React.FC<ResumeControlsProps> = ({
       const url = URL.createObjectURL(pdfBlob);
       setPdfUrl(url);
     } catch (error) {
-      console.error("Print preview failed:", error);
+      // console.error("Print preview failed:", error);
       alert("Unable to open print preview");
     }
   };

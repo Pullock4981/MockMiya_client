@@ -56,7 +56,7 @@ export default function CodingChallenges() {
     
     // If no questions found for the selected category, show a message and return all questions
     if (filteredQuestions.length === 0) {
-      console.warn(`No questions found for category: ${category}. Showing all questions.`);
+      // console.warn(`No questions found for category: ${category}. Showing all questions.`);
       filteredQuestions = role.questions;
     }
     

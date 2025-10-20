@@ -30,7 +30,7 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ success: true, message: "Resume deleted successfully" });
   } catch (error) {
-    console.error("❌ Failed to delete resume:", error);
+    // console.error("❌ Failed to delete resume:", error);
     return NextResponse.json(
       { success: false, message: "Server error while deleting resume" },
       { status: 500 }

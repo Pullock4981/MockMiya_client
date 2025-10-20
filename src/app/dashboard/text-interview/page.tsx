@@ -73,7 +73,7 @@ export default function TextInterview() {
       setQuestions(qs.slice(0, 5));
       setAnswers(Array(5).fill(""));
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       setQuestions(Array.from({ length: 5 }, (_, i) => `Question ${i + 1}`));
       setAnswers(Array(5).fill(""));
     } finally {
@@ -124,7 +124,7 @@ export default function TextInterview() {
       const data = await res.json();
       setEvaluation(data.evaluation ?? { score: 0, feedback: "No evaluation returned." });
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       setEvaluation({ score: 0, feedback: "Evaluation failed." });
     } finally {
       setLoading(false);

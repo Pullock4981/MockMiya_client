@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ text });
   } catch (err) {
-    console.error("Error in API route:", err);
+    // console.error("Error in API route:", err);
     return NextResponse.json({ error: "Failed to generate cover letter" }, { status: 500 });
   }
 }

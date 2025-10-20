@@ -259,7 +259,7 @@ export default function VoiceInterviewPage() {
         nextQuestion: nextQuestion || defaultResult.nextQuestion
       };
     } catch (error) {
-      console.error('Error parsing evaluation result:', error);
+      // console.error('Error parsing evaluation result:', error);
       return defaultResult;
     }
   };
@@ -323,7 +323,7 @@ export default function VoiceInterviewPage() {
       startQuestionTimer(question);
 
     } catch (error) {
-      console.error('Error getting question:', error);
+      // console.error('Error getting question:', error);
       // Fallback question
       const fallbackQuestion = "Can you tell me about your experience relevant to this role?";
       const questionMessage: InterviewMessage = {
@@ -371,7 +371,7 @@ export default function VoiceInterviewPage() {
       if (soundEnabled) speakText("Interview completed. Here's your feedback: " + data.text);
 
     } catch (error) {
-      console.error('Error getting feedback:', error);
+      // console.error('Error getting feedback:', error);
       setFinalFeedback("Thank you for completing the interview. Based on your responses, you demonstrated good knowledge in some areas. Continue practicing to improve your interview skills.");
       if (soundEnabled) speakText("Interview completed. Thank you for your participation.");
     }
@@ -410,7 +410,7 @@ export default function VoiceInterviewPage() {
       return parseEvaluationResult(data.text);
 
     } catch (error) {
-      console.error('Error evaluating answer:', error);
+      // console.error('Error evaluating answer:', error);
       return {
         score: 'INCORRECT',
         feedback: 'Thank you for your response. Let me ask you another question.',
@@ -522,7 +522,7 @@ export default function VoiceInterviewPage() {
       }, 3000);
 
     } catch (error) {
-      console.error('Error in speech completion:', error);
+      // console.error('Error in speech completion:', error);
       // Add error message
       const errorMessage: InterviewMessage = {
         role: 'assistant',

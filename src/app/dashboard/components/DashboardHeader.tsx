@@ -29,7 +29,7 @@ export function DashboardHeader() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      console.log('Searching for:', searchQuery);
+      // console.log('Searching for:', searchQuery);
     }
   };
 
@@ -56,7 +56,7 @@ export function DashboardHeader() {
         });
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Logout failed');
-        console.error(error);
+        // console.error(error);
         Swal.fire({
           title: "Failed!",
           text: error.message,

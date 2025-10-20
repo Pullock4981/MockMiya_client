@@ -23,8 +23,6 @@ const Navbar = () => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const { user, logout } = useAuth();
 
-  console.log("user in navbar" ,user)
-
   const navItems = [
     { name: "Features", href: "#features" },
     { name: "Resume", href: "/resume" },
@@ -56,7 +54,7 @@ const Navbar = () => {
         });
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Logout failed');
-        console.error(error);
+        // console.error(error);
         Swal.fire({
           title: "Failed!",
           text: error.message,

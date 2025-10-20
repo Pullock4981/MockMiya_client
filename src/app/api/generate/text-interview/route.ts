@@ -155,7 +155,7 @@ Provide a concise, honest assessment. No extra text outside the JSON.
         : typeof err === "string"
         ? err
         : "Unknown error occurred";
-    console.error("Gemini API Error:", message);
+    // console.error("Gemini API Error:", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

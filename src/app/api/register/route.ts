@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const { name, email, password } = body;
 
     // 🔍 Debug: log incoming request data
-    console.log("Register API received:", { name, email, password });
+    // console.log("Register API received:", { name, email, password });
 
     if (!name?.trim() || !email?.trim() || !password) {
       return NextResponse.json(
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     const err = error instanceof Error ? error : new Error("Unknown error");
-    console.error("❌ Register error:", err);
+    // console.error("❌ Register error:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

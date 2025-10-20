@@ -56,7 +56,7 @@ export const exportSaveResumeHandler = async (resumeId: string) => {
 
   if (!response.ok) throw new Error("PDF export failed");
 
-  console.log("✅ PDF generated and saved in MongoDB!");
+  // console.log("✅ PDF generated and saved in MongoDB!");
 };
 
 

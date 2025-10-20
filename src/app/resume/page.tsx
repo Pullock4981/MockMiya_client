@@ -79,7 +79,7 @@ const ResumePage = () => {
           });
         }
       } catch (err) {
-        console.error(err);
+        // console.error(err);
         await Swal.fire({
           icon: "error",
           title: "Something went wrong",

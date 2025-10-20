@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ text });
 
   } catch (err) {
-    console.error("Error in interview API route:", err);
+    // console.error("Error in interview API route:", err);
     return NextResponse.json({ 
       error: "Failed to generate interview response",
       details: err instanceof Error ? err.message : 'Unknown error'

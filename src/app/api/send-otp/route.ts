@@ -12,14 +12,14 @@ export async function POST(req: Request) {
   try {
     const body: SendOtpBody = await req.json();
     const { email } = body;
-    console.log("🔹 /api/send-otp received email:", email);
+    // console.log("🔹 /api/send-otp received email:", email);
 
     await connectDB();
-    console.log("🔹 Connected to MongoDB");
+    // console.log("🔹 Connected to MongoDB");
 
     const user = await User.findOne({ email });
     if (!user) {
-      console.log("🔹 User not found for email:", email);
+      // console.log("🔹 User not found for email:", email);
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
@@ -27,14 +27,14 @@ export async function POST(req: Request) {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     user.otp = otp;
     user.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
-    console.log(`🔹 Generated OTP for ${email}: ${otp}`);
-    console.log(`🔹 OTP expires at: ${user.otpExpires.toISOString()}`);
+    // console.log(`🔹 Generated OTP for ${email}: ${otp}`);
+    // console.log(`🔹 OTP expires at: ${user.otpExpires.toISOString()}`);
 
     await user.save();
-    console.log("✅ OTP saved to MongoDB for user:", email);
+    // console.log("✅ OTP saved to MongoDB for user:", email);
 
     await sendOTP(email, otp);
-    console.log("✅ sendOTP function called for:", email);
+    // console.log("✅ sendOTP function called for:", email);
 
     return NextResponse.json({ message: "OTP sent", success: true });
   } catch (error) {

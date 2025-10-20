@@ -10,19 +10,12 @@ import {
 } from '@/components/ui/card';
 import { Award, FileText, MessageSquare, Target, TrendingUp, User } from 'lucide-react';
 import PrivateRoute from '../Routes/PrivateRoute';
-import { useAuth } from '@/context/AuthContext';
 
 interface OverviewProps {
   setActiveTab: (tab: string) => void;
 }
 
-
-
 const Dashboard = ({ setActiveTab }: OverviewProps) => {
-
-  const { user } = useAuth()
-  console.log('Is User', user)
-
 
   const stats = [
     {

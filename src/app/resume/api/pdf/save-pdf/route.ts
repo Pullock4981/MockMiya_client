@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       },
     });
   } catch (error) {
-    console.error("PDF Generation Error:", error);
+    // console.error("PDF Generation Error:", error);
     return new Response("Failed to generate PDF", { status: 500 });
   }
 }

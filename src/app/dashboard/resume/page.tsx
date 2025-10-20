@@ -138,7 +138,7 @@ export default function DashboardResume() {
       const res = await axios.get<ApiResponse>(`/resume/api/list?userEmail=${encodeURIComponent(userEmail)}`);
       setResumes(res.data.success ? res.data.resumes : []);
     } catch (err) {
-      console.error("❌ Failed to fetch resumes:", err);
+      // console.error("❌ Failed to fetch resumes:", err);
       setResumes([]);
     } finally { setLoading(false); }
   }, [userEmail]);
@@ -165,7 +165,7 @@ export default function DashboardResume() {
       localStorage.setItem("resumeCurrentStep", "0");
       router.push(`/resume/${newId}`);
     } catch (err) {
-      console.error("❌ Failed to create resume:", err);
+      // console.error("❌ Failed to create resume:", err);
       const message = err instanceof Error ? err.message : "Could not create resume";
       await MySwal.fire("Error", message, "error");
     } finally { setCreating(false); }
@@ -179,7 +179,7 @@ export default function DashboardResume() {
       setResumes(prev => prev.filter(r => r.id !== id));
       await MySwal.fire("Deleted", "Resume removed.", "success");
     } catch (err) {
-      console.error("❌ Failed to delete resume:", err);
+      // console.error("❌ Failed to delete resume:", err);
       const message = err instanceof Error ? err.message : "Failed to delete";
       await MySwal.fire("Error", message, "error");
     }
@@ -193,7 +193,7 @@ export default function DashboardResume() {
       const url = URL.createObjectURL(pdfBlob);
       setPdfUrl(url);
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       const message = err instanceof Error ? err.message : "Failed to open PDF preview";
       await MySwal.fire("Error", message, "error");
     }
@@ -219,7 +219,7 @@ export default function DashboardResume() {
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Could not upload file";
-      console.error("Upload failed:", message);
+      // console.error("Upload failed:", message);
       await MySwal.fire("Upload failed", message, "error");
     } finally {
       setUploading(false);

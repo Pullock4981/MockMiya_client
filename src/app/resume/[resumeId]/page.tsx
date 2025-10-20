@@ -69,7 +69,7 @@ const ResumePageById = () => {
           setError(json.message || "Resume not found");
         }
       } catch (err) {
-        console.error("❌ Failed to fetch resume:", err);
+        // console.error("❌ Failed to fetch resume:", err);
         setError("Failed to fetch resume");
       } finally {
         setLoading(false);
@@ -92,7 +92,7 @@ const ResumePageById = () => {
     try {
       await exportResumeHandler(resumeId);
     } catch (err) {
-      console.error("Failed to export PDF:", err);
+      // console.error("Failed to export PDF:", err);
       alert("Failed to export PDF");
     }
   }, [resumeId]);

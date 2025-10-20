@@ -120,7 +120,10 @@ export const ResumeForm: React.FC = () => {
       nextStep();
       localStorage.setItem("resumeCurrentStep", String(currentStep + 1));
       localStorage.setItem("resume_draft_id", resumeId);
-    } catch (err) { console.error(err); } finally { setIsSaving(false); }
+    } catch (err) {
+      // console.error(err); 
+    }
+    finally { setIsSaving(false); }
   };
 
   const handlePreviousStep = () => previousStep();
@@ -154,14 +157,16 @@ export const ResumeForm: React.FC = () => {
 
       router.push(`/resume/${resumeId}`);
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       MySwal.fire("Error", "Something went wrong while marking complete.", "error");
     } finally { setIsSaving(false); }
   };
 
   const handleAISuggestion = async () => {
     try { await getAISuggestions(currentFormStep.id); }
-    catch (error) { console.error(error); }
+    catch (error) { 
+      // console.error(error); 
+    }
   };
 
   const handleExport = async () => {
@@ -174,7 +179,7 @@ export const ResumeForm: React.FC = () => {
       const url = URL.createObjectURL(pdfBlob);
       setPdfUrl(url);
     } catch (err) {
-      console.error("❌ PDF export failed:", err);
+      // console.error("❌ PDF export failed:", err);
     }
   };
 

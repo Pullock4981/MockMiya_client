@@ -50,7 +50,7 @@ export default function HomePage() {
       }
     } catch (error) {
       if (error instanceof Error) {
-        console.error("Failed to generate cover letter:", error.message);
+        // console.error("Failed to generate cover letter:", error.message);
       }
     } finally {
       setLoading(false);

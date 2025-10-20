@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true, resume });
   } catch (err) {
-    console.error("❌ Error fetching resume:", err);
+    // console.error("❌ Error fetching resume:", err);
     return NextResponse.json(
       { success: false, message: "Server error while fetching resume" },
       { status: 500 }

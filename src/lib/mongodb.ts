@@ -10,19 +10,19 @@ let isConnected = false;
 
 export const connectDB = async (): Promise<void> => {
   if (isConnected) {
-    console.log("🔄 Using existing MongoDB connection");
+    // console.log("🔄 Using existing MongoDB connection");
     return;
   }
 
   try {
-    console.log("⏳ Connecting to MongoDB...");
+    // console.log("⏳ Connecting to MongoDB...");
     await mongoose.connect(MONGODB_URI, {
       dbName: "MockMiya",
       serverSelectionTimeoutMS: 10000,
     });
 
     isConnected = true;
-    console.log("✅ MongoDB connected successfully");
+    // console.log("✅ MongoDB connected successfully");
   } catch (error) {
     if (error instanceof Error) {
       console.error("❌ MongoDB connection failed");
