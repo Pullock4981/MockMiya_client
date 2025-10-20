@@ -121,29 +121,29 @@ export function DashboardHeader() {
               className="absolute top-full right-0 mt-2 w-56 bg-card border border-card-border rounded-lg shadow-lg z-50"
             >
               <div className="p-3 border-b border-border">
-                <div className="font-medium">{user?.name ?? 'User'}</div>
-                <div className="text-sm text-foreground-muted">
-                  {user?.email ?? 'example@email.com'}
-                </div>
+                <div className="font-medium">{user?.name ?? "User"}</div>
+                <div className="text-sm text-foreground-muted">{user?.email ?? "example@email.com"}</div>
               </div>
 
               <div className="p-1">
-                <Link href="/dashboard/profile">
-                  <button className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors">
-                    <User className="w-4 h-4" />
-                    Profile
-                  </button>
+                <Link
+                  href="/dashboard/profile"
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors"
+                >
+                  <User className="w-4 h-4" />
+                  Profile
                 </Link>
-                <Link href="/dashboard">
-                  <button className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors">
-                    <LayoutDashboard className="w-4 h-4" />
-                    Dashboard
-                  </button>
+                <Link
+                  href="/dashboard"
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  Dashboard
                 </Link>
                 <div className="border-t border-border my-1" />
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-error hover:bg-warning/50 rounded-md transition-transform hover:scale-105"
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-error hover:bg-warning/50 rounded-md hover:scale-105 transition-transform"
                 >
                   <LogOut className="w-4 h-4" />
                   Logout

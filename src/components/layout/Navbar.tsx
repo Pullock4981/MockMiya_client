@@ -233,13 +233,6 @@ const Navbar = () => {
                     <ThemeSwitch />
                   </div>
                   <Button
-                    variant="outline"
-                    className="border-border-light hover:bg-card-secondary"
-                    asChild
-                  >
-                    <Link href="/auth">Sign In</Link>
-                  </Button>
-                  <Button
                     className="bg-primary hover:bg-primary-dark text-primary-foreground"
                     asChild
                   >
