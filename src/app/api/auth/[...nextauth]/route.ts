@@ -156,8 +156,7 @@
 
 
 
-
-
+// src/app/api/auth/[...nextauth]/route.ts
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -237,7 +236,7 @@ export const handler = NextAuth({
         if (!email) return false;
 
         const users = db.collection("users");
-        let dbUser = await users.findOne({ email });
+        const dbUser = await users.findOne({ email });
 
         if (!dbUser) {
           // Create new Google user WITHOUT password
@@ -252,7 +251,10 @@ export const handler = NextAuth({
           };
           await users.insertOne(newUser);
         } else if (!dbUser.isVerified) {
-          await users.updateOne({ email }, { $set: { isVerified: true, updatedAt: new Date() } });
+          await users.updateOne(
+            { email },
+            { $set: { isVerified: true, updatedAt: new Date() } }
+          );
         }
       }
 

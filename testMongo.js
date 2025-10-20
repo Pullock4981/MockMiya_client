@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = "mongodb+srv://MockMiya:WN75NwtAeoJJrUcZ@cluster0.tks1y5a.mongodb.net/MockMiya";
+const MONGODB_URI = "mongodb+srv://ৃুািৃুাাৃু:াৃুািুািাুুাি@cluster0.tks1y5a.mongodb.net/MockMiya";
 
 async function testConnection() {
   try {
