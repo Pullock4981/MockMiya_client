@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QuizConfig, QuizState, Question, QuestionCategory, Role } from '../../dashboard/coding-challenges/types/quiz';
 import { quizRoles, defaultQuizConfigs, questionCategories } from '../../dashboard/coding-challenges/data/quizData';
-import PrivateRoute from '@/app/Routes/PrivateRoute';
 
 interface IncorrectAnswer {
   question: Question;
@@ -48,19 +47,18 @@ export default function CodingChallenges() {
   const generateRandomQuestions = useCallback((roleId: string, count: number, category?: QuestionCategory): Question[] => {
     const role = quizRoles.find(r => r.id === roleId);
     if (!role) return [];
-
+    
     // Filter questions by category if specified
     let filteredQuestions = role.questions;
     if (category) {
       filteredQuestions = role.questions.filter(q => q.category === category);
     }
-
+    
     // If no questions found for the selected category, show a message and return all questions
     if (filteredQuestions.length === 0) {
-      // console.warn(`No questions found for category: ${category}. Showing all questions.`);
       filteredQuestions = role.questions;
     }
-
+    
     const shuffled = [...filteredQuestions].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, Math.min(count, filteredQuestions.length));
   }, []);
@@ -72,10 +70,10 @@ export default function CodingChallenges() {
     }
 
     setIsLoading(true);
-
+    
     // Simulate loading for better UX
     await new Promise(resolve => setTimeout(resolve, 800));
-
+    
     const generatedQuestions = generateRandomQuestions(config.role, config.questionCount, config.category);
     if (generatedQuestions.length === 0) {
       alert('No questions available for this role and category combination');
@@ -111,7 +109,7 @@ export default function CodingChallenges() {
 
     const newAnswers = [...quizState.answers];
     newAnswers[quizState.currentQuestion] = answerIndex;
-
+    
     setQuizState({
       ...quizState,
       answers: newAnswers,
@@ -120,7 +118,7 @@ export default function CodingChallenges() {
 
   const nextQuestion = () => {
     if (!quizState) return;
-
+    
     if (quizState.currentQuestion < questions.length - 1) {
       setQuizState({
         ...quizState,
@@ -140,7 +138,7 @@ export default function CodingChallenges() {
 
   const prevQuestion = () => {
     if (!quizState || quizState.currentQuestion === 0) return;
-
+    
     setQuizState({
       ...quizState,
       currentQuestion: quizState.currentQuestion - 1,
@@ -154,19 +152,19 @@ export default function CodingChallenges() {
     const timer = setInterval(() => {
       setQuizState(prev => {
         if (!prev || prev.timeRemaining <= 0) return prev;
-
+        
         if (prev.timeRemaining === 1) {
           const score = calculateScore();
           setShowLeftPanel(true);
-          return {
-            ...prev,
-            timeRemaining: 0,
+          return { 
+            ...prev, 
+            timeRemaining: 0, 
             isCompleted: true,
             endTime: new Date(),
             score,
           };
         }
-
+        
         return { ...prev, timeRemaining: prev.timeRemaining - 1 };
       });
     }, 1000);
@@ -182,7 +180,7 @@ export default function CodingChallenges() {
 
   const calculateScore = (): number => {
     if (!quizState) return 0;
-
+    
     return quizState.answers.reduce((score, answer, index) => {
       return answer === questions[index]?.correctAnswer ? score + 1 : score;
     }, 0);
@@ -190,40 +188,40 @@ export default function CodingChallenges() {
 
   const calculateTimeTaken = (): string => {
     if (!quizState || !quizState.startTime) return '0:00';
-
+    
     const endTime = quizState.endTime || new Date();
     const timeDiff = endTime.getTime() - quizState.startTime.getTime();
-
+    
     const totalSeconds = Math.floor(timeDiff / 1000);
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
-
+    
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   const calculateTimeSaved = (): string => {
     if (!quizState || !quizState.startTime) return '0:00';
-
+    
     const totalAllowedSeconds = quizState.config.duration * 60;
     const endTime = quizState.endTime || new Date();
     const timeTakenSeconds = Math.floor((endTime.getTime() - quizState.startTime.getTime()) / 1000);
-
+    
     const timeSavedSeconds = totalAllowedSeconds - timeTakenSeconds;
-
+    
     if (timeSavedSeconds <= 0) return '0:00';
-
+    
     const minutes = Math.floor(timeSavedSeconds / 60);
     const seconds = timeSavedSeconds % 60;
-
+    
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   const completedBeforeTimeLimit = (): boolean => {
     if (!quizState || !quizState.startTime || !quizState.endTime) return false;
-
+    
     const totalAllowedSeconds = quizState.config.duration * 60;
     const timeTakenSeconds = Math.floor((quizState.endTime.getTime() - quizState.startTime.getTime()) / 1000);
-
+    
     return timeTakenSeconds < totalAllowedSeconds;
   };
 
@@ -239,11 +237,11 @@ export default function CodingChallenges() {
   // Get incorrect answers for review
   const getIncorrectAnswers = (): IncorrectAnswer[] => {
     if (!quizState) return [];
-
+    
     return questions.map((question, index) => {
       const userAnswer = quizState.answers[index];
       const isCorrect = userAnswer === question.correctAnswer;
-
+      
       if (!isCorrect) {
         return {
           question,
@@ -259,11 +257,11 @@ export default function CodingChallenges() {
   // Get all answers for full review
   const getAllAnswers = (): AnswerReview[] => {
     if (!quizState) return [];
-
+    
     return questions.map((question, index) => {
       const userAnswer = quizState.answers[index];
       const isCorrect = userAnswer === question.correctAnswer;
-
+      
       return {
         question,
         userAnswer,
@@ -278,759 +276,774 @@ export default function CodingChallenges() {
   const allAnswers = getAllAnswers();
 
   return (
-    <PrivateRoute>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-4 lg:p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <motion.div
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="mb-8 text-center"
-          >
-            <h1 className="text-4xl p-2 font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+    <div className="min-h-screen bg-[var(--background)] transition-colors duration-300">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
+        {/* Header */}
+        <motion.div
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="mb-6 sm:mb-8 lg:mb-12 text-center"
+        >
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+            <div className="text-2xl sm:text-3xl">📝</div>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--card-foreground)]">
               Coding Challenges
             </h1>
-            <p className="text-gray-500">Test your skills with role-based assessments</p>
-          </motion.div>
+          </div>
+          <p className="text-sm sm:text-base lg:text-lg text-[var(--foreground-muted)] max-w-2xl mx-auto px-4">
+            Test your skills with role-based assessments
+          </p>
+        </motion.div>
 
-          <div className={`grid gap-6 lg:gap-8 ${showLeftPanel ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'
-            }`}>
-            {/* Left Side - Configuration */}
-            <AnimatePresence>
-              {showLeftPanel && (
-                <motion.div
-                  key="left-panel"
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.9, opacity: 0, transition: { duration: 0.2 } }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border-white/20 p-6 lg:p-8"
+        <div className={`grid gap-4 sm:gap-6 lg:gap-8 ${
+          showLeftPanel ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'
+        }`}>
+          {/* Left Side - Configuration */}
+          <AnimatePresence>
+            {showLeftPanel && (
+              <motion.div
+                key="left-panel"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0, transition: { duration: 0.2 } }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="border-[var(--border)] bg-[var(--card)] shadow-lg rounded-xl sm:rounded-2xl p-4"
+              >
+                <motion.h2 
+                  className="text-xl sm:text-2xl font-bold text-[var(--card-foreground)] mb-4 sm:mb-6"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
                 >
-                  <motion.h2
-                    className="text-2xl font-bold text-gray-800 mb-6"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
+                  Quiz Configuration
+                </motion.h2>
+                
+                <div className="space-y-4 sm:space-y-6">
+                  {/* Role Selection */}
+                  <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 100, delay: 0.1 }}
+                    className="space-y-2 sm:space-y-3"
                   >
-                    Quiz Configuration
-                  </motion.h2>
+                    <label className="block text-xs sm:text-sm font-semibold text-[var(--foreground-secondary)]">
+                      Select Your Role
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={config.role}
+                        onChange={(e) => setConfig({ ...config, role: e.target.value })}
+                        className="w-full p-3 border border-[var(--border)] bg-[var(--background)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30 focus:border-[var(--primary)] transition-all text-[var(--foreground)] text-sm sm:text-base appearance-none cursor-pointer"
+                        disabled={!!quizState}
+                      >
+                        <option value="">Choose a professional role</option>
+                        {quizRoles.map((role) => (
+                          <option key={role.id} value={role.id}>
+                            {role.name}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--foreground-muted)]">
+                        ▼
+                      </div>
+                    </div>
+                    {selectedRole && (
+                      <motion.p 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-xs sm:text-sm font-semibold text-[var(--foreground)] bg-[var(--primary)]/10 p-3 rounded-lg border border-[var(--primary)]/20"
+                      >
+                        {selectedRole.description}
+                      </motion.p>
+                    )}
+                  </motion.div>
 
-                  <div className="space-y-6">
-                    {/* Role Selection */}
-                    <motion.div
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ type: "spring", stiffness: 100, delay: 0.1 }}
-                      className="space-y-3"
-                    >
-                      <label className="block text-sm font-semibold text-gray-700">
-                        Select Your Role
-                      </label>
-                      <div className="relative">
-                        <select
-                          value={config.role}
-                          onChange={(e) => setConfig({ ...config, role: e.target.value })}
-                          className="w-full px-4 py-3.5 bg-white/50 border-2 border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none cursor-pointer"
+                  {/* Question Category Selection */}
+                  <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 100, delay: 0.2 }}
+                    className="space-y-2 sm:space-y-3"
+                  >
+                    <label className="block text-xs sm:text-sm font-semibold text-[var(--foreground-secondary)]">
+                      Questions Category
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={config.category || ''}
+                        onChange={(e) => setConfig({ 
+                          ...config, 
+                          category: e.target.value ? e.target.value as QuestionCategory : undefined 
+                        })}
+                        className="w-full p-3 border border-[var(--border)] bg-[var(--background)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30 focus:border-[var(--primary)] transition-all text-[var(--foreground)] text-sm sm:text-base appearance-none cursor-pointer"
+                        disabled={!!quizState}
+                      >
+                        <option value="">All Levels (Mixed Difficulty)</option>
+                        {questionCategories.map((category) => (
+                          <option key={category.id} value={category.id}>
+                            {category.name} - {category.description}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--foreground-muted)]">
+                        ▼
+                      </div>
+                    </div>
+                    {selectedCategory && (
+                      <motion.p 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-xs font-semibold sm:text-sm text-[var(--foreground)] bg-[var(--primary)]/10 p-3 rounded-lg border border-[var(--primary)]/20"
+                      >
+                        <span className="font-semibold text-[var(--foreground)]">{selectedCategory.name}:</span> {selectedCategory.description}
+                      </motion.p>
+                    )}
+                    {!config.category && (
+                      <motion.p 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-xs sm:text-sm border-[var(--primary)] bg-[var(--primary)]/10 p-3 rounded-lg border"
+                      >
+                        💡 Questions will be selected from all difficulty levels. Choose a specific category to focus on a particular difficulty.
+                      </motion.p>
+                    )}
+                  </motion.div>
+
+                  {/* Timer and Questions Selection */}
+                  <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 100, delay: 0.3 }}
+                    className="space-y-2 sm:space-y-3"
+                  >
+                    <label className="block text-xs sm:text-sm font-semibold text-[var(--foreground-secondary)]">
+                      Quiz Settings
+                    </label>
+                    <div className="grid gap-2 sm:gap-3">
+                      {defaultQuizConfigs.map((configOption, index) => (
+                        <motion.button
+                          key={index}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => {
+                            setConfig({
+                              ...config,
+                              duration: configOption.duration,
+                              questionCount: configOption.questionCount,
+                            });
+                            setIsCustomizing(false);
+                          }}
+                          className={`p-3 sm:p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                            config.duration === configOption.duration && !isCustomizing
+                              ? 'border-[var(--primary)] bg-[var(--primary)]/10 shadow-md'
+                              : 'border-[var(--border)] bg-[var(--background)] hover:border-[var(--primary)]/50'
+                          }`}
                           disabled={!!quizState}
                         >
-                          <option value="">Choose a professional role</option>
-                          {quizRoles.map((role) => (
-                            <option key={role.id} value={role.id}>
-                              {role.name}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400">
-                          ▼
-                        </div>
-                      </div>
-                      {selectedRole && (
-                        <motion.p
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="text-sm text-gray-600 bg-blue-50/50 p-3 rounded-xl"
+                          <div className="font-semibold text-[var(--foreground)] text-sm sm:text-base">{configOption.label}</div>
+                        </motion.button>
+                      ))}
+                      
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setIsCustomizing(true)}
+                        className={`p-3 sm:p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                          isCustomizing
+                            ? 'border-[var(--primary)] bg-[var(--primary)]/10 shadow-md'
+                            : 'border-[var(--border)] bg-[var(--background)] hover:border-[var(--primary)]/50'
+                        }`}
+                        disabled={!!quizState}
+                      >
+                        <div className="font-semibold text-[var(--foreground)] text-sm sm:text-base">Custom Configuration</div>
+                      </motion.button>
+                    </div>
+
+                    <AnimatePresence>
+                      {isCustomizing && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden"
                         >
-                          {selectedRole.description}
-                        </motion.p>
+                          <div className="mt-3 p-3 sm:p-4 bg-[var(--background-secondary)] rounded-lg border border-[var(--border)] space-y-3 sm:space-y-4">
+                            <div>
+                              <label className="block text-xs sm:text-sm font-semibold text-[var(--foreground-secondary)] mb-2">
+                                Duration (minutes)
+                              </label>
+                              <input
+                                type="range"
+                                min="1"
+                                max="60"
+                                value={config.duration}
+                                onChange={(e) => setConfig({ ...config, duration: parseInt(e.target.value) })}
+                                className="w-full h-2 bg-[var(--background-tertiary)] rounded-lg appearance-none cursor-pointer slider"
+                              />
+                              <div className="flex justify-between text-xs sm:text-sm text-[var(--foreground-muted)] mt-1">
+                                <span>1 min</span>
+                                <span className="font-semibold text-[var(--primary)]">{config.duration} min</span>
+                                <span>60 min</span>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-xs sm:text-sm font-semibold text-[var(--foreground-secondary)] mb-2">
+                                Number of Questions
+                              </label>
+                              <input
+                                type="range"
+                                min="1"
+                                max="30"
+                                value={config.questionCount}
+                                onChange={(e) => setConfig({ ...config, questionCount: parseInt(e.target.value) })}
+                                className="w-full h-2 bg-[var(--background-tertiary)] rounded-lg appearance-none cursor-pointer slider"
+                              />
+                              <div className="flex justify-between text-xs sm:text-sm text-[var(--foreground-muted)] mt-1">
+                                <span>1 question</span>
+                                <span className="font-semibold text-[var(--primary)]">{config.questionCount} questions</span>
+                                <span>30 questions</span>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+
+                  {/* Selected Configuration Summary */}
+                  <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 100, delay: 0.4 }}
+                    className="border-[var(--primary)] bg-[var(--primary)]/10 border rounded-lg p-4 sm:p-5"
+                  >
+                    <h3 className="font-bold text-lg mb-3">Ready to Start</h3>
+                    <div className="space-y-2 text-xs sm:text-sm">
+                      <div className="flex justify-between">
+                        <span>Role:</span>
+                        <span className="font-semibold">{selectedRole?.name || 'Not selected'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Category:</span>
+                        <span className="font-semibold">
+                          {config.category 
+                            ? questionCategories.find(c => c.id === config.category)?.name 
+                            : 'All Levels'
+                          }
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Duration:</span>
+                        <span className="font-semibold">{config.duration} minutes</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Questions:</span>
+                        <span className="font-semibold">{config.questionCount}</span>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Action Buttons */}
+                  <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 100, delay: 0.5 }}
+                    className="flex gap-3"
+                  >
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={startQuiz}
+                      disabled={!!quizState || !config.role || isLoading}
+                      className="flex-1 bg-[var(--primary)] text-[var(--primary-foreground)] py-3 sm:py-4 px-4 sm:px-6 rounded-lg font-bold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center text-sm sm:text-base"
+                    >
+                      {isLoading ? (
+                        <>
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-[var(--primary-foreground)] hover:shadow-lg border-t-transparent rounded-full mr-2"
+                          />
+                          Preparing Quiz...
+                        </>
+                      ) : (
+                        'Start Quiz'
+                      )}
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={resetQuiz}
+                      className="flex-1 bg-[var(--secondary)] text-[var(--foreground)] py-3 sm:py-4 px-4 sm:px-6 rounded-lg font-bold hover:shadow-lg transition-all duration-200 text-sm sm:text-base"
+                    >
+                      Reset
+                    </motion.button>
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Right Side - Quiz Interface */}
+          <motion.div
+            layout
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className={`border-[var(--border)] bg-[var(--card)] shadow-lg rounded-xl sm:rounded-2xl p-4 ${
+              !showLeftPanel ? 'lg:col-span-2' : ''
+            }`}
+          >
+            <motion.h2 
+              className="text-xl sm:text-2xl font-bold text-[var(--card-foreground)] mb-4 sm:mb-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              {quizState && !quizState.isCompleted ? 'Quiz in Progress' : 'Quiz Session'}
+            </motion.h2>
+            
+            <AnimatePresence mode="wait">
+              {!quizState ? (
+                <motion.div
+                  key="empty-state"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="text-center py-8 sm:py-12 lg:py-16"
+                >
+                  <motion.div
+                    animate={{ 
+                      y: [0, -10, 0],
+                      rotate: [0, 5, -5, 0]
+                    }}
+                    transition={{ 
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="text-6xl sm:text-7xl lg:text-8xl mb-4 sm:mb-6"
+                  >
+                    📝
+                  </motion.div>
+                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--card-foreground)] mb-2 sm:mb-3">
+                    Ready to Challenge Yourself?
+                  </h3>
+                  <p className="text-[var(--foreground-muted)] text-sm sm:text-base lg:text-lg max-w-md mx-auto px-4">
+                    Configure your quiz settings on the left and click Start Quiz to begin your assessment.
+                  </p>
+                </motion.div>
+              ) : quizState.isCompleted || quizState.timeRemaining <= 0 ? (
+                showReview ? (
+                  <motion.div
+                    key="review"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-4 sm:space-y-6"
+                  >
+                    {/* Review Header */}
+                    <div className="text-center">
+                      <h3 className="text-xl sm:text-2xl font-bold text-[var(--card-foreground)] mb-2">Quiz Review</h3>
+                      <p className="text-[var(--foreground-muted)] text-sm sm:text-base">Review your answers and explanations</p>
+                    </div>
+
+                    {/* Review Tabs */}
+                    <div className="flex border-b border-[var(--border)]">
+                      <button
+                        onClick={() => setShowReview(true)}
+                        className={`flex-1 py-3 font-semibold border-b-2 text-sm sm:text-base ${
+                          showReview 
+                            ? 'border-[var(--primary)] text-[var(--primary)]' 
+                            : 'border-transparent text-[var(--foreground-muted)]'
+                        }`}
+                      >
+                        All Questions ({allAnswers.length})
+                      </button>
+                    </div>
+
+                    {/* Questions Review */}
+                    <div className="space-y-4 max-h-[705px] overflow-y-auto">
+                      {allAnswers.map((item, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className={`p-3 sm:p-4 rounded-lg border-2 ${
+                            item.isCorrect 
+                              ? 'border-[var(--success)]/20 bg-[var(--success)]/10' 
+                              : 'border-[var(--destructive)]/20 bg-[var(--destructive)]/10'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-2 sm:mb-3">
+                            <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                              <span className="font-semibold text-[var(--foreground)] text-sm sm:text-base">
+                                Question {item.questionNumber}
+                              </span>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                item.isCorrect 
+                                  ? 'bg-[var(--success)]/20 text-[var(--success)]' 
+                                  : 'bg-[var(--destructive)]/20 text-[var(--destructive)]'
+                              }`}>
+                                {item.isCorrect ? 'Correct' : 'Incorrect'}
+                              </span>
+                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-[var(--primary)]/20 text-[var(--primary)]">
+                                {item.question.category?.charAt(0).toUpperCase() + item.question.category?.slice(1)}
+                              </span>
+                            </div>
+                          </div>
+
+                          <h4 className="font-semibold text-[var(--foreground)] text-sm sm:text-base mb-2 sm:mb-3">
+                            {item.question.question}
+                          </h4>
+
+                          {/* User Answer */}
+                          <div className="mb-2">
+                            <span className="text-xs sm:text-sm font-medium text-[var(--foreground-secondary)]">Your Answer:</span>
+                            <div className={`p-2 sm:p-3 rounded-lg mt-1 ${
+                              item.isCorrect 
+                                ? 'bg-[var(--success)]/20 border border-[var(--success)]/30' 
+                                : 'bg-[var(--destructive)]/20 border border-[var(--destructive)]/30'
+                            }`}>
+                              <span className={`font-medium text-sm sm:text-base ${
+                                item.isCorrect ? 'text-[var(--success)]' : 'text-[var(--destructive)]'
+                              }`}>
+                                {String.fromCharCode(65 + item.userAnswer)}. {item.question.options[item.userAnswer]}
+                              </span>
+                              {!item.isCorrect && (
+                                <span className="ml-2 text-[var(--destructive)]">❌</span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Correct Answer */}
+                          {!item.isCorrect && (
+                            <div className="mb-2 sm:mb-3">
+                              <span className="text-xs sm:text-sm font-medium text-[var(--foreground-secondary)]">Correct Answer:</span>
+                              <div className="p-2 sm:p-3 rounded-lg mt-1 bg-[var(--success)]/20 border border-[var(--success)]/30">
+                                <span className="font-medium text-[var(--success)] text-sm sm:text-base">
+                                  {String.fromCharCode(65 + item.correctAnswer)}. {item.question.options[item.correctAnswer]}
+                                </span>
+                                <span className="ml-2 text-[var(--success)]">✅</span>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Explanation */}
+                          {item.question.explanation && (
+                            <div className="mt-2 sm:mt-3 p-2 sm:p-3 bg-[var(--primary)]/10 rounded-lg border border-[var(--primary)]/20">
+                              <span className="text-xs sm:text-sm font-medium text-[var(--primary)]">Explanation:</span>
+                              <p className="text-[var(--foreground)] mt-1 text-xs sm:text-sm">{item.question.explanation}</p>
+                            </div>
+                          )}
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    {/* Back to Results Button */}
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setShowReview(false)}
+                      className="w-full bg-[var(--primary)] text-[var(--primary-foreground)] py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base"
+                    >
+                      Back to Results
+                    </motion.button>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="results"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="text-center py-6 sm:py-8 lg:py-12"
+                  >
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 200 }}
+                      className="animate-bounce text-6xl sm:text-7xl lg:text-8xl mb-4 sm:mb-6"
+                    >
+                      🎉
+                    </motion.div>
+                    
+                    <motion.h3 
+                      className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--card-foreground)] mb-4 sm:mb-6"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      Quiz Completed!
+                    </motion.h3>
+
+                    {/* Performance Message */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="mb-4 sm:mb-6"
+                    >
+                      <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-[var(--primary)]">
+                        {getPerformanceMessage(quizState.score, questions.length)}
+                      </p>
+                    </motion.div>
+
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8 max-w-md mx-auto">
+                      <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.4, type: "spring", stiffness: 100 }}
+                        className="bg-[var(--primary)] rounded-lg p-3 sm:p-4 text-[var(--primary-foreground)]"
+                      >
+                        <div className="text-xl sm:text-2xl font-bold">{quizState.score}/{questions.length}</div>
+                        <div className="text-xs sm:text-sm font-bold opacity-90">Score</div>
+                      </motion.div>
+                      
+                      <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.5, type: "spring", stiffness: 100 }}
+                        className="bg-[var(--primary)] rounded-lg p-3 sm:p-4 text-[var(--primary-foreground)]"
+                      >
+                        <div className="text-xl sm:text-2xl font-bold">{((quizState.score / questions.length) * 100).toFixed(1)}%</div>
+                        <div className="text-xs sm:text-sm font-bold opacity-90">Accuracy</div>
+                      </motion.div>
+                      
+                      <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.6, type: "spring", stiffness: 100 }}
+                        className="bg-[var(--primary)] rounded-lg p-3 sm:p-4 text-[var(--primary-foreground)]"
+                      >
+                        <div className="text-xl sm:text-2xl font-bold">{calculateTimeTaken()}</div>
+                        <div className="text-xs sm:text-sm font-bold opacity-90">Time Taken</div>
+                      </motion.div>
+                      
+                      <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.7, type: "spring", stiffness: 100 }}
+                        className="bg-[var(--primary)] rounded-lg p-3 sm:p-4 text-[var(--primary-foreground)]"
+                      >
+                        <div className="text-xl sm:text-2xl font-bold">
+                          {completedBeforeTimeLimit() ? calculateTimeSaved() : '0:00'}
+                        </div>
+                        <div className="text-xs sm:text-sm font-bold opacity-90">Time Saved</div>
+                      </motion.div>
+                    </div>
+
+                    {/* Incorrect Answers Summary */}
+                    {incorrectAnswers.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.8 }}
+                        className="mb-4 sm:mb-6 p-3 sm:p-4 bg-[var(--destructive)]/10 rounded-lg border border-[var(--destructive)]/20"
+                      >
+                        <div className="flex items-center justify-center mb-2">
+                          <span className="text-[var(--destructive)] text-base sm:text-lg font-semibold">
+                            {incorrectAnswers.length} Incorrect Answer{incorrectAnswers.length !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        <p className="text-[var(--destructive)] text-xs sm:text-sm mb-2 sm:mb-3">
+                          Review your mistakes to improve your knowledge
+                        </p>
+                      </motion.div>
+                    )}
+
+                    {/* Additional Info */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.9 }}
+                      className="space-y-2 text-xs sm:text-sm text-[var(--foreground-muted)] mb-6 sm:mb-8"
+                    >
+                      {completedBeforeTimeLimit() && (
+                        <p className="text-[var(--primary)] font-semibold text-lg">
+                          ⚡ You finished {calculateTimeSaved()} before the time limit!
+                        </p>
+                      )}
+                      {quizState.timeRemaining <= 0 && !completedBeforeTimeLimit() && (
+                        <p className="text-[var(--warning)] font-semibold">
+                          ⏰ Times up! Your quiz was automatically submitted.
+                        </p>
                       )}
                     </motion.div>
 
-                    {/* Question Category Selection */}
-                    <motion.div
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ type: "spring", stiffness: 100, delay: 0.2 }}
-                      className="space-y-3"
-                    >
-                      <label className="block text-sm font-semibold text-gray-700">
-                        Questions Category
-                      </label>
-                      <div className="relative">
-                        <select
-                          value={config.category || ''}
-                          onChange={(e) => setConfig({
-                            ...config,
-                            category: e.target.value ? e.target.value as QuestionCategory : undefined
-                          })}
-                          className="w-full px-4 py-3.5 bg-white/50 border-2 border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none cursor-pointer"
-                          disabled={!!quizState}
-                        >
-                          <option value="">All Levels (Mixed Difficulty)</option>
-                          {questionCategories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                              {category.name} - {category.description}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400">
-                          ▼
-                        </div>
+                    {/* Action Buttons */}
+                    <div className="flex flex-col sm:flex-row gap-5">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setShowReview(true)}
+                        className="flex-1 bg-[var(--primary)] text-[var(--primary-foreground)] py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base"
+                      >
+                        Review Answers
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={resetQuiz}
+                        className="flex-1 bg-[var(--secondary)] text-[var(--foreground)] py-3 sm:py-4 px-4 sm:px-6 rounded-lg font-bold hover:shadow-lg transition-all duration-200 text-sm sm:text-base"
+                      >
+                        Take Another Quiz
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                )
+              ) : (
+                <motion.div
+                  key="quiz-active"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="space-y-4 sm:space-y-6"
+                >
+                  {/* Quiz Header */}
+                  <motion.div 
+                    className="bg-[var(--primary)] rounded-lg p-4 sm:p-6 text-[var(--primary-foreground)]"
+                    initial={{ y: -20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                  >
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+                      <div>
+                        <h3 className="font-bold text-lg sm:text-xl">{selectedRole?.name}</h3>
+                        <p className="text-[var(--primary-foreground)]/80 text-sm">
+                          Question {quizState.currentQuestion + 1} of {questions.length}
+                        </p>
                       </div>
-                      {selectedCategory && (
-                        <motion.p
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="text-sm text-gray-600 bg-green-50/50 p-3 rounded-xl border border-green-200"
-                        >
-                          <span className="font-semibold text-green-700">{selectedCategory.name}:</span> {selectedCategory.description}
-                        </motion.p>
-                      )}
-                      {!config.category && (
-                        <motion.p
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="text-sm text-gray-600 bg-yellow-50/50 p-3 rounded-xl border border-yellow-200"
-                        >
-                          💡 Questions will be selected from all difficulty levels. Choose a specific category to focus on a particular difficulty.
-                        </motion.p>
-                      )}
-                    </motion.div>
+                      <div className="text-right">
+                        <p className="text-[var(--primary-foreground)]/80 text-sm">Time Remaining</p>
+                        <p className={`text-xl sm:text-2xl font-bold ${
+                          quizState.timeRemaining < 60 ? 'text-[var(--warning)] animate-pulse' : 'text-[var(--primary-foreground)]'
+                        }`}>
+                          {formatTime(quizState.timeRemaining)}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
 
-                    {/* Timer and Questions Selection */}
+                  {/* Progress Bar */}
+                  <div className="w-full bg-[var(--background-tertiary)] rounded-full h-2">
                     <motion.div
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ type: "spring", stiffness: 100, delay: 0.3 }}
-                      className="space-y-3"
-                    >
-                      <label className="block text-sm font-semibold text-gray-700">
-                        Quiz Settings
-                      </label>
-                      <div className="grid gap-3">
-                        {defaultQuizConfigs.map((configOption, index) => (
+                      className="bg-gradient-to-r from-[var(--primary)] to-[var(--primary-light)] h-2 rounded-full shadow-inner"
+                      initial={{ width: "0%" }}
+                      animate={{ width: `${getProgressPercentage()}%` }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                    />
+                  </div>
+
+                  {/* Current Question */}
+                  <motion.div
+                    key={quizState.currentQuestion}
+                    initial={{ x: 50, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: -50, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                    className="space-y-4 sm:space-y-6"
+                  >
+                    <div className="bg-[var(--card)] rounded-lg p-4 sm:p-6 shadow-lg border border-[var(--border)]">
+                      <h3 className="text-lg sm:text-xl font-semibold text-[var(--card-foreground)] leading-relaxed">
+                        {questions[quizState.currentQuestion]?.question}
+                      </h3>
+                      <div className="flex gap-2 mt-3">
+                        <span className="inline-block px-2 sm:px-3 py-1 bg-[var(--primary)]/20 text-[var(--primary)] text-xs sm:text-sm rounded-full font-medium">
+                          {questions[quizState.currentQuestion]?.category?.charAt(0).toUpperCase() + questions[quizState.currentQuestion]?.category?.slice(1)}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="grid gap-2 sm:gap-3">
+                      {questions[quizState.currentQuestion]?.options.map((option, index) => {
+                        const isSelected = quizState.answers[quizState.currentQuestion] === index;
+                        
+                        return (
                           <motion.button
                             key={index}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            onClick={() => {
-                              setConfig({
-                                ...config,
-                                duration: configOption.duration,
-                                questionCount: configOption.questionCount,
-                              });
-                              setIsCustomizing(false);
-                            }}
-                            className={`p-4 rounded-2xl border-2 transition-all duration-200 text-left ${config.duration === configOption.duration && !isCustomizing
-                                ? 'border-blue-500 bg-gradient-to-r from-blue-50 to-blue-100/50 shadow-md'
-                                : 'border-gray-200 bg-white/50 hover:border-blue-300'
-                              }`}
-                            disabled={!!quizState}
-                          >
-                            <div className="font-semibold text-gray-800">{configOption.label}</div>
-                          </motion.button>
-                        ))}
-
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => setIsCustomizing(true)}
-                          className={`p-4 rounded-2xl border-2 transition-all duration-200 text-left ${isCustomizing
-                              ? 'border-purple-500 bg-gradient-to-r from-purple-50 to-purple-100/50 shadow-md'
-                              : 'border-gray-200 bg-white/50 hover:border-purple-300'
+                            onClick={() => handleAnswerSelect(index)}
+                            disabled={quizState.isCompleted}
+                            className={`p-3 sm:p-4 rounded-lg border-2 text-left transition-all duration-200 ${
+                              isSelected
+                                ? 'border-[var(--primary)] bg-[var(--primary)]/10 shadow-md'
+                                : 'border-[var(--border)] bg-[var(--background)] hover:border-[var(--primary)]/50 hover:bg-[var(--primary)]/5'
                             }`}
-                          disabled={!!quizState}
-                        >
-                          <div className="font-semibold text-gray-800">Custom Configuration</div>
-                        </motion.button>
-                      </div>
-
-                      <AnimatePresence>
-                        {isCustomizing && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden"
                           >
-                            <div className="mt-4 p-4 bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-2xl space-y-4 border border-gray-200">
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                  Duration (minutes)
-                                </label>
-                                <input
-                                  type="range"
-                                  min="1"
-                                  max="60"
-                                  value={config.duration}
-                                  onChange={(e) => setConfig({ ...config, duration: parseInt(e.target.value) })}
-                                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                                />
-                                <div className="flex justify-between text-sm text-gray-600 mt-1">
-                                  <span>1 min</span>
-                                  <span className="font-semibold text-blue-600">{config.duration} min</span>
-                                  <span>60 min</span>
-                                </div>
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                  Number of Questions
-                                </label>
-                                <input
-                                  type="range"
-                                  min="1"
-                                  max="30"
-                                  value={config.questionCount}
-                                  onChange={(e) => setConfig({ ...config, questionCount: parseInt(e.target.value) })}
-                                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                                />
-                                <div className="flex justify-between text-sm text-gray-600 mt-1">
-                                  <span>1 question</span>
-                                  <span className="font-semibold text-blue-600">{config.questionCount} questions</span>
-                                  <span>30 questions</span>
-                                </div>
-                              </div>
+                            <div className="flex items-center">
+                              <span className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center mr-2 sm:mr-3 font-semibold text-sm sm:text-base ${
+                                isSelected 
+                                  ? 'bg-[var(--primary)] text-[var(--primary-foreground)]' 
+                                  : 'bg-[var(--background-tertiary)] text-[var(--foreground-muted)]'
+                              }`}>
+                                {String.fromCharCode(65 + index)}
+                              </span>
+                              <span className="flex-1 text-[var(--foreground)] text-sm sm:text-base">{option}</span>
                             </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </motion.div>
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
 
-                    {/* Selected Configuration Summary */}
-                    <motion.div
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ type: "spring", stiffness: 100, delay: 0.4 }}
-                      className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-5 text-white"
+                  {/* Navigation Buttons */}
+                  <motion.div 
+                    className="flex justify-between pt-4"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={prevQuestion}
+                      disabled={quizState.currentQuestion === 0}
+                      className="bg-[var(--secondary)] text-[var(--foreground)] py-2 sm:py-3 px-4 sm:px-8 rounded-lg font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm sm:text-base"
                     >
-                      <h3 className="font-bold text-lg mb-3">Ready to Start</h3>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Role:</span>
-                          <span className="font-semibold">{selectedRole?.name || 'Not selected'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Category:</span>
-                          <span className="font-semibold">
-                            {config.category
-                              ? questionCategories.find(c => c.id === config.category)?.name
-                              : 'All Levels'
-                            }
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Duration:</span>
-                          <span className="font-semibold">{config.duration} minutes</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Questions:</span>
-                          <span className="font-semibold">{config.questionCount}</span>
-                        </div>
-                      </div>
-                    </motion.div>
-
-                    {/* Action Buttons */}
-                    <motion.div
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ type: "spring", stiffness: 100, delay: 0.5 }}
-                      className="flex gap-4"
+                      Previous
+                    </motion.button>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={nextQuestion}
+                      className="bg-[var(--primary)] text-[var(--primary-foreground)] py-2 sm:py-3 px-4 sm:px-8 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base"
                     >
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={startQuiz}
-                        disabled={!!quizState || !config.role || isLoading}
-                        className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-2xl font-bold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center"
-                      >
-                        {isLoading ? (
-                          <>
-                            <motion.div
-                              animate={{ rotate: 360 }}
-                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                              className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
-                            />
-                            Preparing Quiz...
-                          </>
-                        ) : (
-                          'Start Quiz'
-                        )}
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={resetQuiz}
-                        className="flex-1 bg-gradient-to-r from-gray-600 to-gray-700 text-white py-4 px-6 rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all duration-200"
-                      >
-                        Reset
-                      </motion.button>
-                    </motion.div>
-                  </div>
+                      {quizState.currentQuestion === questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
+                    </motion.button>
+                  </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>
-
-            {/* Right Side - Quiz Interface */}
-            <motion.div
-              layout
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className={`bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6 lg:p-8 ${!showLeftPanel ? 'lg:col-span-2' : ''
-                }`}
-            >
-              <motion.h2
-                className="text-2xl font-bold text-gray-800 mb-6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                {quizState && !quizState.isCompleted ? 'Quiz in Progress' : 'Quiz Session'}
-              </motion.h2>
-
-              <AnimatePresence mode="wait">
-                {!quizState ? (
-                  <motion.div
-                    key="empty-state"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    className="text-center py-16"
-                  >
-                    <motion.div
-                      animate={{
-                        y: [0, -10, 0],
-                        rotate: [0, 5, -5, 0]
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                      className="text-8xl mb-6"
-                    >
-                      📝
-                    </motion.div>
-                    <h3 className="text-2xl font-bold text-gray-700 mb-3">
-                      Ready to Challenge Yourself?
-                    </h3>
-                    <p className="text-gray-500 text-lg max-w-md mx-auto">
-                      Configure your quiz settings on the left and click Start Quiz to begin your assessment.
-                    </p>
-                  </motion.div>
-                ) : quizState.isCompleted || quizState.timeRemaining <= 0 ? (
-                  showReview ? (
-                    <motion.div
-                      key="review"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      className="space-y-6"
-                    >
-                      {/* Review Header */}
-                      <div className="text-center">
-                        <h3 className="text-2xl font-bold text-gray-800 mb-2">Quiz Review</h3>
-                        <p className="text-gray-600">Review your answers and explanations</p>
-                      </div>
-
-                      {/* Review Tabs */}
-                      <div className="flex border-b border-gray-200">
-                        <button
-                          onClick={() => setShowReview(true)}
-                          className={`flex-1 py-3 font-semibold border-b-2 ${showReview
-                              ? 'border-blue-500 text-blue-600'
-                              : 'border-transparent text-gray-500'
-                            }`}
-                        >
-                          All Questions ({allAnswers.length})
-                        </button>
-                      </div>
-
-                      {/* Questions Review */}
-                      <div className="space-y-6 max-h-[500px] overflow-y-auto">
-                        {allAnswers.map((item, index) => (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                            className={`p-4 rounded-2xl border-2 ${item.isCorrect
-                                ? 'border-green-200 bg-green-50'
-                                : 'border-red-200 bg-red-50'
-                              }`}
-                          >
-                            <div className="flex items-start justify-between mb-3">
-                              <div>
-                                <span className="font-semibold text-gray-700">
-                                  Question {item.questionNumber}
-                                </span>
-                                <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${item.isCorrect
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-red-100 text-red-800'
-                                  }`}>
-                                  {item.isCorrect ? 'Correct' : 'Incorrect'}
-                                </span>
-                                <span className="ml-2 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                  {item.question.category?.charAt(0).toUpperCase() + item.question.category?.slice(1)}
-                                </span>
-                              </div>
-                            </div>
-
-                            <h4 className="font-semibold text-gray-800 mb-3">
-                              {item.question.question}
-                            </h4>
-
-                            {/* User Answer */}
-                            <div className="mb-2">
-                              <span className="text-sm font-medium text-gray-600">Your Answer:</span>
-                              <div className={`p-3 rounded-lg mt-1 ${item.isCorrect
-                                  ? 'bg-green-100 border border-green-200'
-                                  : 'bg-red-100 border border-red-200'
-                                }`}>
-                                <span className={`font-medium ${item.isCorrect ? 'text-green-800' : 'text-red-800'
-                                  }`}>
-                                  {String.fromCharCode(65 + item.userAnswer)}. {item.question.options[item.userAnswer]}
-                                </span>
-                                {!item.isCorrect && (
-                                  <span className="ml-2 text-red-600">❌</span>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Correct Answer */}
-                            {!item.isCorrect && (
-                              <div className="mb-3">
-                                <span className="text-sm font-medium text-gray-600">Correct Answer:</span>
-                                <div className="p-3 rounded-lg mt-1 bg-green-100 border border-green-200">
-                                  <span className="font-medium text-green-800">
-                                    {String.fromCharCode(65 + item.correctAnswer)}. {item.question.options[item.correctAnswer]}
-                                  </span>
-                                  <span className="ml-2 text-green-600">✅</span>
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Explanation */}
-                            {item.question.explanation && (
-                              <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                <span className="text-sm font-medium text-blue-700">Explanation:</span>
-                                <p className="text-blue-800 mt-1 text-sm">{item.question.explanation}</p>
-                              </div>
-                            )}
-                          </motion.div>
-                        ))}
-                      </div>
-
-                      {/* Back to Results Button */}
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setShowReview(false)}
-                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all duration-200"
-                      >
-                        Back to Results
-                      </motion.button>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="results"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      className="text-center py-8"
-                    >
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", stiffness: 200 }}
-                        className="text-8xl mb-6"
-                      >
-                        🎉
-                      </motion.div>
-
-                      <motion.h3
-                        className="text-3xl font-bold text-gray-800 mb-6"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                      >
-                        Quiz Completed!
-                      </motion.h3>
-
-                      {/* Performance Message */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                        className="mb-6"
-                      >
-                        <p className="text-xl font-semibold text-purple-600">
-                          {getPerformanceMessage(quizState.score, questions.length)}
-                        </p>
-                      </motion.div>
-
-                      {/* Stats Grid */}
-                      <div className="grid grid-cols-2 gap-4 mb-8 max-w-md mx-auto">
-                        <motion.div
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ delay: 0.4, type: "spring", stiffness: 100 }}
-                          className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-4 text-white"
-                        >
-                          <div className="text-2xl font-bold">{quizState.score}/{questions.length}</div>
-                          <div className="text-sm opacity-90">Score</div>
-                        </motion.div>
-
-                        <motion.div
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ delay: 0.5, type: "spring", stiffness: 100 }}
-                          className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl p-4 text-white"
-                        >
-                          <div className="text-2xl font-bold">{((quizState.score / questions.length) * 100).toFixed(1)}%</div>
-                          <div className="text-sm opacity-90">Accuracy</div>
-                        </motion.div>
-
-                        <motion.div
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ delay: 0.6, type: "spring", stiffness: 100 }}
-                          className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-4 text-white"
-                        >
-                          <div className="text-2xl font-bold">{calculateTimeTaken()}</div>
-                          <div className="text-sm opacity-90">Time Taken</div>
-                        </motion.div>
-
-                        <motion.div
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ delay: 0.7, type: "spring", stiffness: 100 }}
-                          className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-4 text-white"
-                        >
-                          <div className="text-2xl font-bold">
-                            {completedBeforeTimeLimit() ? calculateTimeSaved() : '0:00'}
-                          </div>
-                          <div className="text-sm opacity-90">Time Saved</div>
-                        </motion.div>
-                      </div>
-
-                      {/* Incorrect Answers Summary */}
-                      {incorrectAnswers.length > 0 && (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.8 }}
-                          className="mb-6 p-4 bg-red-50 rounded-2xl border border-red-200"
-                        >
-                          <div className="flex items-center justify-center mb-2">
-                            <span className="text-red-600 text-lg font-semibold">
-                              {incorrectAnswers.length} Incorrect Answer{incorrectAnswers.length !== 1 ? 's' : ''}
-                            </span>
-                          </div>
-                          <p className="text-red-700 text-sm mb-3">
-                            Review your mistakes to improve your knowledge
-                          </p>
-                        </motion.div>
-                      )}
-
-                      {/* Additional Info */}
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.9 }}
-                        className="space-y-3 text-sm text-gray-600 mb-8"
-                      >
-                        {completedBeforeTimeLimit() && (
-                          <p className="text-green-600 font-semibold">
-                            ⚡ You finished {calculateTimeSaved()} before the time limit!
-                          </p>
-                        )}
-                        {quizState.timeRemaining <= 0 && !completedBeforeTimeLimit() && (
-                          <p className="text-yellow-600 font-semibold">
-                            ⏰ Times up! Your quiz was automatically submitted.
-                          </p>
-                        )}
-                      </motion.div>
-
-                      {/* Action Buttons */}
-                      <div className="flex gap-4">
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => setShowReview(true)}
-                          className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all duration-200"
-                        >
-                          Review Answers
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={resetQuiz}
-                          className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all duration-200"
-                        >
-                          Take Another Quiz
-                        </motion.button>
-                      </div>
-                    </motion.div>
-                  )
-                ) : (
-                  <motion.div
-                    key="quiz-active"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="space-y-6"
-                  >
-                    {/* Quiz Header */}
-                    <motion.div
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-6 text-white"
-                      initial={{ y: -20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="font-bold text-lg">{selectedRole?.name}</h3>
-                          <p className="text-blue-100 text-sm">
-                            Question {quizState.currentQuestion + 1} of {questions.length}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-blue-100 text-sm">Time Remaining</p>
-                          <p className={`text-2xl font-bold ${quizState.timeRemaining < 60 ? 'text-red-300 animate-pulse' : 'text-white'
-                            }`}>
-                            {formatTime(quizState.timeRemaining)}
-                          </p>
-                        </div>
-                      </div>
-                    </motion.div>
-
-                    {/* Progress Bar */}
-                    <div className="w-full bg-gray-200 rounded-full h-3">
-                      <motion.div
-                        className="bg-gradient-to-r from-green-500 to-blue-500 h-3 rounded-full shadow-inner"
-                        initial={{ width: "0%" }}
-                        animate={{ width: `${getProgressPercentage()}%` }}
-                        transition={{ duration: 0.5, ease: "easeOut" }}
-                      />
-                    </div>
-
-                    {/* Current Question */}
-                    <motion.div
-                      key={quizState.currentQuestion}
-                      initial={{ x: 50, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      exit={{ x: -50, opacity: 0 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                      className="space-y-6"
-                    >
-                      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-                        <h3 className="text-xl font-semibold text-gray-800 leading-relaxed">
-                          {questions[quizState.currentQuestion]?.question}
-                        </h3>
-                        <div className="flex gap-2 mt-3">
-                          <span className="inline-block px-3 py-1 bg-blue-100 text-blue-600 text-sm rounded-full font-medium">
-                            {questions[quizState.currentQuestion]?.category?.charAt(0).toUpperCase() + questions[quizState.currentQuestion]?.category?.slice(1)}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="grid gap-3">
-                        {questions[quizState.currentQuestion]?.options.map((option, index) => {
-                          const isSelected = quizState.answers[quizState.currentQuestion] === index;
-
-                          return (
-                            <motion.button
-                              key={index}
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => handleAnswerSelect(index)}
-                              disabled={quizState.isCompleted}
-                              className={`p-4 rounded-2xl border-2 text-left transition-all duration-200 ${isSelected
-                                  ? 'border-blue-500 bg-blue-50 shadow-md'
-                                  : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/50'
-                                }`}
-                            >
-                              <div className="flex items-center">
-                                <span className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 font-semibold ${isSelected
-                                    ? 'bg-blue-500 text-white'
-                                    : 'bg-gray-100 text-gray-600'
-                                  }`}>
-                                  {String.fromCharCode(65 + index)}
-                                </span>
-                                <span className="flex-1">{option}</span>
-                              </div>
-                            </motion.button>
-                          );
-                        })}
-                      </div>
-                    </motion.div>
-
-                    {/* Navigation Buttons */}
-                    <motion.div
-                      className="flex justify-between pt-4"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.5 }}
-                    >
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={prevQuestion}
-                        disabled={quizState.currentQuestion === 0}
-                        className="bg-gray-600 text-white py-3 px-8 rounded-2xl font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                      >
-                        Previous
-                      </motion.button>
-
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={nextQuestion}
-                        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-8 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
-                      >
-                        {quizState.currentQuestion === questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
-                      </motion.button>
-                    </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          </div>
+          </motion.div>
         </div>
+      </div>
 
-        {/* Custom CSS for range inputs */}
-        <style jsx>{`
+      {/* Custom CSS for range inputs */}
+      <style jsx>{`
         .slider::-webkit-slider-thumb {
           appearance: none;
-          height: 20px;
-          width: 20px;
+          height: 18px;
+          width: 18px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+          background: linear-gradient(135deg, var(--primary), var(--primary-light));
           cursor: pointer;
-          border: 2px solid white;
+          border: 2px solid var(--background);
           box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
         
         .slider::-moz-range-thumb {
-          height: 20px;
-          width: 20px;
+          height: 18px;
+          width: 18px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+          background: linear-gradient(135deg, var(--primary), var(--primary-light));
           cursor: pointer;
-          border: 2px solid white;
+          border: 2px solid var(--background);
           box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
       `}</style>
-      </div>
-    </PrivateRoute>
+    </div>
   );
 }
