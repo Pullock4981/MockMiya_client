@@ -24,7 +24,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useActiveTab } from '../dashcontext/ActiveTabContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext/AuthContext';
 import Swal from 'sweetalert2';
 
 interface SidebarProps {

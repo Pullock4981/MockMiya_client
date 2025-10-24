@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext/AuthContext';
 import { motion } from 'framer-motion';
 import { ChevronDown, LogOut, Settings, User } from 'lucide-react';
 import Link from 'next/link';
@@ -65,8 +65,8 @@ const handleLogout = async () => {
     >
       {/* Left: Home Button */}
       <div>
-        <Link href="/">
-          <Button variant="secondary">🏠 Home</Button>
+        <Link href="/dashboard/resume">
+          <Button variant="secondary">📋 Resume</Button>
         </Link>
       </div>
 
