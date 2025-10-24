@@ -1151,12 +1151,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Temporary storage
-    const tmpDir = path.join(process.cwd(), "tmp");
+    // const tmpDir = path.join(process.cwd(), "tmp");
+    const tmpDir = "/tmp";
     await fs.mkdir(tmpDir, { recursive: true });
     const filename = `${uuidv4()}.pdf`;
     const tmpPath = path.join(tmpDir, filename);
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(tmpPath, buffer);
+
 
     // Instantiate pdf2json
     const PDFParserCtor = PDFParser as unknown as PdfParserConstructor;
