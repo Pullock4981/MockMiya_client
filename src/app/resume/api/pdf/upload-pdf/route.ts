@@ -1151,6 +1151,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Temporary storage
+    // Temporary storage
     // const tmpDir = path.join(process.cwd(), "tmp");
     const tmpDir = "/tmp";
     await fs.mkdir(tmpDir, { recursive: true });
@@ -1158,6 +1159,7 @@ export async function POST(req: NextRequest) {
     const tmpPath = path.join(tmpDir, filename);
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(tmpPath, buffer);
+
 
 
     // Instantiate pdf2json
