@@ -181,10 +181,18 @@ interface AuthUser {
 export const handler = NextAuth({
   providers: [
     // ---------- GOOGLE LOGIN ----------
+    // GoogleProvider({
+    //   clientId: process.env.GOOGLE_CLIENT_ID!,
+    //   clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    // }),
+
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
+  clientId: process.env.GOOGLE_CLIENT_ID!,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+  authorization: { params: { prompt: "consent", access_type: "offline", response_type: "code" } },
+  httpOptions: { timeout: 10000 }, // ⏰ increase to 10s
+}),
+
 
     // ---------- EMAIL/PASSWORD LOGIN ----------
     CredentialsProvider({
