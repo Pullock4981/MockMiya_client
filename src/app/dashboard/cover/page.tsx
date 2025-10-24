@@ -2,6 +2,7 @@
 
 import { useState, ChangeEvent, FormEvent } from "react";
 import jsPDF from "jspdf";
+import PrivateRoute from "@/app/Routes/PrivateRoute";
 
 interface FormData {
   name: string;
@@ -50,7 +51,7 @@ export default function HomePage() {
       }
     } catch (error) {
       if (error instanceof Error) {
-        console.error("Failed to generate cover letter:", error.message);
+        // console.error("Failed to generate cover letter:", error.message);
       }
     } finally {
       setLoading(false);
@@ -76,93 +77,95 @@ export default function HomePage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-100 dark:bg-gray-950 flex items-center justify-center p-6 transition-colors">
-      <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-8 rounded-2xl shadow-lg max-w-2xl w-full">
-        <h1 className="text-3xl font-bold text-center mb-6">
-          Cover Letter Generator 🤖
-        </h1>
+    <PrivateRoute>
+      <main className="min-h-screen bg-gray-100 dark:bg-gray-950 flex items-center justify-center p-6 transition-colors">
+        <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-8 rounded-2xl shadow-lg max-w-2xl w-full">
+          <h1 className="text-3xl font-bold text-center mb-6">
+            Cover Letter Generator 🤖
+          </h1>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <input
-            type="text"
-            name="name"
-            placeholder="Your Name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
-          />
-          <input
-            type="text"
-            name="jobTitle"
-            placeholder="Job Title You're Applying For"
-            value={formData.jobTitle}
-            onChange={handleChange}
-            required
-            className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
-          />
-          <input
-            type="text"
-            name="companyName"
-            placeholder="Company Name"
-            value={formData.companyName}
-            onChange={handleChange}
-            required
-            className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
-          />
-          <textarea
-            name="skills"
-            placeholder="Your Key Skills (e.g., JavaScript, Project Management)"
-            value={formData.skills}
-            onChange={handleChange}
-            required
-            className="p-3 border rounded-lg h-24 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
-          />
-          <textarea
-            name="experience"
-            placeholder="Briefly describe your relevant experience"
-            value={formData.experience}
-            onChange={handleChange}
-            required
-            className="p-3 border rounded-lg h-24 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
-          />
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <input
+              type="text"
+              name="name"
+              placeholder="Your Name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+            />
+            <input
+              type="text"
+              name="jobTitle"
+              placeholder="Job Title You're Applying For"
+              value={formData.jobTitle}
+              onChange={handleChange}
+              required
+              className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+            />
+            <input
+              type="text"
+              name="companyName"
+              placeholder="Company Name"
+              value={formData.companyName}
+              onChange={handleChange}
+              required
+              className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+            />
+            <textarea
+              name="skills"
+              placeholder="Your Key Skills (e.g., JavaScript, Project Management)"
+              value={formData.skills}
+              onChange={handleChange}
+              required
+              className="p-3 border rounded-lg h-24 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+            />
+            <textarea
+              name="experience"
+              placeholder="Briefly describe your relevant experience"
+              value={formData.experience}
+              onChange={handleChange}
+              required
+              className="p-3 border rounded-lg h-24 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+            />
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
-          >
-            {loading ? "Generating..." : "Generate Cover Letter"}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
+            >
+              {loading ? "Generating..." : "Generate Cover Letter"}
+            </button>
+          </form>
 
-        {/* Generated Cover Letter */}
-        {coverLetter && (
-          <div className="mt-8 p-6 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-            <h2 className="text-xl font-semibold mb-4">
-              Your Generated Cover Letter 📄
-            </h2>
-            <p className="whitespace-pre-wrap">{coverLetter}</p>
+          {/* Generated Cover Letter */}
+          {coverLetter && (
+            <div className="mt-8 p-6 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+              <h2 className="text-xl font-semibold mb-4">
+                Your Generated Cover Letter 📄
+              </h2>
+              <p className="whitespace-pre-wrap">{coverLetter}</p>
 
-            {/* Download Buttons */}
-            <div className="flex gap-4 mt-6">
-              <button
-                onClick={handleDownloadPDF}
-                className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded transition"
-              >
-                Download PDF
-              </button>
-              <button
-                onClick={handleDownloadText}
-                className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded transition"
-              >
-                Download TXT
-              </button>
+              {/* Download Buttons */}
+              <div className="flex gap-4 mt-6">
+                <button
+                  onClick={handleDownloadPDF}
+                  className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded transition"
+                >
+                  Download PDF
+                </button>
+                <button
+                  onClick={handleDownloadText}
+                  className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded transition"
+                >
+                  Download TXT
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-    </main>
+          )}
+        </div>
+      </main>
+    </PrivateRoute>
   );
 }

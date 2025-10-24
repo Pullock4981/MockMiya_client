@@ -18,7 +18,7 @@ const client: MongoClient = new MongoClient(uri, options);
 
 const clientPromise: Promise<MongoClient> =
   global._mongoClientPromise ?? client.connect().catch((err) => {
-    console.error("MongoDB connection failed:", err instanceof Error ? err.message : err);
+    // console.error("MongoDB connection failed:", err instanceof Error ? err.message : err);
     throw err;
   });
 

@@ -56,7 +56,7 @@ export default function VoiceChat({ config, onEnd }: Props) {
         const data: { text: string } = await res.json()
         speak(data.text)
       } catch (err) {
-        console.error('AI error:', err)
+        // console.error('AI error:', err)
         speak('Sorry, there was an error connecting to the AI.')
       }
     },

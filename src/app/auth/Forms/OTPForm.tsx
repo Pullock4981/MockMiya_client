@@ -69,11 +69,16 @@ export default function OTPForm({ email, onVerified, onResend }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp: code }),
       });
+
       const data: VerifyOtpResponse = await res.json();
+      console.log("OTP verify response:", data);
 
       if (!res.ok) return alert(data.error || "OTP verification failed");
-
-      onVerified(code); // ✅ OTP passed to parent component
+      if (data.success) {
+        onVerified(code); // ✅ OTP passed to parent
+      } else {
+        alert(data.error || "OTP verification failed");
+      }
     } catch (err) {
       const error = err instanceof Error ? err : new Error("Unknown error");
       alert(`Server error during OTP verification: ${error.message}`);

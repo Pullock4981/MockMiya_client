@@ -36,7 +36,7 @@ The interview should feel natural, friendly, and time-limited.
 
     if (!res.ok) {
       const errText = await res.text()
-      console.error('Gemini API error:', errText)
+      // console.error('Gemini API error:', errText)
       return NextResponse.json({ error: 'Gemini API error', details: errText }, { status: 500 })
     }
 
@@ -46,7 +46,7 @@ The interview should feel natural, friendly, and time-limited.
 
     return NextResponse.json({ text: reply })
   } catch (error) {
-    console.error('Server error:', error)
+    // console.error('Server error:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }

@@ -38,7 +38,7 @@ export default function ResetPasswordForm({ email, onResetSuccess, onBack }: Pro
     setLoading(true);
 
     // 🔹 Debug log: what we are sending
-    console.log("🔹 ResetPasswordForm submitting:", { email, newPassword: password.trim() });
+    // console.log("🔹 ResetPasswordForm submitting:", { email, newPassword: password.trim() });
 
     try {
       const res = await fetch("/api/reset-password", {
@@ -47,10 +47,10 @@ export default function ResetPasswordForm({ email, onResetSuccess, onBack }: Pro
         body: JSON.stringify({ email, newPassword: password.trim() }), // no OTP sent
       });
 
-      console.log("🔹 Raw response status:", res.status);
+      // console.log("🔹 Raw response status:", res.status);
 
       const data = await res.json();
-      console.log("🔹 ResetPasswordForm response:", data);
+      // console.log("🔹 ResetPasswordForm response:", data);
 
       if (!res.ok) return alert(data.error || "Failed to reset password");
 

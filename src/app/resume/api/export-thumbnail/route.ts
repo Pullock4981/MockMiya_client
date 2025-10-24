@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   try {
     const { html, resumeId, userEmail } = await req.json();
 
-    console.log("🚀 Thumbnail API called:", { resumeId, userEmail, htmlLength: html?.length });
+    // console.log("🚀 Thumbnail API called:", { resumeId, userEmail, htmlLength: html?.length });
 
     if (!html || !resumeId || !userEmail) {
       console.error("❌ Missing html, resumeId, or userEmail");
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     await page.setContent(html, { waitUntil: "networkidle0" });
 
     const buffer = await page.screenshot({ type: "png", fullPage: true });
-    console.log("📸 Screenshot length:", buffer.length);
+    // console.log("📸 Screenshot length:", buffer.length);
 
     await browser.close();
 
@@ -39,16 +39,16 @@ export async function POST(req: NextRequest) {
       { $set: { thumbnail: new Binary(buffer) } }
     );
 
-    console.log("🗄️ MongoDB update result:", result);
+    // console.log("🗄️ MongoDB update result:", result);
 
     if (result.matchedCount === 0) {
-      console.warn("⚠️ No document matched. Check resumeId and userEmail");
+      // console.warn("⚠️ No document matched. Check resumeId and userEmail");
       return new Response("No matching resume found", { status: 404 });
     }
 
     return new Response("Thumbnail saved successfully", { status: 200 });
   } catch (error) {
-    console.error("❌ Thumbnail Generation Error:", error);
+    // console.error("❌ Thumbnail Generation Error:", error);
     return new Response("Failed to generate thumbnail", { status: 500 });
   }
 }

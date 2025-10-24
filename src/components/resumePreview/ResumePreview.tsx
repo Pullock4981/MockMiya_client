@@ -48,7 +48,7 @@ const ResumePreview: React.FC = () => {
           const score = await calculateATSScore(resumeData);
           setATSScore(score);
         } catch (error) {
-          console.error("ATS calculation failed:", error);
+          // console.error("ATS calculation failed:", error);
         }
       };
       calculateScore();

@@ -44,7 +44,7 @@ export async function saveResumeStep(
       throw new Error(data?.message || "Failed to save resume step");
     }
 
-    console.log("✅ Resume step saved successfully:", payload);
+    // console.log("✅ Resume step saved successfully:", payload);
     return data;
   } catch (error) {
     console.error("❌ Error saving resume step:", error);

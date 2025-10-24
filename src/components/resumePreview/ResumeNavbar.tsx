@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext/AuthContext';
 import { motion } from 'framer-motion';
 import { ChevronDown, LogOut, Settings, User } from 'lucide-react';
 import Link from 'next/link';
@@ -46,7 +46,7 @@ const handleLogout = async () => {
         });
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Logout failed');
-        console.error(error);
+        // console.error(error);
         Swal.fire({
           title: "Failed!",
           text: error.message,
@@ -65,8 +65,8 @@ const handleLogout = async () => {
     >
       {/* Left: Home Button */}
       <div>
-        <Link href="/">
-          <Button variant="secondary">🏠 Home</Button>
+        <Link href="/dashboard/resume">
+          <Button variant="secondary">📋 Resume</Button>
         </Link>
       </div>
 

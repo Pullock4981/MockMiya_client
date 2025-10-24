@@ -37,8 +37,4 @@ export interface Role {
 export type QuestionCategory = 'beginner' | 'easy' | 'medium' | 'hard' | 'advanced';
 
 // Export QuizRole as an alias for Role for backward compatibility
-<<<<<<< HEAD
 export type QuizRole = Role;
-=======
-export type QuizRole = Role;
->>>>>>> a18869bad1544d343318ec043a669992f13a43ba

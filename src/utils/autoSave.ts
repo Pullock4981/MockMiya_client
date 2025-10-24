@@ -8,7 +8,7 @@ const AUTO_SAVE_KEY = "resume_builder_autosave";
 export const autoSave = (resumeData: ResumeData) => {
   try {
     localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(resumeData));
-    console.log("Resume auto-saved ✅");
+    // console.log("Resume auto-saved ✅");
   } catch (error) {
     console.error("Auto-save failed:", error);
   }

@@ -1,6 +1,5 @@
 'use client';
 
-
 import {
   BarChart3,
   Bot,
@@ -25,7 +24,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useActiveTab } from '../dashcontext/ActiveTabContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext/AuthContext';
 import Swal from 'sweetalert2';
 
 interface SidebarProps {
@@ -38,89 +37,18 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
   const { activeTab, setActiveTab } = useActiveTab();
 
   const sidebarItems = [
-    {
-      id: 'overview',
-      name: 'Dashboard',
-      icon: BarChart3,
-      section: 'main',
-      path: '/dashboard/overview',
-    },
-    {
-      id: 'resume',
-      name: 'Resume Builder',
-      icon: FileText,
-      section: 'main',
-      path: '/dashboard/resume',
-    },
-    {
-      id: 'analyzer',
-      name: 'Job Analyzer',
-      icon: Search,
-      section: 'main',
-      path: '/dashboard/analyzer',
-    },
-    {
-      id: 'cover',
-      name: 'Cover Letter',
-      icon: FileEdit,
-      section: 'main',
-      path: '/dashboard/cover',
-    },
-    {
-      id: 'text-interview',
-      name: 'Text Interview',
-      icon: MessageSquare,
-      section: 'interviews',
-      path: '/dashboard/text-interview',
-    },
-    {
-      id: 'voice-interview',
-      name: 'Voice Interview',
-      icon: Mic,
-      section: 'interviews',
-      path: '/dashboard/voice-interview',
-    },
-    {
-      id: 'video-interview',
-      name: 'Video Interview',
-      icon: Video,
-      section: 'interviews',
-      path: '/dashboard/live-interview',
-    },
-    {
-      id: 'coding',
-      name: 'Coding Challenges',
-      icon: Code,
-      section: 'practice',
-      path: '/dashboard/coding-challenges',
-    },
-    {
-      id: 'analytics',
-      name: 'Analytics',
-      icon: TrendingUp,
-      section: 'insights',
-      path: '/dashboard/analytics',
-    },
-    { id: 'admin', 
-      name: 'Admin', 
-      icon: Shield, 
-      section: 'admin', 
-      path: '/dashboard/admin' 
-    },
-    {
-      id: 'admin-console',
-      name: 'Admin Console',
-      icon: Settings,
-      section: 'admin',
-      path: '/dashboard/admin-console',
-    },
-    {
-      id: 'user-management',
-      name: 'User Management',
-      icon: Users,
-      section: 'admin',
-      path: '/dashboard/user-management',
-    },
+    { id: 'overview', name: 'Dashboard', icon: BarChart3, section: 'main', path: '/dashboard' },
+    { id: 'resume', name: 'Resume Builder', icon: FileText, section: 'main', path: '/dashboard/resume' },
+    { id: 'analyzer', name: 'Job Analyzer', icon: Search, section: 'main', path: '/dashboard/job-analyzer' },
+    { id: 'cover', name: 'Cover Letter', icon: FileEdit, section: 'main', path: '/dashboard/cover' },
+    { id: 'text-interview', name: 'Text Interview', icon: MessageSquare, section: 'interviews', path: '/dashboard/text-interview' },
+    { id: 'voice-interview', name: 'Voice Interview', icon: Mic, section: 'interviews', path: '/dashboard/voice-interview' },
+    { id: 'video-interview', name: 'Video Interview', icon: Video, section: 'interviews', path: '/dashboard/live-interview' },
+    { id: 'coding', name: 'Coding Challenges', icon: Code, section: 'practice', path: '/dashboard/coding-challenges' },
+    { id: 'analytics', name: 'Analytics', icon: TrendingUp, section: 'insights', path: '/dashboard/analytics' },
+    { id: 'admin', name: 'Admin', icon: Shield, section: 'admin', path: '/dashboard/admin/panel' },
+    { id: 'admin-console', name: 'Admin Console', icon: Settings, section: 'admin', path: '/dashboard/admin/console' },
+    { id: 'user-management', name: 'User Management', icon: Users, section: 'admin', path: '/dashboard/admin/user-management' },
     { id: 'profile', name: 'Profile', icon: User, section: 'account', path: '/dashboard/profile' },
   ];
 
@@ -132,6 +60,20 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
     admin: 'Administration',
     account: 'Account',
   };
+
+  // Role-based filtering
+  const filteredSidebarItems = sidebarItems.filter(item => {
+    if (item.section === 'admin') {
+      return user?.role === 'System Admin' || user?.role === 'Admin';
+    }
+    return true;
+  });
+
+  const groupedItems = filteredSidebarItems.reduce((acc, item) => {
+    if (!acc[item.section]) acc[item.section] = [];
+    acc[item.section].push(item);
+    return acc;
+  }, {} as Record<string, typeof filteredSidebarItems>);
 
   const [collapsed, setCollapsedState] = useState<boolean>(
     collapsedProp ?? (typeof window !== 'undefined' ? window.innerWidth < 768 : false)
@@ -190,13 +132,6 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
     if (setCollapsedProp) setCollapsedProp(newCollapsed);
   };
 
-  const groupedItems = sidebarItems.reduce((acc, item) => {
-    if (!acc[item.section]) acc[item.section] = [];
-    acc[item.section].push(item);
-    return acc;
-  }, {} as Record<string, typeof sidebarItems>);
-
-
   const handleLogout = async () => {
     const result = await Swal.fire({
       title: "Are you sure?",
@@ -220,12 +155,7 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
         });
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Logout failed');
-        console.error(error);
-        Swal.fire({
-          title: "Failed!",
-          text: error.message,
-          icon: "error",
-        });
+        Swal.fire({ title: "Failed!", text: error.message, icon: "error" });
       }
     }
   };
@@ -244,22 +174,13 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
           </div>
           {!collapsed && <Link href="/"><span className="ml-2 text-xl font-bold gradient-text">MockMiya</span></Link>}
         </div>
-
         <button
           onClick={toggleCollapsed}
-          className={`p-2 rounded-md hover:bg-muted/30 transition ${collapsed
-              ? 'absolute top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2'
-              : ''
-            }`}
+          className={`p-2 rounded-md hover:bg-muted/30 transition ${collapsed ? 'absolute top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2' : ''}`}
         >
-          {collapsed ? (
-            <PanelLeftOpen className="h-5 w-5" />
-          ) : (
-            <PanelLeftClose className="h-5 w-5" />
-          )}
+          {collapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
         </button>
       </div>
-
 
       {/* Navigation */}
       <nav className="flex-1 px-2 py-4 space-y-6 overflow-y-auto custom-scroll">
@@ -270,14 +191,11 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
                 {sections[sectionKey as keyof typeof sections]}
               </h3>
             )}
-            {items.map((item) => (
+            {items.map(item => (
               <Link key={item.id} href={item.path} passHref>
                 <button
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full sidebar-button flex items-center rounded-lg px-3 py-2 text-sm transition-colors ${activeTab === item.id
-                    ? ' bg-primary text-black'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-primary/30'
-                    } ${collapsed ? 'justify-center' : ''}`}
+                  className={`w-full sidebar-button flex items-center rounded-lg px-3 py-2 text-sm transition-colors ${activeTab === item.id ? ' bg-primary text-black' : 'text-muted-foreground hover:text-foreground hover:bg-primary/30'} ${collapsed ? 'justify-center' : ''}`}
                 >
                   <item.icon className="h-4 w-4" />
                   {!collapsed && <span className="ml-3">{item.name}</span>}
@@ -293,9 +211,7 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
         {!collapsed && (
           <div className="flex items-center space-x-3 mb-4">
             <Avatar>
-              <AvatarFallback className="bg-green-primary text-primary-foreground">
-                JD
-              </AvatarFallback>
+              <AvatarFallback className="bg-green-primary text-primary-foreground">JD</AvatarFallback>
             </Avatar>
             <div>
               <p className="font-medium text-sm">{user?.name}</p>
@@ -312,8 +228,7 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
       {/* Drag Handle */}
       <div
         onMouseDown={() => setDragging(true)}
-        className={`w-1 cursor-col-resize h-full absolute right-0 top-0 z-10 ${dragging ? 'bg-indigo-500' : 'hover:bg-indigo-300'
-          }`}
+        className={`w-1 cursor-col-resize h-full absolute right-0 top-0 z-10 ${dragging ? 'bg-indigo-500' : 'hover:bg-indigo-300'}`}
       />
     </aside>
   );

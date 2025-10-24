@@ -14,7 +14,7 @@ import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import ThemeSwitch from "../ui/ThemeSwitch";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext/AuthContext";
 import Swal from "sweetalert2";
 
 const Navbar = () => {
@@ -23,13 +23,11 @@ const Navbar = () => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const { user, logout } = useAuth();
 
-  console.log("user in navbar" ,user)
-
   const navItems = [
-    { name: "Features", href: "#features" },
-    { name: "Resume", href: "/resume" },
+    { name: "Home", href: "/" },
     { name: "Blogs", href: "/blogs", isRoute: true },
     { name: "About", href: "/about", isRoute: true },
+    { name: "Contact", href: "/contact" },
   ];
 
   // ✅ Handle Logout
@@ -56,7 +54,7 @@ const Navbar = () => {
         });
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Logout failed');
-        console.error(error);
+        // console.error(error);
         Swal.fire({
           title: "Failed!",
           text: error.message,
@@ -232,13 +230,6 @@ const Navbar = () => {
                   <div className="flex justify-center pb-2">
                     <ThemeSwitch />
                   </div>
-                  <Button
-                    variant="outline"
-                    className="border-border-light hover:bg-card-secondary"
-                    asChild
-                  >
-                    <Link href="/auth">Sign In</Link>
-                  </Button>
                   <Button
                     className="bg-primary hover:bg-primary-dark text-primary-foreground"
                     asChild

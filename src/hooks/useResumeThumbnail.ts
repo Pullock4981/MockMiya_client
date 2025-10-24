@@ -14,7 +14,7 @@ export function useResumeThumbnail() {
 
   const generateThumbnail = useCallback(
     async ({ elementId, resumeId, userEmail }: GenerateThumbnailParams) => {
-      console.log("🖼️ generateThumbnail called:", { elementId, resumeId, userEmail });
+      // console.log("🖼️ generateThumbnail called:", { elementId, resumeId, userEmail });
 
       if (!resumeId || !userEmail) {
         setError("Resume ID or User Email missing");
@@ -56,7 +56,7 @@ export function useResumeThumbnail() {
           </html>
         `;
 
-        console.log("📄 HTML length for thumbnail:", html.length);
+        // console.log("📄 HTML length for thumbnail:", html.length);
 
         const response = await fetch("/resume/api/export-thumbnail", {
           method: "POST",
@@ -64,7 +64,7 @@ export function useResumeThumbnail() {
           body: JSON.stringify({ html, resumeId, userEmail }),
         });
 
-        console.log("🌐 Thumbnail API response:", response.status);
+        // console.log("🌐 Thumbnail API response:", response.status);
 
         if (!response.ok) {
           const text = await response.text();
@@ -74,7 +74,7 @@ export function useResumeThumbnail() {
         return true;
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Unknown error";
-        console.error("❌ generateThumbnail error:", msg);
+        // console.error("❌ generateThumbnail error:", msg);
         setError(msg);
         return null;
       } finally {

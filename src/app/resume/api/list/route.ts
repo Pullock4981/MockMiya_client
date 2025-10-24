@@ -51,7 +51,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ success: true, resumes: mapped });
   } catch (err) {
-    console.error("❌ Fetch resumes failed:", err);
+    // console.error("❌ Fetch resumes failed:", err);
     return NextResponse.json({ success: false, message: "Failed to fetch resumes" });
   }
 }

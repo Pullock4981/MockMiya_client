@@ -111,7 +111,7 @@ const PricingSection: React.FC = () => {
         alert("Payment initialization failed. Please try again.");
       }
     } catch (error) {
-      console.error("Error starting payment:", error);
+      // console.error("Error starting payment:", error);
       alert("Something went wrong during payment initialization.");
     }
   };

@@ -40,7 +40,7 @@ export default function ForgotForm({ onSubmit, onBack }: Props) {
       alert("OTP sent to your email");
       onSubmit(email);
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       setError("Something went wrong");
     } finally {
       setLoading(false);

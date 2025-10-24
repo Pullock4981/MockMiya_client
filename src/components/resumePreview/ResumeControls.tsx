@@ -55,7 +55,7 @@ const ResumePrintOverlay = ({
       />
       <button
         onClick={onClose}
-        className="fixed top-25  right-25 bg-muted/30 px-3 py-2 rounded-md cursor-pointer z-[10000] shadow-md hover:bg-muted/50 transition"
+        className="fixed top-25  right-25 bg-muted/30 px-3 py-2 rounded-md cursor-pointer z-10000 shadow-md hover:bg-muted/50 transition"
       >
         Close
       </button>
@@ -97,7 +97,7 @@ const ResumeControls: React.FC<ResumeControlsProps> = ({
     try {
       await exportResumeHandler(resumeId);
     } catch (error) {
-      console.error("PDF Export failed:", error);
+      // console.error("PDF Export failed:", error);
     }
   };
 
@@ -113,7 +113,7 @@ const ResumeControls: React.FC<ResumeControlsProps> = ({
       const url = URL.createObjectURL(pdfBlob);
       setPdfUrl(url);
     } catch (error) {
-      console.error("Print preview failed:", error);
+      // console.error("Print preview failed:", error);
       alert("Unable to open print preview");
     }
   };

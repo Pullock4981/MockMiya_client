@@ -3,7 +3,7 @@
 import { ThemeProvider } from '@/components/ui/ThemeProvider';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { SessionProvider } from 'next-auth/react';
-import { AuthProvider } from '@/context/AuthContext';
+import { AuthProvider } from '@/context/AuthContext/AuthContext';
 import type { ReactNode } from 'react';
 
 import './globals.css';

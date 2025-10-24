@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext/AuthContext';
 import { motion } from 'framer-motion';
 import { ChevronDown, LogOut, Search, LayoutDashboard, User } from 'lucide-react';
 import Link from 'next/link';
@@ -29,7 +29,7 @@ export function DashboardHeader() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      console.log('Searching for:', searchQuery);
+      // console.log('Searching for:', searchQuery);
     }
   };
 
@@ -56,7 +56,7 @@ export function DashboardHeader() {
         });
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Logout failed');
-        console.error(error);
+        // console.error(error);
         Swal.fire({
           title: "Failed!",
           text: error.message,
@@ -70,25 +70,19 @@ export function DashboardHeader() {
     <motion.header
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="sticky top-0 z-40 bg-card/80 backdrop-blur-sm border-b border-card-border px-6 py-4 flex items-center justify-between"
+      className="sticky top-0 z-40 bg-card/80 backdrop-blur-sm border-b border-card-border px-6 py-4 flex items-center justify-between gap-5"
     >
-      {/* Left: Home Button */}
-      <div>
-        <Link href="/">
-          <Button variant="secondary">Home</Button>
-        </Link>
-      </div>
 
       {/* Center: Search */}
-      <div className="flex-1 flex justify-center px-2 md:px-0">
-        <form onSubmit={handleSearch} className="relative w-full max-w-md md:max-w-lg lg:max-w-xl">
+      <div className="flex justify-center flex-1 px-2 md:px-0">
+        <form onSubmit={handleSearch} className="relative w-full">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground-muted w-4 h-4" />
           <input
             type="text"
             placeholder="Search posts, users, analytics..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-4 py-2 w-full bg-input border border-border rounded-lg
+            className="w-full pl-10 pr-4 py-2 bg-input border border-border rounded-lg
                        focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
                        hover:bg-input-hover transition-colors"
           />
@@ -97,7 +91,7 @@ export function DashboardHeader() {
 
       {/* Right: Actions */}
       <div className="flex items-center gap-3">
-        <div className="-mr-5 -ml-7">
+        <div className="-mr-5 scale-90 md:scale-100">
           <ThemeSwitch />
         </div>
 
@@ -121,29 +115,29 @@ export function DashboardHeader() {
               className="absolute top-full right-0 mt-2 w-56 bg-card border border-card-border rounded-lg shadow-lg z-50"
             >
               <div className="p-3 border-b border-border">
-                <div className="font-medium">{user?.name ?? 'User'}</div>
-                <div className="text-sm text-foreground-muted">
-                  {user?.email ?? 'example@email.com'}
-                </div>
+                <div className="font-medium">{user?.name ?? "User"}</div>
+                <div className="text-sm text-foreground-muted">{user?.email ?? "example@email.com"}</div>
               </div>
 
               <div className="p-1">
-                <Link href="/dashboard/profile">
-                  <button className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors">
-                    <User className="w-4 h-4" />
-                    Profile
-                  </button>
+                <Link
+                  href="/dashboard/profile"
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors"
+                >
+                  <User className="w-4 h-4" />
+                  Profile
                 </Link>
-                <Link href="/dashboard">
-                  <button className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors">
-                    <LayoutDashboard className="w-4 h-4" />
-                    Dashboard
-                  </button>
+                <Link
+                  href="/dashboard"
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  Dashboard
                 </Link>
                 <div className="border-t border-border my-1" />
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-error hover:bg-warning/50 rounded-md transition-transform hover:scale-105"
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-error hover:bg-warning/50 rounded-md hover:scale-105 transition-transform"
                 >
                   <LogOut className="w-4 h-4" />
                   Logout
