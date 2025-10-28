@@ -13,7 +13,7 @@ interface BlogPost {
   imageAlt: string;
 }
 
-// ---------------- Static blog posts ----------------
+// ---------------- Static blog posts ----------
 const blogPosts: BlogPost[] = [
   {
     id: 1,
@@ -77,7 +77,7 @@ const blogPosts: BlogPost[] = [
   },
 ];
 
-// ---------------- Blog Details Page ----------------
+// ---------------- Blog Details Page here ----------------
 export default function BlogDetails({
   params,
 }: {
