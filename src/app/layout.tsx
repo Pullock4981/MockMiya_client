@@ -43,7 +43,7 @@
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
-import { AuthProvider } from "@/context/AuthContext";
+
 import type { ReactNode } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -51,6 +51,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { AuthProvider } from "@/context/AuthContext/AuthContext";
 
 const geistSans = Geist({
   subsets: ["latin"],
