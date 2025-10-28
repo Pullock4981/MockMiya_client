@@ -3,442 +3,592 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/uis/tabs';
+import { useSession } from 'next-auth/react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 import { 
-  User, Mail, Phone, MapPin, Briefcase, GraduationCap, 
-  Edit, Save, Upload, Award, Calendar, LogOut,
-  Github, Linkedin, Globe, Twitter, Shield
+  User, Mail, Phone, MapPin, Edit3,
+  CheckCircle2, Loader2, Eye, EyeOff
 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import toast from 'react-hot-toast';
 
+// Define proper interfaces
 interface UserProfile {
-  displayName: string;
-  email: string;
   phone?: string;
   location?: string;
-  jobTitle?: string;
+  title?: string;
   company?: string;
+  education?: string;
+  experience?: string;
   bio?: string;
-  skills: string[];
-  education?: Education[];
-  experience?: Experience[];
-  socialLinks?: SocialLinks;
-  photoURL?: string;
+  skills?: string[];
+  avatar?: string;
 }
 
-interface Education {
-  id: string;
-  school: string;
-  degree: string;
-  field: string;
-  startDate: string;
-  endDate: string;
-  current: boolean;
+interface UserData {
+  _id: string;
+  id?: string;
+  name: string;
+  email: string;
+  role: string;
+  membershipType: string;
+  isVerified: boolean;
+  profile?: UserProfile;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-interface Experience {
-  id: string;
-  company: string;
-  position: string;
-  startDate: string;
-  endDate: string;
-  current: boolean;
-  description: string;
-}
+// Form validation schema
+const profileFormSchema = z.object({
+  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
+  phone: z.string().optional(),
+  location: z.string().optional(),
+  title: z.string().min(2, { message: 'Title must be at least 2 characters.' }),
+  company: z.string().optional(),
+  education: z.string().optional(),
+  experience: z.string().optional(),
+  bio: z.string().max(500, { message: 'Bio must not exceed 500 characters.' }).optional(),
+  skills: z.string().optional(),
+});
 
-interface SocialLinks {
-  github?: string;
-  linkedin?: string;
-  twitter?: string;
-  portfolio?: string;
-}
+type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export default function Profile() {
+  const { data: session, status, update } = useSession();
   const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState<UserProfile>({
-    displayName: '',
-    email: '',
-    phone: '',
-    location: '',
-    jobTitle: '',
-    company: '',
-    bio: '',
-    skills: [],
-    socialLinks: {
-      github: '',
-      linkedin: '',
-      twitter: '',
-      portfolio: ''
-    }
+  const [isSaving, setIsSaving] = useState(false);
+  const [showEmail, setShowEmail] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (status === 'authenticated' && session?.user?.email) {
+        try {
+          setIsLoading(true);
+          const response = await fetch(`/api/user/profile?email=${encodeURIComponent(session.user.email)}`);
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+          }
+          
+          const data: UserData = await response.json();
+          setUserData(data);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          const errorMessage = error instanceof Error ? error.message : 'Failed to load profile data';
+          toast.error(errorMessage);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [session, status]);
+
+  // Default form values
+  const defaultValues: Partial<ProfileFormValues> = {
+    name: userData?.name || session?.user?.name || '',
+    phone: userData?.profile?.phone || '',
+    location: userData?.profile?.location || '',
+    title: userData?.profile?.title || '',
+    company: userData?.profile?.company || '',
+    education: userData?.profile?.education || '',
+    experience: userData?.profile?.experience || '',
+    bio: userData?.profile?.bio || '',
+    skills: userData?.profile?.skills?.join(', ') || '',
+  };
+
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues,
+    mode: 'onChange',
   });
 
-  const [newSkill, setNewSkill] = useState('');
-
-  const handleInputChange = (field: string, value: string) => {
-    setProfile(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleSocialLinkChange = (platform: keyof SocialLinks, value: string) => {
-    setProfile(prev => ({
-      ...prev,
-      socialLinks: {
-        ...prev.socialLinks,
-        [platform]: value
-      }
-    }));
-  };
-
-  const handleAddSkill = () => {
-    if (newSkill.trim() && !profile.skills.includes(newSkill.trim())) {
-      setProfile(prev => ({
-        ...prev,
-        skills: [...prev.skills, newSkill.trim()]
-      }));
-      setNewSkill('');
+  // Reset form when user data changes
+  useEffect(() => {
+    if (userData && !isEditing) {
+      form.reset({
+        name: userData.name || '',
+        phone: userData.profile?.phone || '',
+        location: userData.profile?.location || '',
+        title: userData.profile?.title || '',
+        company: userData.profile?.company || '',
+        education: userData.profile?.education || '',
+        experience: userData.profile?.experience || '',
+        bio: userData.profile?.bio || '',
+        skills: userData.profile?.skills?.join(', ') || '',
+      });
     }
-  };
+  }, [userData, form, isEditing]);
 
-  const handleRemoveSkill = (skillToRemove: string) => {
-    setProfile(prev => ({
-      ...prev,
-      skills: prev.skills.filter(skill => skill !== skillToRemove)
-    }));
-  };
+  const onSubmit = async (data: ProfileFormValues) => {
+    if (!session?.user?.email) {
+      toast.error('No session found');
+      return;
+    }
+    
+    setIsSaving(true);
+    
+    try {
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: session.user.email,
+          name: data.name,
+          profile: {
+            phone: data.phone || '',
+            location: data.location || '',
+            title: data.title || '',
+            company: data.company || '',
+            education: data.education || '',
+            experience: data.experience || '',
+            bio: data.bio || '',
+            skills: data.skills ? data.skills.split(',').map((skill: string) => skill.trim()).filter(Boolean) : [],
+          }
+        }),
+      });
 
-  const handleSave = () => {
-    // Add your save logic here
-    console.log('Saving profile:', profile);
-    setIsEditing(false);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Failed to update profile. Status: ${response.status}`);
+      }
+
+      const updatedUser: UserData = await response.json();
+      setUserData(updatedUser);
+      
+      // Update session
+      await update({
+        ...session,
+        user: {
+          ...session.user,
+          name: data.name,
+        }
+      });
+
+      setIsEditing(false);
+      toast.success('Profile updated successfully! 🎉');
+      
+    } catch (error: unknown) {
+      console.error('Failed to update profile:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update profile';
+      toast.error(errorMessage);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
-    // Add cancel logic or reset form
+    form.reset(defaultValues);
     setIsEditing(false);
+    toast('Changes discarded', { 
+      icon: '↶',
+      style: {
+        background: '#fef3c7',
+        color: '#92400e',
+      }
+    });
   };
 
+  // Get user initials for avatar
+  const getUserInitials = (name: string): string => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  if (status === 'loading' || isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-green-500" />
+          <p className="text-muted-foreground">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <p className="text-muted-foreground">Please log in to view your profile.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Profile</h1>
+          <h1 className="text-3xl font-bold text-green-800">Professional Profile</h1>
           <p className="text-muted-foreground mt-2">
-            Manage your personal information and career details
+            Manage your professional identity and career information
           </p>
         </div>
         <div className="flex gap-2">
           {isEditing ? (
             <>
-              <Button 
-                onClick={handleSave}
-                className="flex items-center gap-2"
-              >
-                <Save className="h-4 w-4" />
-                Save Changes
+              <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
+                Cancel
               </Button>
               <Button 
-                variant="outline"
-                onClick={handleCancel}
+                onClick={form.handleSubmit(onSubmit)} 
+                disabled={isSaving || !form.formState.isValid}
+                className="bg-green-600 hover:bg-green-700"
               >
-                Cancel
+                {isSaving ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                )}
+                {isSaving ? 'Saving...' : 'Save Changes'}
               </Button>
             </>
           ) : (
             <Button 
               onClick={() => setIsEditing(true)}
-              className="flex items-center gap-2"
+              className="bg-green-600 hover:bg-green-700"
             >
-              <Edit className="h-4 w-4" />
+              <Edit3 className="h-4 w-4 mr-2" />
               Edit Profile
             </Button>
           )}
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </Button>
         </div>
       </div>
 
-      <Tabs defaultValue="personal" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="personal">Personal Info</TabsTrigger>
-          <TabsTrigger value="professional">Professional</TabsTrigger>
-          <TabsTrigger value="social">Social Links</TabsTrigger>
-        </TabsList>
-
-        {/* Personal Information Tab */}
-        <TabsContent value="personal" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Profile Picture */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Profile Picture</CardTitle>
-                <CardDescription>
-                  Update your profile photo
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex flex-col items-center space-y-4">
-                  <Avatar className="h-24 w-24">
-                    <AvatarImage src={profile.photoURL} />
-                    <AvatarFallback className="text-lg">
-                      <User />
-                    </AvatarFallback>
-                  </Avatar>
-                  {isEditing && (
-                    <div className="space-y-2">
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        className="w-full"
-                        onChange={(e) => {
-                          // Handle file upload logic here
-                          console.log('File selected:', e.target.files?.[0]);
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Basic Information */}
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Basic Information</CardTitle>
-                <CardDescription>
-                  Your personal details and contact information
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="displayName">Full Name</Label>
-                    <Input
-                      id="displayName"
-                      value={profile.displayName || "No Data Here"}
-                      placeholder="Your full name"
-                      onChange={(e) => handleInputChange('displayName', e.target.value)}
-                      readOnly={!isEditing}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={profile.email || "No Data Here"}
-                      className="bg-muted"
-                      readOnly
-                    />
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
-                    <Input
-                      id="phone"
-                      value={profile.phone || "No Data Here"}
-                      placeholder="+1 (555) 123-4567"
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                      readOnly={!isEditing}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
-                    <Input
-                      id="location"
-                      value={profile.location || "No Data Here"}
-                      placeholder="City, Country"
-                      onChange={(e) => handleInputChange('location', e.target.value)}
-                      readOnly={!isEditing}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="bio">Bio</Label>
-                  <Textarea
-                    id="bio"
-                    value={profile.bio || "No Data Here"}
-                    placeholder="Tell us about yourself..."
-                    rows={4}
-                    onChange={(e) => handleInputChange('bio', e.target.value)}
-                    readOnly={!isEditing}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Professional Information Tab */}
-        <TabsContent value="professional" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Job Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Briefcase className="h-5 w-5" />
-                  Current Position
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="jobTitle">Job Title</Label>
-                  <Input
-                    id="jobTitle"
-                    value={profile.jobTitle || "No Data Here"}
-                    placeholder="Software Engineer"
-                    onChange={(e) => handleInputChange('jobTitle', e.target.value)}
-                    readOnly={!isEditing}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="company">Company</Label>
-                  <Input
-                    id="company"
-                    value={profile.company || "No Data Here"}
-                    placeholder="Company Name"
-                    onChange={(e) => handleInputChange('company', e.target.value)}
-                    readOnly={!isEditing}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Skills */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5" />
-                  Skills
-                </CardTitle>
-                <CardDescription>
-                  Add your technical and professional skills
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {isEditing && (
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Add a skill"
-                      value={newSkill}
-                      onChange={(e) => setNewSkill(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          handleAddSkill();
-                        }
-                      }}
-                    />
-                    <Button variant="outline" onClick={handleAddSkill}>
-                      Add
-                    </Button>
-                  </div>
-                )}
-                <div className="flex flex-wrap gap-2">
-                  {profile.skills.length > 0 ? (
-                    profile.skills.map((skill, index) => (
-                      <Badge key={index} variant="secondary" className="px-3 py-1">
-                        {skill}
-                        {isEditing && (
-                          <button
-                            onClick={() => handleRemoveSkill(skill)}
-                            className="ml-2 text-xs text-red-500 hover:text-red-700"
-                          >
-                            ×
-                          </button>
-                        )}
-                      </Badge>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No skills added yet</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Social Links Tab */}
-        <TabsContent value="social" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Social Links</CardTitle>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          {/* Profile Overview Card */}
+          <Card className="border-green-200">
+            <CardHeader className="bg-green-50">
+              <CardTitle className="flex items-center text-green-800">
+                <User className="h-5 w-5 mr-2" />
+                Profile Overview
+              </CardTitle>
               <CardDescription>
-                Add your professional social media profiles
+                Your professional identity and contact information
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="github" className="flex items-center gap-2">
-                    <Github className="h-4 w-4" />
-                    GitHub
-                  </Label>
-                  <Input
-                    id="github"
-                    value={profile.socialLinks?.github || "No Data Here"}
-                    placeholder="https://github.com/username"
-                    onChange={(e) => handleSocialLinkChange('github', e.target.value)}
-                    readOnly={!isEditing}
-                  />
+            <CardContent className="space-y-6 pt-6">
+              {/* Avatar & Basic Info */}
+              <div className="flex flex-col sm:flex-row items-start gap-6">
+                <div className="flex flex-col items-center gap-4">
+                  <Avatar className="h-24 w-24 border-4 border-green-100 shadow-lg">
+                    <AvatarImage src={userData?.profile?.avatar} alt={userData?.name || 'User avatar'} />
+                    <AvatarFallback className="text-xl bg-gradient-to-br from-green-500 to-green-600 text-white">
+                      {getUserInitials(userData?.name || session.user?.name || session.user?.email || 'U')}
+                    </AvatarFallback>
+                  </Avatar>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="linkedin" className="flex items-center gap-2">
-                    <Linkedin className="h-4 w-4" />
-                    LinkedIn
-                  </Label>
-                  <Input
-                    id="linkedin"
-                    value={profile.socialLinks?.linkedin || "No Data Here"}
-                    placeholder="https://linkedin.com/in/username"
-                    onChange={(e) => handleSocialLinkChange('linkedin', e.target.value)}
-                    readOnly={!isEditing}
+                
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center text-sm font-semibold">
+                          <User className="h-4 w-4 mr-2 text-green-600" />
+                          Full Name *
+                        </FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="John Doe" 
+                            {...field} 
+                            disabled={!isEditing}
+                            className="border-green-200 focus:border-green-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="twitter" className="flex items-center gap-2">
-                    <Twitter className="h-4 w-4" />
-                    Twitter
-                  </Label>
-                  <Input
-                    id="twitter"
-                    value={profile.socialLinks?.twitter || "No Data Here"}
-                    placeholder="https://twitter.com/username"
-                    onChange={(e) => handleSocialLinkChange('twitter', e.target.value)}
-                    readOnly={!isEditing}
+
+                  {/* Email Field - Read Only */}
+                  <FormItem>
+                    <FormLabel className="flex items-center text-sm font-semibold">
+                      <Mail className="h-4 w-4 mr-2 text-green-600" />
+                      Email Address
+                    </FormLabel>
+                    <div className="relative">
+                      <Input 
+                        type={showEmail ? "text" : "password"}
+                        value={session.user?.email || ''}
+                        disabled
+                        className="pr-10 font-mono text-sm border-green-200"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-green-600"
+                        onClick={() => setShowEmail(!showEmail)}
+                      >
+                        {showEmail ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    <FormDescription className="text-xs">
+                      Email cannot be changed for security reasons
+                    </FormDescription>
+                  </FormItem>
+
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center text-sm font-semibold">
+                          <Phone className="h-4 w-4 mr-2 text-green-600" />
+                          Phone Number
+                        </FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="+1 (555) 123-4567" 
+                            {...field} 
+                            disabled={!isEditing}
+                            className="border-green-200 focus:border-green-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="portfolio" className="flex items-center gap-2">
-                    <Globe className="h-4 w-4" />
-                    Portfolio
-                  </Label>
-                  <Input
-                    id="portfolio"
-                    value={profile.socialLinks?.portfolio || "No Data Here"}
-                    placeholder="https://yourportfolio.com"
-                    onChange={(e) => handleSocialLinkChange('portfolio', e.target.value)}
-                    readOnly={!isEditing}
+
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center text-sm font-semibold">
+                          <MapPin className="h-4 w-4 mr-2 text-green-600" />
+                          Location
+                        </FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="San Francisco, CA" 
+                            {...field} 
+                            disabled={!isEditing}
+                            className="border-green-200 focus:border-green-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+
+          {/* Professional Details */}
+          <Card className="border-green-200">
+            <CardHeader className="bg-green-50">
+              <CardTitle className="flex items-center text-green-800">
+                Professional Details
+              </CardTitle>
+              <CardDescription>
+                Your career information and professional background
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold">Job Title *</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Senior Software Engineer" 
+                          {...field} 
+                          disabled={!isEditing}
+                          className="border-green-200 focus:border-green-500"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="company"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold">Company</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Tech Corporation Inc." 
+                          {...field} 
+                          disabled={!isEditing}
+                          className="border-green-200 focus:border-green-500"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="education"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-semibold">Education</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Bachelor of Science in Computer Science" 
+                        {...field} 
+                        disabled={!isEditing}
+                        className="border-green-200 focus:border-green-500"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="experience"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-semibold">Experience</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="5+ years in software development" 
+                        {...field} 
+                        disabled={!isEditing}
+                        className="border-green-200 focus:border-green-500"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="bio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-semibold">Professional Bio</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describe your professional background, skills, and career aspirations..."
+                        className="min-h-32 resize-none border-green-200 focus:border-green-500"
+                        {...field}
+                        disabled={!isEditing}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {field.value?.length || 0}/500 characters
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="skills"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-semibold">Skills & Technologies</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="JavaScript, React, Node.js, TypeScript, Python, AWS, Docker..."
+                        className="border-green-200 focus:border-green-500"
+                        {...field}
+                        disabled={!isEditing}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Separate skills with commas
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Account Information */}
+          <Card className="border-green-200">
+            <CardHeader className="bg-green-50">
+              <CardTitle className="flex items-center text-green-800">
+                Account Information
+              </CardTitle>
+              <CardDescription>
+                Your account details and security settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-green-50 rounded-lg">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold flex items-center">
+                    <User className="h-4 w-4 mr-2 text-green-600" />
+                    User ID
+                  </label>
+                  <Input value={userData?._id || userData?.id || 'N/A'} disabled className="font-mono text-xs border-green-200" />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">Account Role</label>
+                  <Input value={userData?.role || 'user'} disabled className="capitalize border-green-200" />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">Membership Type</label>
+                  <Input value={userData?.membershipType || "Free Tier"} disabled className="capitalize border-green-200" />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">Verification Status</label>
+                  <Input 
+                    value={userData?.isVerified ? "Verified" : "Pending Verification"} 
+                    disabled 
+                    className="border-green-200"
+                  />
+                </div>
+              </div>
+
+              <Separator className="my-6" />
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button variant="outline" className="flex-1 border-green-200 text-green-700 hover:bg-green-50">
+                  Change Password
+                </Button>
+                <Button variant="outline" className="flex-1 border-green-200 text-green-700 hover:bg-green-50">
+                  Two-Factor Authentication
+                </Button>
+                <Button variant="outline" className="flex-1 text-red-600 border-red-200 hover:text-red-700 hover:bg-red-50">
+                  Delete Account
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </form>
+      </Form>
     </div>
   );
 }
