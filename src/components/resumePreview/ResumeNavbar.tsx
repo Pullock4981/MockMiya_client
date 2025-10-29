@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
+
 import { motion } from 'framer-motion';
 import { ChevronDown, LogOut, Settings, User } from 'lucide-react';
 import Link from 'next/link';
@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import ThemeSwitch from '../ui/ThemeSwitch';
 import Swal from 'sweetalert2';
+import { useAuth } from '@/context/AuthContext/AuthContext';
 export function ResumeNavbar() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);

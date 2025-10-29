@@ -16,7 +16,7 @@ import { useAdditionalInfo } from "@/context/ResumeContext/AdditionalInfo";
 import { useMeta } from "@/context/ResumeContext/MetaContext";
 import { ResumeData, FormStep } from "@/types/resume";
 import { useATS } from "./useATS";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext/AuthContext";
 import { saveResumeStep } from "@/utils/resumeActions";
 
 import { v4 as uuidv4 } from "uuid";
