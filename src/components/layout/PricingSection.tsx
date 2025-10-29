@@ -1,16 +1,16 @@
-
-
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Check, Zap, Crown, Rocket } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
+import PaymentModal from "./PaymentModal";
 
-// ✅ Define types for plans
+
+// ✅ Define types for plans for getting more access
 interface Plan {
   name: string;
-  price: string; // Example: "$19"
+  price: string; 
   period: string;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -78,41 +78,13 @@ const plans: Plan[] = [
 
 const PricingSection: React.FC = () => {
   const router = useRouter();
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null); // ✅ For modal control
 
-  // ✅ Typed parameter (no 'any')
-  const handlePlanClick = async (plan: Plan) => {
-    // Free plan → direct dashboard
+  const handlePlanClick = (plan: Plan) => {
     if (plan.price === "$0") {
       router.push("/dashboard");
-      return;
-    }
-
-    // Convert "$19" → 19
-    const priceValue = parseFloat(plan.price.replace("$", ""));
-
-    try {
-      const res = await fetch("/api/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          plan: {
-            name: plan.name,
-            description: plan.description,
-            price: priceValue,
-          },
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Payment initialization failed. Please try again.");
-      }
-    } catch (error) {
-      // console.error("Error starting payment:", error);
-      alert("Something went wrong during payment initialization.");
+    } else {
+      setSelectedPlan(plan); // ✅ open payment modal
     }
   };
 
@@ -210,9 +182,13 @@ const PricingSection: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* ✅ Payment Modal */}
+      {selectedPlan && (
+        <PaymentModal plan={selectedPlan} onClose={() => setSelectedPlan(null)} />
+      )}
     </section>
   );
 };
 
 export default PricingSection;
-

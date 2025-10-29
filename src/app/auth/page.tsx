@@ -1,7 +1,4 @@
 
-
-
-
 'use client';
 
 import React, { Suspense, useEffect, useState } from 'react';
@@ -18,6 +15,7 @@ import signupAnimation from '@/assets/lottie/signup.json';
 import LoginForm from './LoginForm';
 import SignupFormComponent from './SignupForm'; // আলাদা SignupForm
 import GoogleLoginButton from './socialAuth/GoogleLogin';
+import GithubLoginButton from './socialAuth/GithubLogin';
 
 function AuthPageInner() {
   const searchParams = useSearchParams();
@@ -52,6 +50,10 @@ function AuthPageInner() {
           {/* Social login */}
           <div className='py-8'>
             <GoogleLoginButton />
+          </div>
+             {/* Social login */}
+          <div className='pb-8'>
+            <GithubLoginButton />
           </div>
 
           {/* Tabs */}
