@@ -7,10 +7,10 @@ import React, { useState } from "react";
 import PaymentModal from "./PaymentModal";
 
 
-// ✅ Define types for plans
+// ✅ Define types for plans for getting more access
 interface Plan {
   name: string;
-  price: string; // Example: "$19"
+  price: string; 
   period: string;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
