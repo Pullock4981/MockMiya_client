@@ -11,18 +11,20 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
 
   useEffect(() => {
-    if (!loading) {
+    // Only redirect if loading finished AND user is not undefined
+    if (!loading && user !== undefined) {
       if (!user) {
-        router.replace(`/login?from=${pathname}`);
-      } else if (user.role !== 'System Admin' && user.role !== 'Admin') {
-        router.replace(`/dashboard?from=${pathname}`);
+        router.replace(`/auth?redirect=${encodeURIComponent(pathname)}`);
+      } else if (!['System Admin', 'Admin'].includes(user.role)) {
+        router.replace(`/dashboard?redirect=${encodeURIComponent(pathname)}`);
       }
     }
   }, [user, loading, pathname, router]);
 
-  if (loading || !user) return <LoadingSpinner />;
+  if (loading || user === undefined) return <LoadingSpinner />;
 
-  if (user.role !== 'System Admin' && user.role !== 'Admin') return null;
+  // Only render children if user is admin
+  if (!user || !['System Admin', 'Admin'].includes(user.role)) return null;
 
   return <>{children}</>;
 };
