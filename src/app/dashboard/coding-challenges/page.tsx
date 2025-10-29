@@ -1087,17 +1087,15 @@ export default function CodingChallenges() {
   const generateRandomQuestions = useCallback((roleId: string, count: number, category?: QuestionCategory): Question[] => {
     const role = quizRoles.find(r => r.id === roleId);
     if (!role) return [];
-
     let filteredQuestions = role.questions;
     if (category) {
       // category might be id or full object depending on your types; match by id if needed
       filteredQuestions = role.questions.filter(q => q.category === category || q.category === (category as unknown as string));
     }
-
     if (filteredQuestions.length === 0) {
       filteredQuestions = role.questions;
     }
-
+    
     const shuffled = [...filteredQuestions].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, Math.min(count, filteredQuestions.length));
   }, []);
@@ -1112,7 +1110,7 @@ export default function CodingChallenges() {
 
     // small UX delay
     await new Promise(resolve => setTimeout(resolve, 800));
-
+    
     const generatedQuestions = generateRandomQuestions(config.role, config.questionCount, config.category);
     if (generatedQuestions.length === 0) {
       alert('No questions available for this role and category combination');
@@ -1148,7 +1146,7 @@ export default function CodingChallenges() {
 
     const newAnswers = [...quizState.answers];
     newAnswers[quizState.currentQuestion] = answerIndex;
-
+    
     setQuizState({
       ...quizState,
       answers: newAnswers,
@@ -1157,7 +1155,7 @@ export default function CodingChallenges() {
 
   const nextQuestion = () => {
     if (!quizState) return;
-
+    
     if (quizState.currentQuestion < questions.length - 1) {
       setQuizState({
         ...quizState,
@@ -1177,7 +1175,7 @@ export default function CodingChallenges() {
 
   const prevQuestion = () => {
     if (!quizState || quizState.currentQuestion === 0) return;
-
+    
     setQuizState({
       ...quizState,
       currentQuestion: quizState.currentQuestion - 1,
@@ -1191,19 +1189,19 @@ export default function CodingChallenges() {
     const timer = setInterval(() => {
       setQuizState(prev => {
         if (!prev || prev.timeRemaining <= 0) return prev;
-
+        
         if (prev.timeRemaining === 1) {
           const score = calculateScore();
           setShowLeftPanel(true);
-          return {
-            ...prev,
-            timeRemaining: 0,
+          return { 
+            ...prev, 
+            timeRemaining: 0, 
             isCompleted: true,
             endTime: new Date(),
             score,
           };
         }
-
+        
         return { ...prev, timeRemaining: prev.timeRemaining - 1 };
       });
     }, 1000);
@@ -1219,7 +1217,7 @@ export default function CodingChallenges() {
 
   const calculateScore = (): number => {
     if (!quizState) return 0;
-
+    
     return quizState.answers.reduce((score, answer, index) => {
       return answer === questions[index]?.correctAnswer ? score + 1 : score;
     }, 0);
@@ -1227,40 +1225,40 @@ export default function CodingChallenges() {
 
   const calculateTimeTaken = (): string => {
     if (!quizState || !quizState.startTime) return '0:00';
-
+    
     const endTime = quizState.endTime || new Date();
     const timeDiff = endTime.getTime() - quizState.startTime.getTime();
-
+    
     const totalSeconds = Math.floor(timeDiff / 1000);
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
-
+    
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   const calculateTimeSaved = (): string => {
     if (!quizState || !quizState.startTime) return '0:00';
-
+    
     const totalAllowedSeconds = quizState.config.duration * 60;
     const endTime = quizState.endTime || new Date();
     const timeTakenSeconds = Math.floor((endTime.getTime() - quizState.startTime.getTime()) / 1000);
-
+    
     const timeSavedSeconds = totalAllowedSeconds - timeTakenSeconds;
-
+    
     if (timeSavedSeconds <= 0) return '0:00';
-
+    
     const minutes = Math.floor(timeSavedSeconds / 60);
     const seconds = timeSavedSeconds % 60;
-
+    
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   const completedBeforeTimeLimit = (): boolean => {
     if (!quizState || !quizState.startTime || !quizState.endTime) return false;
-
+    
     const totalAllowedSeconds = quizState.config.duration * 60;
     const timeTakenSeconds = Math.floor((quizState.endTime.getTime() - quizState.startTime.getTime()) / 1000);
-
+    
     return timeTakenSeconds < totalAllowedSeconds;
   };
 
@@ -1275,11 +1273,11 @@ export default function CodingChallenges() {
 
   const getIncorrectAnswers = () => {
     if (!quizState) return [];
-
+    
     return questions.map((question, index) => {
       const userAnswer = quizState.answers[index];
       const isCorrect = userAnswer === question.correctAnswer;
-
+      
       if (!isCorrect) {
         return {
           question,
@@ -1299,11 +1297,11 @@ export default function CodingChallenges() {
 
   const getAllAnswers = () => {
     if (!quizState) return [];
-
+    
     return questions.map((question, index) => {
       const userAnswer = quizState.answers[index];
       const isCorrect = userAnswer === question.correctAnswer;
-
+      
       return {
         question,
         userAnswer,
