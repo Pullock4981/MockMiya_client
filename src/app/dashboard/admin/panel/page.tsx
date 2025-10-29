@@ -73,11 +73,18 @@ const AdminPanel = () => {
         cancelToken: cancelTokenRef.current.token,
       });
       setStats(data);
-    } catch (err: any) {
-      if (!axios.isCancel(err)) console.error("❌ Error fetching stats:", err);
+    } catch (err: unknown) {
+      if (!axios.isCancel(err)) {
+        if (err instanceof Error) {
+          console.error("❌ Error fetching stats:", err.message);
+        } else {
+          console.error("❌ Error fetching stats:", err);
+        }
+      }
     } finally {
       if (showSkeleton) setLoading(false);
     }
+
   };
 
   // Initial load
@@ -219,26 +226,26 @@ const AdminPanel = () => {
                 {loading
                   ? Array(6).fill(0).map((_, i) => <CustomSkeleton key={i} height={24} />)
                   : [
-                      { label: "API Server", status: "Healthy" },
-                      { label: "Database", status: "Connected" },
-                      { label: "AI Services", status: "Running" },
-                      { label: "File Storage", status: "Available" },
-                      { label: "Email Service", status: "Degraded" },
-                      { label: "Background Jobs", status: "Processing" },
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center justify-between text-sm">
-                        <span>{item.label}</span>
-                        <Badge
-                          className={
-                            ["Healthy", "Connected", "Running", "Available", "Processing"].includes(item.status)
-                              ? "bg-green-primary"
-                              : "bg-yellow-400"
-                          }
-                        >
-                          {item.status}
-                        </Badge>
-                      </div>
-                    ))
+                    { label: "API Server", status: "Healthy" },
+                    { label: "Database", status: "Connected" },
+                    { label: "AI Services", status: "Running" },
+                    { label: "File Storage", status: "Available" },
+                    { label: "Email Service", status: "Degraded" },
+                    { label: "Background Jobs", status: "Processing" },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center justify-between text-sm">
+                      <span>{item.label}</span>
+                      <Badge
+                        className={
+                          ["Healthy", "Connected", "Running", "Available", "Processing"].includes(item.status)
+                            ? "bg-green-primary"
+                            : "bg-yellow-400"
+                        }
+                      >
+                        {item.status}
+                      </Badge>
+                    </div>
+                  ))
                 }
               </div>
             </CardContent>
@@ -254,26 +261,25 @@ const AdminPanel = () => {
               {loading
                 ? Array(5).fill(0).map((_, i) => <CustomSkeleton key={i} height={24} />)
                 : stats?.recentActivities?.map((act, i) => (
-                    <div key={i} className="flex items-center space-x-3">
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          act.type === "success"
-                            ? "bg-green-primary"
-                            : act.type === "warning"
+                  <div key={i} className="flex items-center space-x-3">
+                    <div
+                      className={`w-2 h-2 rounded-full ${act.type === "success"
+                          ? "bg-green-primary"
+                          : act.type === "warning"
                             ? "bg-yellow-400"
                             : act.type === "error"
-                            ? "bg-red-400"
-                            : "bg-blue-400"
+                              ? "bg-red-400"
+                              : "bg-blue-400"
                         }`}
-                      />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">{act.action}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(act.time).toLocaleString()}
-                        </p>
-                      </div>
+                    />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{act.action}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(act.time).toLocaleString()}
+                      </p>
                     </div>
-                  ))
+                  </div>
+                ))
               }
             </CardContent>
           </Card>

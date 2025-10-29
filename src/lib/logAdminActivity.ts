@@ -8,7 +8,7 @@ export async function logAdminActivity(
   level: "info" | "success" | "warning" | "error" = "info",
   page: ActivityType | string = "other",
   userId?: string | null,
-  meta?: Record<string, any>
+  meta?: Record<string, unknown> 
 ) {
   try {
     const { db } = await connectDB();
@@ -23,7 +23,6 @@ export async function logAdminActivity(
       createdAt: new Date(),
     });
   } catch (err) {
-    // don't throw — just log to server console
     console.error("❌ logAdminActivity error:", err);
   }
 }

@@ -991,52 +991,54 @@ export default function UserManagement() {
     cancelTokenRef.current = axios.CancelToken.source();
 
     try {
-      const params: any = {
-        page,
-        perPage,
-        search: debouncedSearch || undefined,
-        role: roleFilter || undefined,
-        status: statusFilter || undefined,
-      };
-      if (opts?.skipStats) params.skipStats = true;
+  const params = {
+    page,
+    perPage,
+    search: debouncedSearch || undefined,
+    role: roleFilter || undefined,
+    status: statusFilter || undefined,
+    ...(opts?.skipStats ? { skipStats: true } : {}),
+  };
 
-      const res = await axios.get("/dashboard/admin/api/user-management", {
-        params,
-        cancelToken: cancelTokenRef.current.token,
+  const res = await axios.get("/dashboard/admin/api/user-management", {
+    params,
+    cancelToken: cancelTokenRef.current?.token,
+  });
+
+  const payload = res.data ?? {};
+  setUsers((payload.users ?? []) as APIUser[]);
+  setTotal(payload.meta?.total ?? 0);
+
+  if (!opts?.skipStats) {
+    const s = payload.stats ?? null;
+    if (s) {
+      const totalUsers = s.total ?? s.totalUsers ?? 0;
+      const newLast30Days = s.newLast30Days ?? s.newUsersLast30Days ?? 0;
+      setStats({
+        total: totalUsers,
+        activeUsers: s.activeUsers ?? 0,
+        premiumUsers: s.premiumUsers ?? 0,
+        verifiedUsers: s.verifiedUsers ?? 0,
+        newLast30Days,
+        usersByRole: s.usersByRole ?? [],
       });
-
-      const payload = res.data ?? {};
-      setUsers((payload.users ?? []) as APIUser[]);
-      setTotal(payload.meta?.total ?? 0);
-
-      if (!opts?.skipStats) {
-        const s = payload.stats ?? null;
-        if (s) {
-          const totalUsers = s.total ?? s.totalUsers ?? 0;
-          const newLast30Days = s.newLast30Days ?? s.newUsersLast30Days ?? 0;
-          setStats({
-            total: totalUsers,
-            activeUsers: s.activeUsers ?? 0,
-            premiumUsers: s.premiumUsers ?? 0,
-            verifiedUsers: s.verifiedUsers ?? 0,
-            newLast30Days,
-            usersByRole: s.usersByRole ?? [],
-          });
-        } else {
-          setStats(null);
-        }
-        setRecentActivities(payload.recentActivities ?? []);
-      } else {
-        if (payload.recentActivities) setRecentActivities(payload.recentActivities);
-      }
-    } catch (err: any) {
-      if (!axios.isCancel(err)) {
-        console.error("Error fetching users:", err);
-      }
-    } finally {
-      if (opts?.initial) setInitialLoading(false);
-      else setFetching(false);
+    } else {
+      setStats(null);
     }
+    setRecentActivities(payload.recentActivities ?? []);
+  } else {
+    if (payload.recentActivities) setRecentActivities(payload.recentActivities);
+  }
+} catch (err: unknown) {
+  if (!axios.isCancel(err)) {
+    if (err instanceof Error) console.error("Error fetching users:", err.message);
+    else console.error("Error fetching users:", err);
+  }
+} finally {
+  if (opts?.initial) setInitialLoading(false);
+  else setFetching(false);
+}
+
   };
 
   // ----- debounce search (200ms) -----
@@ -1150,15 +1152,23 @@ export default function UserManagement() {
     }
     setAdding(true);
     try {
-      const res = await axios.post("/dashboard/admin/api/user-management", { ...addForm });
-      await Swal.fire("Created", res.data?.message ?? "User created", "success");
-      setOpenAddModal(false);
-      setAddForm({ name: "", email: "", password: "", role: "user", membershipType: "Free" });
-      await fetchUsers();
-    } catch (err: any) {
-      console.error(err);
-      await Swal.fire("Error", err?.response?.data?.error ?? "Failed to add user", "error");
-    } finally { setAdding(false); }
+  const res = await axios.post("/dashboard/admin/api/user-management", { ...addForm });
+  await Swal.fire("Created", res.data?.message ?? "User created", "success");
+  setOpenAddModal(false);
+  setAddForm({ name: "", email: "", password: "", role: "user", membershipType: "Free" });
+  await fetchUsers();
+} catch (err: unknown) {
+  if (err instanceof Error) {
+    console.error(err.message);
+    await Swal.fire("Error", err.message, "error");
+  } else {
+    console.error(err);
+    await Swal.fire("Error", "Failed to add user", "error");
+  }
+} finally {
+  setAdding(false);
+}
+
   };
 
   const submitBulkRoleUpdate = async (): Promise<void> => {
@@ -1261,17 +1271,18 @@ export default function UserManagement() {
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search users by name, email, or ID..."
-                  className="pl-10 pr-12"
-                  value={search}
-                  onChange={(e: any) => setSearch(e.target.value)}
-                  onKeyDown={(e: any) => {
-                    if (e.key === "Enter") {
-                      setDebouncedSearch(e.currentTarget.value);
-                      setPage(1);
-                    }
-                  }}
-                />
+  placeholder="Search users by name, email, or ID..."
+  className="pl-10 pr-12"
+  value={search}
+  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      setDebouncedSearch(e.currentTarget.value);
+      setPage(1);
+    }
+  }}
+/>
+
                 {!initialLoading && fetching && (
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                     <SmallSpinner />

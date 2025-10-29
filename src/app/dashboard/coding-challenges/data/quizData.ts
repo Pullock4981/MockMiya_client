@@ -1,4 +1,4 @@
-import { Role, QuestionCategory } from '@/app/dashboard/coding-challenges/types/quiz';
+import { Role } from '@/app/dashboard/coding-challenges/types/quiz';
 
 export const quizRoles: Role[] = [
  {
