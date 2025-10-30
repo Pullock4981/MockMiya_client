@@ -81,12 +81,12 @@ const blogPosts: BlogPost[] = [
 // ---------------- Blog List Page ----------------
 export default function BlogPage() {
   return (
-    <div className="min-h-screen font-[Poppins] mt-16 pb-28">
-      <main className="container mx-auto px-4 py-16">
+    <div className="min-h-screen font-[geist] mt-16 pb-28">
+      <main className="container mx-auto px-4 py-28">
         {/* Header */}
         <header className="text-center mb-20">
           <div className="relative w-full md:w-auto">
-            <div className="bg-gradient-to-r from-green-500 to-blue-500 px-6 md:px-16 py-6 md:py-10 rounded-none md:rounded-2xl shadow-2xl relative z-10">
+            <div className="bg-primary/60 px-6 md:px-16 py-6 md:py-10 rounded-none md:rounded-2xl shadow-2xl relative z-10">
               <h1 className="text-3xl md:text-6xl font-extrabold tracking-widest  uppercase drop-shadow-lg">
                 MockMiya <span className="">Blog</span>
               </h1>
@@ -122,7 +122,7 @@ export default function BlogPage() {
                 <span className="text-xs font-semibold uppercase  tracking-widest">
                   {post.category}
                 </span>
-                <h2 className="text-2xl md:text-3xl font-bold mt-3 mb-4 bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent hover:from-green-300 hover:to-blue-300 transition-colors duration-300">
+                <h2 className="text-2xl md:text-3xl font-bold mt-3 mb-4 text-primary/80 transition-colors duration-300">
                   {post.title}
                 </h2>
                 <p className=" mt-2 text-sm md:text-base leading-relaxed">

@@ -3,7 +3,7 @@ import { Briefcase, FileText, MessageCircle, Users, Star } from "lucide-react";
 
 export default function AboutPage() {
   return (
-    <main className="py-8 min-h-screen">
+    <main className="py-28 min-h-screen">
       {/* Header */}
       <section className="text-center py-16 px-4">
         <h1 className="text-4xl font-bold  mb-4">About MockMiya</h1>

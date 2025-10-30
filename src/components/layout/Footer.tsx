@@ -213,16 +213,16 @@ export default function Footer() {
             <div>
               <h3 className="text-lg font-semibold text-foreground mb-4">Company</h3>
               <ul className="space-y-3 text-sm">
-                <li><a href="#" className="text-foreground-secondary hover:text-primary transition-colors">About</a></li>
-                <li><a href="#" className="text-foreground-secondary hover:text-primary transition-colors">Blog</a></li>
-                <li><a href="#" className="text-foreground-secondary hover:text-primary transition-colors">Contact</a></li>
+                <li><a href="/about" className="text-foreground-secondary hover:text-primary transition-colors">About</a></li>
+                <li><a href="/blog" className="text-foreground-secondary hover:text-primary transition-colors">Blog</a></li>
+                <li><a href="/contact" className="text-foreground-secondary hover:text-primary transition-colors">Contact</a></li>
               </ul>
             </div>
 
             <div>
               <h3 className="text-lg font-semibold text-foreground mb-4">Support</h3>
               <ul className="space-y-3 text-sm">
-                <li><a href="#" className="text-foreground-secondary hover:text-primary transition-colors">Documentation</a></li>
+                <li><a href="https://docs.google.com/document/d/1OUfkGXjVB8UbEVBfqqgZVO6v5qwJjOWQz8Z46UAPXHw/edit?tab=t.0" target="blank" className="text-foreground-secondary hover:text-primary transition-colors">Documentation</a></li>
                 <li><a href="#" className="text-foreground-secondary hover:text-primary transition-colors">Privacy Policy</a></li>
               </ul>
             </div>
