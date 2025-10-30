@@ -16,6 +16,7 @@ import Link from "next/link";
 import ThemeSwitch from "../ui/ThemeSwitch";
 import { useAuth } from "@/context/AuthContext/AuthContext";
 import Swal from "sweetalert2";
+import Logo from "./Logo";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -81,10 +82,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <Code2 className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold text-foreground">MockMiya</span>
+           <Logo></Logo>
           </div>
 
           {/* Desktop Navigation */}
