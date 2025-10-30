@@ -98,13 +98,13 @@ const UploadBanner: React.FC<{
       tabIndex={0}
       className={`w-full border-2 transition-colors rounded-xl p-6 cursor-pointer flex flex-col md:flex-row items-center justify-between gap-6 ${dragOver ? "border-blue-500 bg-blue-50" : "border-dashed border-gray-300"}`}
     >
-      <div className="flex items-center gap-4 w-full md:w-auto">
+      <div className="flex items-center justify-center md:justify-start gap-4 w-full">
         <div className="p-3 rounded-lg bg-gradient-to-r from-blue-100 to-blue-200 flex items-center justify-center">
           <CloudUpload className="h-7 w-7 text-blue-600" />
         </div>
-        <div className="text-left">
+        <div className="text-left hidden md:block">
           <p className="font-semibold text-lg">Upload or Drag & Drop your resume</p>
-          <p className="text-sm text-muted-foreground mt-1 max-w-md">We accept PDF, DOC and DOCX files. Max 10MB. We’ll auto-fill your resume — you can edit after upload.</p>
+          <p className="text-sm text-muted-foreground mt-1 max-w-md">We accept PDF files. Max 10MB. We’ll auto-fill your resume — you can edit after upload.</p>
           <div className="mt-2">
             {uploading && currentFileName ? (
               <div className="space-y-1">
@@ -131,11 +131,11 @@ const UploadBanner: React.FC<{
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="hidden md:block text-sm text-muted-foreground">Accept: PDF, DOC, DOCX</div>
+        <div className="hidden md:block text-sm text-muted-foreground">Accept: PDF</div>
         <input
           ref={fileInputRef}
           type="file"
-          accept=".pdf,.doc,.docx"
+          accept=".pdf"
           className="hidden"
           onChange={(e) => handleFiles(e.target.files)}
         />
@@ -374,7 +374,7 @@ const handleFileUpload = useCallback(
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredResumes.map((r) => (
-              <Card key={r.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border rounded-2xl">
+              <div key={r.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border rounded-2xl">
                 <div className="relative h-40 bg-gray-100">
                   <Image
                     src={r.thumbnailUrl || "/assets/default-thumbnail.jpg"}
@@ -403,7 +403,7 @@ const handleFileUpload = useCallback(
                     </Button>
                   </div>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         )}

@@ -137,8 +137,22 @@
   --sidebar-accent-foreground: rgb(255, 255, 255);
   --sidebar-border: rgb(235, 235, 235);
   --sidebar-ring: rgb(255, 140, 0);
-}
 
+  /* ---------- helper RGB vars (for opacity utilities) ---------- */
+  --primary-rgb: 255,140,0;
+  --primary-dark-rgb: 204,112,0;
+  --primary-light-rgb: 255,180,80;
+  --accent-rgb: 255,140,0;
+  --destructive-rgb: 190,48,48;
+  --destructive-foreground-rgb: 255,255,255;
+  --success-rgb: 0,204,102;
+  --warning-rgb: 255,217,102;
+  --border-rgb: 235,235,235;
+  --background-rgb: 255,255,255;
+  --card-rgb: 255,255,255;
+  --foreground-rgb: 37,37,37;
+  --foreground-muted-rgb: 128,140,156;
+}
 
 /* ===============================
    Dark Theme Variables
@@ -196,6 +210,20 @@
   --sidebar-accent-foreground: rgb(245, 245, 245);
   --sidebar-border: rgb(50, 52, 58);
   --sidebar-ring: rgb(0, 255, 128);
+
+  /* dark helper rgb overrides */
+  --primary-rgb: 0,255,128;
+  --primary-dark-rgb: 0,204,102;
+  --primary-light-rgb: 102,255,178;
+  --accent-rgb: 0,255,128;
+  --destructive-rgb: 220,38,38;
+  --destructive-foreground-rgb: 245,245,245;
+  --success-rgb: 0,255,128;
+  --border-rgb: 50,52,58;
+  --background-rgb: 20,22,25;
+  --card-rgb: 25,27,30;
+  --foreground-rgb: 245,245,245;
+  --foreground-muted-rgb: 170,170,170;
 }
 
 /* ===============================
@@ -219,3 +247,105 @@
   font-size: 16px;
   font-weight: 600;
 }
+
+/* ===============================
+   SHORT / UTILITY CLASSES (New)
+   - Use these in JSX instead of long `bg-[var(...)]/10 text-[var(...)]` forms
+   - All use CSS variables so they follow light/dark automatically
+   =============================== */
+
+/* ---------- Background helpers (solid) ---------- */
+.bg-background { background-color: rgb(var(--background-rgb)); }
+.bg-background-secondary { background-color: var(--background-secondary); }
+.bg-background-tertiary { background-color: var(--background-tertiary); }
+.bg-card { background-color: rgb(var(--card-rgb)); }
+
+/* primary */
+.bg-primary { background-color: rgb(var(--primary-rgb)); }
+.bg-primary-10 { background-color: rgba(var(--primary-rgb), 0.10); }
+.bg-primary-20 { background-color: rgba(var(--primary-rgb), 0.20); }
+.bg-primary-50 { background-color: rgba(var(--primary-rgb), 0.50); }
+
+/* accent */
+.bg-accent { background-color: rgb(var(--accent-rgb)); }
+.bg-accent-10 { background-color: rgba(var(--accent-rgb), 0.10); }
+
+/* success / destructive / warning */
+.bg-success { background-color: rgb(var(--success-rgb)); }
+.bg-success-10 { background-color: rgba(var(--success-rgb), 0.10); }
+.bg-destructive { background-color: rgb(var(--destructive-rgb)); }
+.bg-destructive-10 { background-color: rgba(var(--destructive-rgb), 0.10); }
+.bg-warning { background-color: rgb(var(--warning-rgb)); }
+.bg-warning-10 { background-color: rgba(var(--warning-rgb), 0.10); }
+
+/* ---------- Text color helpers ---------- */
+.text-foreground { color: var(--foreground); }
+.text-foreground-muted { color: var(--foreground-muted); }
+.text-foreground-secondary { color: var(--foreground-secondary); }
+
+.text-primary { color: rgb(var(--primary-rgb)); }
+.text-primary-foreground { color: var(--primary-foreground); }
+.text-accent { color: rgb(var(--accent-rgb)); }
+
+.text-success { color: rgb(var(--success-rgb)); }
+.text-destructive { color: rgb(var(--destructive-rgb)); }
+.text-warning { color: rgb(var(--warning-rgb)); }
+
+/* ---------- Border helpers ---------- */
+.border { border-color: var(--border); }
+.border-light { border-color: var(--border-light); }
+
+.border-primary { border-color: rgb(var(--primary-rgb)); }
+.border-success { border-color: rgb(var(--success-rgb)); }
+.border-success-20 { border-color: rgba(var(--success-rgb), 0.20); }
+.border-destructive { border-color: rgb(var(--destructive-rgb)); }
+.border-destructive-20 { border-color: rgba(var(--destructive-rgb), 0.20); }
+
+/* ---------- Ring / outline ---------- */
+.ring-primary { box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.08); }
+.ring-accent { box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.08); }
+
+/* ---------- Small badges / pill helpers ---------- */
+.pill { display:inline-flex; align-items:center; gap:0.5rem; padding:0.25rem 0.5rem; border-radius:9999px; font-size:0.75rem; font-weight:600; }
+.pill-primary { background-color: rgba(var(--primary-rgb), 0.10); color: rgb(var(--primary-rgb)); }
+.pill-success { background-color: rgba(var(--success-rgb), 0.10); color: rgb(var(--success-rgb)); }
+.pill-destructive { background-color: rgba(var(--destructive-rgb), 0.10); color: rgb(var(--destructive-rgb)); }
+
+/* ---------- Gradient utilities ---------- */
+.bg-gradient-primary { background: linear-gradient(135deg, rgb(var(--primary-light-rgb)), rgb(var(--primary-dark-rgb))); color: var(--primary-foreground); }
+.bg-gradient-accent { background: linear-gradient(135deg, rgb(var(--accent-rgb)), rgb(var(--primary-rgb))); color: var(--accent-foreground); }
+.bg-gradient-success { background: linear-gradient(135deg, rgba(var(--success-rgb),1), rgba(var(--primary-light-rgb),1)); color: var(--foreground); }
+.bg-gradient-warning { background: linear-gradient(135deg, rgba(var(--warning-rgb),1), rgba(var(--primary-rgb),1)); color: var(--foreground); }
+.bg-gradient-danger { background: linear-gradient(135deg, rgb(var(--destructive-rgb)), var(--destructive-foreground)); color: var(--destructive-foreground); }
+
+.bg-gradient-hero { background: var(--gradient-hero); }
+.bg-gradient-card { background: var(--gradient-card); }
+.bg-gradient-glow { background: var(--gradient-glow); }
+
+/* ---------- Text gradient (for headings) ---------- */
+.text-gradient {
+  background: linear-gradient(90deg, rgb(var(--primary-rgb)), rgb(var(--accent-rgb)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- Utility combos (for faster usage) ---------- */
+.ui-card { background-color: var(--card); color: var(--card-foreground); border: 1px solid var(--border); border-radius: var(--radius); }
+.ui-muted { background-color: var(--muted); color: var(--muted-foreground); }
+
+/* ---------- Common sizes (optional) ---------- */
+.size-sm { padding: 0.5rem; }
+.size-md { padding: 1rem; }
+.size-lg { padding: 1.5rem; }
+
+/* ===============================
+   Usage notes:
+   - Replace e.g. `bg-[var(--destructive)]/10 text-[var(--destructive)]`
+     with `.bg-destructive-10 .text-destructive`
+   - Replace `border-[var(--success)]/20 bg-[var(--success)]/10` with
+     `.border-success-20 .bg-success-10`
+   - Use `.text-foreground` instead of `text-[var(--foreground)]`
+   - Gradient sections: use `.bg-gradient-primary`, `.bg-gradient-card` etc.
+   - All utilities depend on CSS variables so theme (dark/light) switches automatically.
+   =============================== */

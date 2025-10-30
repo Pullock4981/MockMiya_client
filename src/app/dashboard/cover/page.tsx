@@ -3,6 +3,7 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import jsPDF from "jspdf";
 import PrivateRoute from "@/app/Routes/PrivateRoute";
+import { Button } from "@/components/ui/button";
 
 interface FormData {
   name: string;
@@ -130,13 +131,14 @@ export default function HomePage() {
               className="p-3 border rounded-lg h-24 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
             />
 
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
+              className="font-semibold py-3 rounded-lg transition disabled:opacity-50"
             >
               {loading ? "Generating..." : "Generate Cover Letter"}
-            </button>
+            </Button>
+
           </form>
 
           {/* Generated Cover Letter */}

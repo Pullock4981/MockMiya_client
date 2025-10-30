@@ -1,23 +1,28 @@
-'use client';
+"use client";
 
-import { ThemeProvider } from '@/components/ui/ThemeProvider';
-import { Geist, Geist_Mono } from 'next/font/google';
-import { SessionProvider } from 'next-auth/react';
-import { AuthProvider } from '@/context/AuthContext/AuthContext';
-import type { ReactNode } from 'react';
-
-import './globals.css';
+import { ThemeProvider } from "@/components/ui/ThemeProvider";
+import { Geist, Geist_Mono } from "next/font/google";
+import { SessionProvider } from "next-auth/react";
+import type { ReactNode } from "react";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "./globals.css";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import { AuthProvider } from "@/context/AuthContext/AuthContext";
+import StripeProvider from "./providers/StripeProvider";
+import { usePathname } from "next/navigation";
 
 const geistSans = Geist({
-  subsets: ['latin'],
-  variable: '--font-geist',
-  display: 'swap',
+  subsets: ["latin"],
+  variable: "--font-geist",
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
-  subsets: ['latin'],
-  variable: '--font-geist-mono',
-  display: 'swap',
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
+  display: "swap",
 });
 
 interface RootLayoutProps {
@@ -25,12 +30,32 @@ interface RootLayoutProps {
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
+  const pathname = usePathname();
+
+  // যেসব রুটে Navbar/Footer দেখানো হবে না
+  const noLayoutRoutes = ["/dashboard", "/auth", "/checkout", "/resume"];
+
+  // চেক করি বর্তমান রুট ওইগুলোর মধ্যে পড়ে কিনা
+  const hideLayout = noLayoutRoutes.some((path) =>
+    pathname.startsWith(path)
+  );
+
   return (
     <html lang="en" className="antialiased" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <SessionProvider>
           <AuthProvider>
-            <ThemeProvider>{children}</ThemeProvider>
+            <ThemeProvider>
+              <StripeProvider>
+                {/* শুধু রুট রুটগুলোতে Navbar/Footer দেখাবে */}
+                {!hideLayout && <Navbar />}
+                {children}
+                {!hideLayout && <Footer />}
+              </StripeProvider>
+
+              {/* Toast notification container */}
+              <ToastContainer position="top-center" autoClose={3000} />
+            </ThemeProvider>
           </AuthProvider>
         </SessionProvider>
       </body>

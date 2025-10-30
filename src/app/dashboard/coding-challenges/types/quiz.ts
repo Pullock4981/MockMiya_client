@@ -1,3 +1,6 @@
+// types/quiz.ts
+export type QuestionCategory = 'beginner' | 'easy' | 'medium' | 'hard' | 'advanced';
+
 export interface Question {
   id: string;
   question: string;
@@ -9,7 +12,7 @@ export interface Question {
 
 export interface QuizConfig {
   role: string;
-  duration: number;
+  duration: number; // in minutes
   questionCount: number;
   customDuration?: number;
   customQuestionCount?: number;
@@ -19,11 +22,11 @@ export interface QuizConfig {
 export interface QuizState {
   config: QuizConfig;
   currentQuestion: number;
-  answers: number[];
+  answers: number[]; // index of selected answers
   startTime: Date | null;
   endTime: Date | null;
   isCompleted: boolean;
-  timeRemaining: number;
+  timeRemaining: number; // in seconds
   score: number;
 }
 
@@ -34,7 +37,19 @@ export interface Role {
   questions: Question[];
 }
 
-export type QuestionCategory = 'beginner' | 'easy' | 'medium' | 'hard' | 'advanced';
-
-// Export QuizRole as an alias for Role for backward compatibility
 export type QuizRole = Role;
+
+export interface AnswerReview {
+  question: Question;
+  userAnswer: number;
+  correctAnswer: number;
+  isCorrect: boolean;
+  questionNumber: number;
+}
+
+export interface IncorrectAnswer {
+  question: Question;
+  userAnswer: number;
+  correctAnswer: number;
+  questionNumber: number;
+}

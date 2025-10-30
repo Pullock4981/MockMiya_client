@@ -1,6 +1,5 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext/AuthContext';
 import { motion } from 'framer-motion';
 import { ChevronDown, LogOut, Settings, User } from 'lucide-react';
 import Link from 'next/link';
@@ -8,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import ThemeSwitch from '../ui/ThemeSwitch';
 import Swal from 'sweetalert2';
+import { useAuth } from '@/context/AuthContext/AuthContext';
 export function ResumeNavbar() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -65,6 +65,9 @@ const handleLogout = async () => {
     >
       {/* Left: Home Button */}
       <div>
+        <Link href="/">
+          <Button variant="default">🏠 Home</Button>
+        </Link>
         <Link href="/dashboard/resume">
           <Button variant="secondary">📋 Resume</Button>
         </Link>
@@ -85,11 +88,7 @@ const handleLogout = async () => {
             <div className="text-right hidden md:block">
               <div className="text-sm font-medium">{user?.name}</div>
             </div>
-            <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
-              <span className="text-sm font-medium text-white">
-                {user?.name?.charAt(0).toUpperCase() ?? 'U'}
-              </span>
-            </div>
+           
             <ChevronDown className="w-4 h-4 text-foreground-muted" />
           </button>
 

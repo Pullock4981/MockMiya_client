@@ -57,7 +57,7 @@ export const AiAvatar = ({ state }: AiAvatarProps) => {
 
       <div className="text-center">
         <p className="text-lg font-semibold capitalize text-foreground">{state}</p>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-white">
           {state === 'idle' && 'Ready to start'}
           {state === 'listening' && 'Listening to your answer...'}
           {state === 'thinking' && 'Processing your response...'}
