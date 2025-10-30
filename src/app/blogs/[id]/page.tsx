@@ -90,8 +90,8 @@ export default function BlogDetails({
   const recommended = blogPosts.filter((p) => p.id !== post.id).slice(0, 3);
 
   return (
-    <div className="my-8 min-h-screen font-[Poppins]">
-      <main className="w-11/12 mx-auto px-4 py-16">
+    <div className="my-8 min-h-screen font-[geist]">
+      <main className="w-11/12 mx-auto px-4 py-38">
         {/* Blog Details */}
         <article className="p-6 md:p-10 lg:p-12 rounded-3xl shadow-lg border">
           <span className="text-xs font-semibold uppercase  tracking-widest">

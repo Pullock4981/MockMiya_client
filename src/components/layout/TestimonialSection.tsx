@@ -32,6 +32,46 @@ const testimonials = [
     content: "The platform is incredibly intuitive and the AI is surprisingly accurate. It helped me prepare for system design questions and coding challenges. Worth every penny!",
     rating: 5,
     avatar: "AJ"
+  },
+    {
+    name: "Alex Johnson",
+    role: "Backend Developer",
+    company: "Stripe",
+    content: "The platform is incredibly intuitive and the AI is surprisingly accurate. It helped me prepare for system design questions and coding challenges. Worth every penny!",
+    rating: 5,
+    avatar: "AJ"
+  },
+    {
+    name: "Alex Johnson",
+    role: "Backend Developer",
+    company: "Stripe",
+    content: "The platform is incredibly intuitive and the AI is surprisingly accurate. It helped me prepare for system design questions and coding challenges. Worth every penny!",
+    rating: 5,
+    avatar: "AJ"
+  },
+    {
+    name: "Alex Johnson",
+    role: "Backend Developer",
+    company: "Stripe",
+    content: "The platform is incredibly intuitive and the AI is surprisingly accurate. It helped me prepare for system design questions and coding challenges. Worth every penny!",
+    rating: 5,
+    avatar: "AJ"
+  },
+    {
+    name: "Alex Johnson",
+    role: "Backend Developer",
+    company: "Stripe",
+    content: "The platform is incredibly intuitive and the AI is surprisingly accurate. It helped me prepare for system design questions and coding challenges. Worth every penny!",
+    rating: 5,
+    avatar: "AJ"
+  },
+    {
+    name: "Alex Johnson",
+    role: "Backend Developer",
+    company: "Stripe",
+    content: "The platform is incredibly intuitive and the AI is surprisingly accurate. It helped me prepare for system design questions and coding challenges. Worth every penny!",
+    rating: 5,
+    avatar: "AJ"
   }
 ];
 

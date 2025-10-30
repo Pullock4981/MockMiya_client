@@ -2,10 +2,11 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Play } from "lucide-react";
 import confidentManImage from "@/assets/confident-man-hero.jpg";
 import Image from "next/image";
+import Link from "next/link";
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-hero pt-16">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-hero pt-24 lg:pt-0">
       {/* Background glow effects */}
       <div className="absolute inset-0 bg-gradient-glow opacity-30"></div>
       <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
@@ -16,11 +17,11 @@ const HeroSection = () => {
           {/* Content */}
           <div className="space-y-8">
             <div className="space-y-4">
-              <div className="inline-flex items-center px-4 py-2 rounded-full bg-card border border-border text-sm text-foreground-secondary">
+              <div className="inline-flex items-center px-4 py-2 md:pt-0 rounded-full bg-card border border-border text-sm text-foreground-secondary">
                 <span className="w-2 h-2 bg-primary rounded-full mr-2 animate-pulse"></span>
                 AI-Powered Interview Platform
               </div>
-              
+
               <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
                 Master Your
                 <span className="text-gradient block">
@@ -28,7 +29,7 @@ const HeroSection = () => {
                 </span>
                 with AI
               </h1>
-              
+
               <p className="text-xl text-foreground-secondary max-w-lg leading-relaxed">
                 Revolutionary AI tool for developers. Build perfect resumes, practice interviews, and ace your next tech job with MockMiya comprehensive suite.
               </p>
@@ -36,15 +37,12 @@ const HeroSection = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-primary-foreground font-semibold px-8 py-4 rounded-xl glow-effect group">
-                Get Started Free
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              
-              <Button variant="outline" size="lg" className="border-border-light hover:bg-card-secondary px-8 py-4 rounded-xl group">
-                <Play className="mr-2 h-5 w-5" />
-                Watch Demo
-              </Button>
+              <Link href="/dashboard">
+                <Button size="lg" className="bg-primary cursor-pointer hover:bg-primary-dark text-primary-foreground font-semibold px-8 py-4 rounded-xl glow-effect group">
+                  Get Started Free
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
             </div>
 
             {/* Stats */}
@@ -68,12 +66,12 @@ const HeroSection = () => {
           <div className="relative">
             <div className="relative rounded-2xl overflow-hidden glow-effect">
               <Image
-                src={confidentManImage} 
-                alt="Confident developer ready for tech interviews with MockMiya AI platform" 
+                src={confidentManImage}
+                alt="Confident developer ready for tech interviews with MockMiya AI platform"
                 className="w-full h-auto animate-float"
               />
             </div>
-            
+
             {/* Floating elements */}
             <div className="absolute -top-4 -left-4 w-20 h-20 bg-primary/20 rounded-xl blur-sm animate-pulse"></div>
             <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-primary/30 rounded-full blur-sm animate-pulse delay-1000"></div>
