@@ -81,7 +81,7 @@ const blogPosts: BlogPost[] = [
 // ---------------- Blog List Page ----------------
 export default function BlogPage() {
   return (
-    <div className="min-h-screen font-[Poppins] mt-16">
+    <div className="min-h-screen font-[Poppins] mt-16 pb-28">
       <main className="container mx-auto px-4 py-16">
         {/* Header */}
         <header className="text-center mb-20">

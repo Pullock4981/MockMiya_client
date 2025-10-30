@@ -47,7 +47,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="w-11/12 mx-auto min-h-screen py-16">
+    <div className="w-11/12 mx-auto min-h-screen py-28">
       <div className="text-center mb-10">
         <h1 className="text-xl md:text-2xl lg:text-3xl font-bold">Get in Touch</h1>
         <p className="px-2 text-base mt-2">
