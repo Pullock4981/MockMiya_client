@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
@@ -18,11 +19,12 @@ interface Props {
 export default function VoiceChat({ config, onEnd }: Props) {
   const [state, setState] = useState<'idle' | 'listening' | 'thinking' | 'speaking'>('idle')
   const [timeLeft, setTimeLeft] = useState<number>(config.duration * 60)
+  const [isInterviewStarted, setIsInterviewStarted] = useState(false)
 
   const recognitionRef = useRef<SpeechRecognition | null>(null)
   const synthRef = useRef<SpeechSynthesis>(window.speechSynthesis)
 
-  // ✅ Speak function (stable reference)
+  // ✅ Speak function
   const speak = useCallback(
     (text: string) => {
       if (!text) return
@@ -30,11 +32,11 @@ export default function VoiceChat({ config, onEnd }: Props) {
 
       const utter = new SpeechSynthesisUtterance(text)
       utter.lang = 'en-US'
-      utter.onend = () => setTimeout(() => startListening(), 1000)
+      utter.onend = () => setTimeout(() => startListening(), 5000)
 
       synthRef.current.speak(utter)
     },
-    [] // no dependency — static function
+    []
   )
 
   // ✅ Send to AI API
@@ -56,15 +58,16 @@ export default function VoiceChat({ config, onEnd }: Props) {
         const data: { text: string } = await res.json()
         speak(data.text)
       } catch (err) {
-        // console.error('AI error:', err)
         speak('Sorry, there was an error connecting to the AI.')
       }
     },
     [config.jobRole, config.name, speak]
   )
 
-  // ✅ Timer logic
+  // ✅ Timer starts only after interview starts
   useEffect(() => {
+    if (!isInterviewStarted) return
+
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -77,7 +80,7 @@ export default function VoiceChat({ config, onEnd }: Props) {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [onEnd])
+  }, [isInterviewStarted, onEnd])
 
   // ✅ Setup speech recognition
   useEffect(() => {
@@ -109,6 +112,7 @@ export default function VoiceChat({ config, onEnd }: Props) {
   }
 
   const startInterview = () => {
+    setIsInterviewStarted(true) // ✅ start timer
     setState('speaking')
     speak(
       `Hello ${config.name}. Let's begin your interview for ${config.jobRole}. Tell me about yourself.`
@@ -125,17 +129,21 @@ export default function VoiceChat({ config, onEnd }: Props) {
     <div className="flex flex-col items-center gap-6">
       <AiAvatar state={state} />
 
-      <div className="text-center text-lg font-medium">
-        Time left: {formatTime(timeLeft)}
-      </div>
+      {/* ✅ Timer only visible after start */}
+      {isInterviewStarted && (
+        <div className="text-center text-lg font-medium">
+          Time left: {formatTime(timeLeft)}
+        </div>
+      )}
 
-      <button
-        onClick={startInterview}
-        className="bg-primary text-primary-foreground px-6 py-3 rounded-xl hover:opacity-90"
-      >
-        Start Interview
-      </button>
+      {!isInterviewStarted && (
+        <button
+          onClick={startInterview}
+          className="bg-primary text-primary-foreground px-6 py-3 rounded-xl hover:opacity-90"
+        >
+          Start Interview
+        </button>
+      )}
     </div>
   )
 }
-

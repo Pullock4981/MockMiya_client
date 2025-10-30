@@ -1,8 +1,3 @@
-// import { NextResponse } from "next/server";
-// import bcrypt from "bcryptjs";
-// import User from "@/models/User";
-// import { connectDB } from "@/lib/mongodb";
-// import { sendOTP } from "@/utils/sendOTP";
 
 // interface RegisterBody {
 //   name: string;

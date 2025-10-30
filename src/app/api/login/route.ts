@@ -1,7 +1,4 @@
-// import { NextRequest, NextResponse } from "next/server";
-// import User from "@/models/User";
-// import { connectDB } from "@/lib/mongodb";
-// import bcrypt from "bcryptjs";
+
 
 // interface LoginBody {
 //   email: string;
@@ -124,11 +121,10 @@
 
 
 
-// src/app/api/auth/login/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongodbNative";
-import { logAdminActivity } from "@/lib/logAdminActivity";
 
 interface LoginBody {
   email: string;
@@ -155,26 +151,21 @@ export async function POST(req: NextRequest) {
     // Find user by email
     const user = await usersCollection.findOne({ email: email.trim().toLowerCase() });
     if (!user) {
-      await logAdminActivity(`Login failed - user not found: ${email}`, "warning", "auth", null);
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check password (hashed)
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      await logAdminActivity(`Login failed - incorrect password: ${email}`, "warning", "auth", user._id?.toString?.() ?? null);
       return NextResponse.json({ error: "Incorrect password" }, { status: 401 });
     }
 
     // Check email verification
     if (!user.isVerified) {
-      await logAdminActivity(`Login failed - email not verified: ${email}`, "warning", "auth", user._id?.toString?.() ?? null);
       return NextResponse.json({ error: "Email not verified", requireOTP: true }, { status: 403 });
     }
 
     // Login successful
-    await logAdminActivity(`User logged in: ${email}`, "success", "auth", user._id?.toString?.() ?? null);
-
     return NextResponse.json({ message: "Login successful", user: {
       id: user._id.toString(),
       name: user.name,
@@ -184,7 +175,6 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("❌ Login API error (Native MongoDB):", error);
     const errMsg = error instanceof Error ? error.message : "Unknown error";
-    await logAdminActivity(`Login API error: ${errMsg}`, "error", "auth", null);
     return NextResponse.json({ error: errMsg }, { status: 500 });
   }
 }

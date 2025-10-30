@@ -297,14 +297,12 @@
 
 
 
-
-// src/app/api/auth/[...nextauth]/route.ts
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongodbNative";
-import { logAdminActivity } from "@/lib/logAdminActivity";
+import GithubProvider from "next-auth/providers/github";
 
 interface GoogleProfile {
   email?: string;
@@ -323,10 +321,22 @@ interface AuthUser {
 
 export const handler = NextAuth({
   providers: [
-    // ---------- GOOGLE LOGIN ----------
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
+      httpOptions: { timeout: 10000 }, // ⏰ increase to 10s
+    }),
+
+    GithubProvider({
+      clientId: process.env.GITHUB_ID!,
+      clientSecret: process.env.GITHUB_SECRET!,
     }),
 
     // ---------- EMAIL/PASSWORD LOGIN ----------
@@ -338,8 +348,6 @@ export const handler = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          // optional: log missing credential attempt
-          await logAdminActivity(`Missing credentials attempt`, "warning", "auth", null);
           throw new Error("Missing credentials");
         }
 
@@ -348,27 +356,15 @@ export const handler = NextAuth({
         const users = db.collection("users");
 
         const user = await users.findOne({ email });
-        if (!user) {
-          await logAdminActivity(`Failed login: email not found (${email})`, "warning", "auth", null);
-          throw new Error("Email not found");
-        }
-        if (!user.isVerified) {
-          await logAdminActivity(`Failed login: unverified email (${email})`, "warning", "auth", user._id?.toString?.() ?? null);
-          throw new Error("Please verify your email first");
-        }
-        if (!user.password) {
-          await logAdminActivity(`Failed login: account uses Google login (${email})`, "warning", "auth", user._id?.toString?.() ?? null);
-          throw new Error("This account uses Google login.");
-        }
+        if (!user) throw new Error("Email not found");
+        if (!user.isVerified) throw new Error("Please verify your email first");
+        if (!user.password) throw new Error("This account uses Google login.");
 
-        const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
-        if (!isPasswordCorrect) {
-          await logAdminActivity(`Failed login: incorrect password (${email})`, "warning", "auth", user._id?.toString?.() ?? null);
-          throw new Error("Password is incorrect");
-        }
-
-        // Successful credential login
-        await logAdminActivity(`User logged in (credentials): ${email}`, "success", "auth", user._id?.toString?.() ?? null);
+        const isPasswordCorrect = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
+        if (!isPasswordCorrect) throw new Error("Password is incorrect");
 
         return {
           id: user._id.toString(),
@@ -402,24 +398,23 @@ export const handler = NextAuth({
           // Create new Google user WITHOUT password
           const newUser = {
             email,
-            name: googleProfile.name || `${googleProfile.given_name || ""} ${googleProfile.family_name || ""}`.trim(),
+            name:
+              googleProfile.name ||
+              `${googleProfile.given_name || ""} ${
+                googleProfile.family_name || ""
+              }`.trim(),
             role: "user",
             isVerified: true,
             googleId: googleProfile.sub,
             createdAt: new Date(),
             updatedAt: new Date(),
           };
-          const insertRes = await users.insertOne(newUser);
-          await logAdminActivity(`New Google user created: ${email}`, "success", "auth", insertRes.insertedId?.toString?.() ?? null);
+          await users.insertOne(newUser);
         } else if (!dbUser.isVerified) {
           await users.updateOne(
             { email },
             { $set: { isVerified: true, updatedAt: new Date() } }
           );
-          await logAdminActivity(`User verified via Google: ${email}`, "success", "auth", dbUser._id?.toString?.() ?? null);
-        } else {
-          // existing google login sign in
-          await logAdminActivity(`User signed in (google): ${email}`, "success", "auth", dbUser._id?.toString?.() ?? null);
         }
       }
 
@@ -458,6 +453,3 @@ export const handler = NextAuth({
 });
 
 export { handler as GET, handler as POST };
-
-
-

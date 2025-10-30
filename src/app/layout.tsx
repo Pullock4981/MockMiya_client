@@ -10,6 +10,7 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { AuthProvider } from "@/context/AuthContext/AuthContext";
+import StripeProvider from "./providers/StripeProvider";
 import { usePathname } from "next/navigation";
 
 const geistSans = Geist({
@@ -45,12 +46,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <SessionProvider>
           <AuthProvider>
             <ThemeProvider>
-              
+              <StripeProvider>
                 {/* শুধু রুট রুটগুলোতে Navbar/Footer দেখাবে */}
                 {!hideLayout && <Navbar />}
                 {children}
                 {!hideLayout && <Footer />}
-              
+              </StripeProvider>
 
               {/* Toast notification container */}
               <ToastContainer position="top-center" autoClose={3000} />
