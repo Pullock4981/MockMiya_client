@@ -14,6 +14,17 @@ interface FormData {
   experience: string;
 }
 
+// Define custom error types
+interface ApiError extends Error {
+  status?: number;
+  details?: string;
+}
+
+interface ErrorWithName extends Error {
+  name: string;
+  message: string;
+}
+
 export default function HomePage() {
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -152,7 +163,12 @@ export default function HomePage() {
         }));
         
         console.error("❌ API Error Response:", errorData);
-        throw new Error(errorData.details || errorData.error || `Request failed with status ${response.status}`);
+        const apiError: ApiError = new Error(
+          errorData.details || errorData.error || `Request failed with status ${response.status}`
+        );
+        apiError.status = response.status;
+        apiError.details = errorData.details;
+        throw apiError;
       }
 
       const data = await response.json();
@@ -177,28 +193,34 @@ export default function HomePage() {
         `Your ${words}-word professional cover letter is ready.`
       );
 
-    } catch (error: any) {
-      console.error("❌ Cover letter generation failed:", {
-        name: error?.name,
-        message: error?.message
-      });
+    } catch (error: unknown) {
+      console.error("❌ Cover letter generation failed:", error);
 
       closeLoadingAlert();
 
       let userMessage = "Failed to generate cover letter. Please try again.";
       
-      if (error.name === 'AbortError') {
-        userMessage = "Request timed out. Please check your connection and try again.";
-      } else if (error.message.includes("Model unavailable")) {
-        userMessage = "AI service is temporarily unavailable. Please try again in a few minutes.";
-      } else if (error.message.includes("Service limit reached")) {
-        userMessage = "We've reached our service limit for now. Please try again later.";
-      } else if (error.message.includes("Access denied")) {
-        userMessage = "Service configuration issue. Please contact support if this continues.";
-      } else if (error.message.includes("Network error") || error.message.includes("Failed to fetch")) {
-        userMessage = "Network connection issue. Please check your internet and try again.";
-      } else if (error.message.includes("Empty response")) {
-        userMessage = "The AI didn't generate any content. Please try again with different details.";
+      // Type-safe error handling
+      if (error instanceof Error) {
+        const errorWithName = error as ErrorWithName;
+        
+        if (errorWithName.name === 'AbortError') {
+          userMessage = "Request timed out. Please check your connection and try again.";
+        } else if (errorWithName.message.includes("Model unavailable")) {
+          userMessage = "AI service is temporarily unavailable. Please try again in a few minutes.";
+        } else if (errorWithName.message.includes("Service limit reached")) {
+          userMessage = "We've reached our service limit for now. Please try again later.";
+        } else if (errorWithName.message.includes("Access denied")) {
+          userMessage = "Service configuration issue. Please contact support if this continues.";
+        } else if (errorWithName.message.includes("Network error") || errorWithName.message.includes("Failed to fetch")) {
+          userMessage = "Network connection issue. Please check your internet and try again.";
+        } else if (errorWithName.message.includes("Empty response")) {
+          userMessage = "The AI didn't generate any content. Please try again with different details.";
+        }
+      } else {
+        // Handle non-Error objects
+        console.error("Unknown error type:", error);
+        userMessage = "An unexpected error occurred. Please try again.";
       }
 
       showErrorAlert("Generation Failed", userMessage);
