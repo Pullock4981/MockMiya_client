@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
 function Logo() {
@@ -27,13 +28,15 @@ function Logo() {
 
   return (
     <div className="flex items-center transition-all duration-300">
-      <Image
-        src={isDark ? '/logo/MOCK.png' : '/logo/MOCK2.png'}
-        alt="Mock Miya Logo"
-        width={120}
-        height={40}
-        priority
-      />
+      <Link href="/">
+        <Image
+          src={isDark ? '/logo/MOCK.png' : '/logo/MOCK2.png'}
+          alt="Mock Miya Logo"
+          width={80}
+          height={40}
+          priority
+        />
+      </Link>
     </div>
   );
 }

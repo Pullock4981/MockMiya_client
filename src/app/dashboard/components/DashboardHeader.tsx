@@ -74,7 +74,7 @@ export function DashboardHeader() {
     >
 
       {/* Center: Search */}
-      <div className="flex justify-center flex-1 px-2 md:px-0">
+      <div className="hidden md:flex justify-center flex-1 px-2 md:px-0">
         <form onSubmit={handleSearch} className="relative w-full">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground-muted w-4 h-4" />
           <input
@@ -87,6 +87,11 @@ export function DashboardHeader() {
                        hover:bg-input-hover transition-colors"
           />
         </form>
+      </div>
+
+
+      <div className='block md:hidden'>
+        <Link href="/"> <Button>Home</Button> </Link>
       </div>
 
       {/* Right: Actions */}

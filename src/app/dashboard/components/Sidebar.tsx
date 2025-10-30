@@ -26,6 +26,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext/AuthContext';
 import Swal from 'sweetalert2';
+import Logo from '@/components/layout/Logo';
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -172,7 +173,7 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
           <div className="w-8 h-8 bg-gradient-to-r from-green-primary to-green-accent rounded-lg flex items-center justify-center">
             <Bot className="h-5 w-5 text-primary-foreground" />
           </div>
-          {!collapsed && <Link href="/"><span className="ml-2 text-xl font-bold gradient-text">MockMiya</span></Link>}
+          {!collapsed && <Logo/>}
         </div>
         <button
           onClick={toggleCollapsed}
@@ -187,7 +188,7 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
         {Object.entries(groupedItems).map(([sectionKey, items]) => (
           <div key={sectionKey} className="space-y-2">
             {!collapsed && (
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider px-3">
                 {sections[sectionKey as keyof typeof sections]}
               </h3>
             )}
@@ -195,7 +196,7 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
               <Link key={item.id} href={item.path} passHref>
                 <button
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full sidebar-button flex items-center rounded-lg px-3 py-2 text-sm transition-colors ${activeTab === item.id ? ' bg-primary text-black' : 'text-muted-foreground hover:text-foreground hover:bg-primary/30'} ${collapsed ? 'justify-center' : ''}`}
+                  className={`w-full sidebar-button flex items-center rounded-lg px-3 py-2 text-sm transition-colors ${activeTab === item.id ? ' bg-primary text-black' : ' hover:text-foreground hover:bg-primary/30'} ${collapsed ? 'justify-center' : ''}`}
                 >
                   <item.icon className="h-4 w-4" />
                   {!collapsed && <span className="ml-3">{item.name}</span>}
