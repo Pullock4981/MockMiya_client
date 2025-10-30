@@ -27,7 +27,7 @@ const Navbar = () => {
     { name: "Home", href: "/" },
     { name: "Blogs", href: "/blogs", isRoute: true },
     { name: "About", href: "/about", isRoute: true },
-    { name: "Contact", href: "/contact" },
+    { name: "Contact", href: "/contact",isRoute: true },
   ];
 
   // ✅ Handle Logout
