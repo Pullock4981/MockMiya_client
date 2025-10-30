@@ -15,25 +15,19 @@ export async function POST(req: NextRequest) {
     const { name, jobTitle, companyName, skills, experience } = body;
 
     console.log("🔄 Received cover letter request:", {
-      name,
-      jobTitle,
-      companyName,
+      name: name?.substring(0, 50),
+      jobTitle: jobTitle?.substring(0, 50),
+      companyName: companyName?.substring(0, 50),
       skillsLength: skills?.length,
       experienceLength: experience?.length
     });
 
     // Validate inputs
-    if (!name || !jobTitle || !companyName || !skills || !experience) {
-      console.error("❌ Missing required fields:", {
-        name: !!name,
-        jobTitle: !!jobTitle,
-        companyName: !!companyName,
-        skills: !!skills,
-        experience: !!experience
-      });
+    if (!name?.trim() || !jobTitle?.trim() || !companyName?.trim() || !skills?.trim() || !experience?.trim()) {
+      console.error("❌ Missing required fields");
       return NextResponse.json({ 
         error: "Missing required fields",
-        details: "Please fill in all fields: name, job title, company name, skills, and experience."
+        details: "All fields are required: name, job title, company name, skills, and experience."
       }, { status: 400 });
     }
 
@@ -41,98 +35,116 @@ export async function POST(req: NextRequest) {
     if (!process.env.GOOGLE_API_KEY) {
       console.error("❌ GOOGLE_API_KEY is not configured");
       return NextResponse.json({ 
-        error: "Server configuration error",
-        details: "API key is not configured. Please contact support."
+        error: "Configuration error",
+        details: "API service is not properly configured."
       }, { status: 500 });
     }
 
-    console.log("🔑 API Key present, creating GenAI client");
+    console.log("🔑 Initializing Google AI client");
 
     // Create GenAI client
     const ai = new GoogleGenAI({
       apiKey: process.env.GOOGLE_API_KEY,
     });
 
-    // Use the same model that works in your voice interview
-    const prompt = `Write a professional and compelling cover letter (150-300 words) for the following applicant:
+    const prompt = `Create a professional cover letter for a job application with the following details:
 
-Applicant Name: ${name}
-Target Position: ${jobTitle}
-Company: ${companyName}
-Key Skills: ${skills}
-Professional Experience: ${experience}
+Applicant: ${name.trim()}
+Target Position: ${jobTitle.trim()}
+Company: ${companyName.trim()}
+Key Skills: ${skills.trim()}
+Experience: ${experience.trim()}
 
 Requirements:
-- Tone: Professional, enthusiastic, and confident
-- Structure: Proper business letter format with salutation, body paragraphs, and closing
-- Content: Highlight relevant skills and experience, show enthusiasm for the role and company
-- Length: 150-300 words
-- Include a call to action encouraging an interview
+- Professional business letter format
+- 150-300 words
+- Confident and enthusiastic tone
+- Highlight relevant skills and experience
+- Personalized to the company
+- Include a call to action
+- Proper salutation and closing
 
-Please generate a well-structured cover letter that will help this candidate stand out.`;
+Generate a compelling cover letter that will help the applicant stand out:`;
 
-    console.log("📝 Sending request to Gemini API with model: gemini-2.5-flash");
+    console.log("📝 Sending request to Gemini API");
 
-    // Generate content - USE THE SAME MODEL AS YOUR WORKING VOICE INTERVIEW
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash", // Use the same model that works
-      contents: prompt,
-    });
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-2.0-flash", // Use a more stable model
+        contents: prompt,
+      });
 
-    console.log("✅ Received response from Gemini API");
+      console.log("✅ Received response from Gemini API");
 
-    // Extract the generated text
-    const text = response.text;
+      const text = response.text;
 
-    if (!text || text.trim().length === 0) {
-      console.error("❌ Empty response from AI model");
+      if (!text?.trim()) {
+        console.error("❌ Empty response from AI");
+        return NextResponse.json({ 
+          error: "Empty response",
+          details: "The AI service returned an empty response. Please try again."
+        }, { status: 500 });
+      }
+
+      console.log("📄 Generated cover letter length:", text.length, "characters");
+
       return NextResponse.json({ 
-        error: "Empty response",
-        details: "The AI model returned an empty response. Please try again."
-      }, { status: 500 });
+        text: text.trim(),
+        length: text.length 
+      });
+
+    } catch (apiError: any) {
+      console.error("❌ Google AI API error:", {
+        message: apiError.message,
+        status: apiError.status,
+        code: apiError.code
+      });
+
+      // Handle specific Google AI errors
+      if (apiError.message?.includes("404") || apiError.message?.includes("not found")) {
+        return NextResponse.json({ 
+          error: "Model unavailable",
+          details: "The AI model is currently unavailable. Please try a different model or try again later."
+        }, { status: 503 });
+      }
+
+      if (apiError.message?.includes("quota") || apiError.message?.includes("rate limit")) {
+        return NextResponse.json({ 
+          error: "Service limit reached",
+          details: "API quota exceeded. Please try again later."
+        }, { status: 429 });
+      }
+
+      if (apiError.message?.includes("permission") || apiError.message?.includes("403")) {
+        return NextResponse.json({ 
+          error: "Access denied",
+          details: "API access denied. Please check your API configuration."
+        }, { status: 403 });
+      }
+
+      throw apiError; // Re-throw to be caught by outer catch
     }
-
-    console.log("📄 Generated cover letter length:", text.length, "characters");
-    console.log("✨ Cover letter preview:", text.substring(0, 100) + "...");
-
-    return NextResponse.json({ text });
 
   } catch (err: any) {
     console.error("❌ API Route Error:", {
       name: err?.name,
       message: err?.message,
-      status: err?.status,
-      code: err?.code
+      stack: err?.stack?.split('\n')[0] // Only first line of stack for brevity
     });
 
-    // Enhanced error handling
-    let errorMessage = "Failed to generate cover letter";
-    let errorDetails = "An unexpected error occurred. Please try again.";
+    let errorMessage = "Service temporarily unavailable";
+    let errorDetails = "We're experiencing technical difficulties. Please try again in a few moments.";
     let statusCode = 500;
 
-    if (err?.message?.includes("404") || err?.message?.includes("not found")) {
-      errorMessage = "Model Not Available";
-      errorDetails = "The AI model is currently unavailable. Please try again later or contact support.";
-      statusCode = 503;
-    } else if (err?.message?.includes("API key") || err?.message?.includes("401")) {
-      errorMessage = "Invalid API Key";
-      errorDetails = "There's an issue with the service configuration. Please contact support.";
-      statusCode = 500;
-    } else if (err?.message?.includes("403") || err?.message?.includes("PERMISSION_DENIED")) {
-      errorMessage = "API Access Denied";
-      errorDetails = "Service access denied. Please ensure the Generative Language API is enabled.";
-      statusCode = 403;
-    } else if (err?.message?.includes("quota") || err?.message?.includes("rate limit")) {
-      errorMessage = "Service Limit Reached";
-      errorDetails = "We've reached our service limit. Please try again in a few hours.";
-      statusCode = 429;
-    } else if (err?.message?.includes("network") || err?.name === "FetchError") {
-      errorMessage = "Network Error";
+    if (err instanceof SyntaxError) {
+      errorMessage = "Invalid request data";
+      errorDetails = "The request data is not properly formatted.";
+      statusCode = 400;
+    } else if (err.message?.includes("fetch") || err.name === "TypeError") {
+      errorMessage = "Network error";
       errorDetails = "Unable to connect to the AI service. Please check your internet connection.";
       statusCode = 503;
     }
-
-    console.error(`❌ Final Error: ${errorMessage} - ${errorDetails}`);
 
     return NextResponse.json({ 
       error: errorMessage,

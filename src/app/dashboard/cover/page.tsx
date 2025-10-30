@@ -24,6 +24,7 @@ export default function HomePage() {
   });
   const [coverLetter, setCoverLetter] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [wordCount, setWordCount] = useState<number>(0);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -42,7 +43,7 @@ export default function HomePage() {
       background: '#1f2937',
       color: '#f9fafb',
       confirmButtonText: 'OK',
-      timer: 5000
+      timer: 6000
     });
   };
 
@@ -55,30 +56,22 @@ export default function HomePage() {
       confirmButtonColor: '#059669',
       background: '#1f2937',
       color: '#f9fafb',
-      timer: 3000
-    });
-  };
-
-  const showWarningAlert = (title: string, message: string) => {
-    console.warn(`⚠️ ${title}:`, message);
-    Swal.fire({
-      icon: 'warning',
-      title: title,
-      text: message,
-      confirmButtonColor: '#d97706',
-      background: '#1f2937',
-      color: '#f9fafb'
+      timer: 4000
     });
   };
 
   const showLoadingAlert = () => {
     Swal.fire({
       title: 'Generating Cover Letter...',
-      text: 'Please wait while we create your professional cover letter',
+      html: `
+        <div style="text-align: center;">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p class="text-gray-300">AI is crafting your professional cover letter</p>
+          <p class="text-sm text-gray-400 mt-2">This usually takes 10-20 seconds</p>
+        </div>
+      `,
       allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
+      showConfirmButton: false,
       background: '#1f2937',
       color: '#f9fafb'
     });
@@ -93,7 +86,7 @@ export default function HomePage() {
     setLoading(true);
     setCoverLetter("");
 
-    console.log("🔄 Starting cover letter generation with data:", formData);
+    console.log("🔄 Starting cover letter generation:", formData);
 
     // Validate form before submission
     const missingFields = [];
@@ -106,7 +99,26 @@ export default function HomePage() {
     if (missingFields.length > 0) {
       showErrorAlert(
         "Missing Information", 
-        `Please fill in the following fields: ${missingFields.join(', ')}`
+        `Please fill in all required fields: ${missingFields.join(', ')}`
+      );
+      setLoading(false);
+      return;
+    }
+
+    // Additional validation
+    if (formData.skills.trim().length < 10) {
+      showErrorAlert(
+        "Skills Too Short",
+        "Please provide more details about your skills (at least 10 characters)."
+      );
+      setLoading(false);
+      return;
+    }
+
+    if (formData.experience.trim().length < 20) {
+      showErrorAlert(
+        "Experience Too Brief",
+        "Please provide more details about your experience (at least 20 characters)."
       );
       setLoading(false);
       return;
@@ -117,86 +129,79 @@ export default function HomePage() {
     try {
       console.log("📤 Making API request to /api/generate/cover");
       
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch("/api/generate/cover", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       console.log("📥 API Response status:", response.status);
 
-      const data = await response.json();
-      console.log("📥 API Response data:", data);
-
       if (!response.ok) {
-        // Enhanced error message extraction
-        const errorDetails = data.details || data.error || `Server responded with status: ${response.status}`;
-        console.error("❌ API Error Response:", errorDetails);
-        throw new Error(errorDetails);
+        const errorData = await response.json().catch(() => ({ 
+          error: `HTTP ${response.status}`,
+          details: response.statusText
+        }));
+        
+        console.error("❌ API Error Response:", errorData);
+        throw new Error(errorData.details || errorData.error || `Request failed with status ${response.status}`);
       }
 
-      if (data.text && data.text.trim().length > 0) {
-        setCoverLetter(data.text);
-        console.log("✅ Cover letter generated successfully, length:", data.text.length);
-        closeLoadingAlert();
-        showSuccessAlert(
-          "Success!", 
-          "Your professional cover letter has been generated successfully."
-        );
-      } else {
-        throw new Error("The AI returned an empty response. Please try again.");
+      const data = await response.json();
+      console.log("📥 API Response data received");
+
+      if (!data.text || data.text.trim().length === 0) {
+        throw new Error("The AI service returned an empty response.");
       }
+
+      setCoverLetter(data.text);
+      const words = data.text.split(/\s+/).filter((word: string) => word.length > 0).length;
+      setWordCount(words);
+      
+      console.log("✅ Cover letter generated successfully:", {
+        length: data.text.length,
+        words: words
+      });
+      
+      closeLoadingAlert();
+      showSuccessAlert(
+        "Success! 🎉", 
+        `Your ${words}-word professional cover letter is ready.`
+      );
 
     } catch (error: any) {
       console.error("❌ Cover letter generation failed:", {
         name: error?.name,
-        message: error?.message,
-        stack: error?.stack
+        message: error?.message
       });
 
       closeLoadingAlert();
 
-      // Enhanced error handling with specific messages
-      const errorMessage = error.message || "Failed to generate cover letter";
+      let userMessage = "Failed to generate cover letter. Please try again.";
       
-      if (errorMessage.includes("Model Not Available")) {
-        showErrorAlert(
-          "Service Temporarily Unavailable",
-          "The AI service is currently undergoing maintenance. Please try again in a few minutes."
-        );
-      } else if (errorMessage.includes("API Access Denied") || errorMessage.includes("403")) {
-        showErrorAlert(
-          "Service Configuration Issue",
-          "There's a temporary issue with our AI service. Our team has been notified. Please try again later."
-        );
-      } else if (errorMessage.includes("Service Limit Reached") || errorMessage.includes("429")) {
-        showErrorAlert(
-          "Service Limit Reached",
-          "We've reached our daily service limit. Please try again tomorrow or contact support."
-        );
-      } else if (errorMessage.includes("Network Error") || errorMessage.includes("Failed to fetch")) {
-        showErrorAlert(
-          "Connection Issue",
-          "Unable to connect to our servers. Please check your internet connection and try again."
-        );
-      } else if (errorMessage.includes("Empty response")) {
-        showErrorAlert(
-          "Empty Response",
-          "The AI service didn't return any content. Please try generating again."
-        );
-      } else if (errorMessage.includes("Missing required fields")) {
-        showErrorAlert(
-          "Incomplete Form",
-          "Please fill in all the required fields before generating the cover letter."
-        );
-      } else {
-        showErrorAlert(
-          "Generation Failed",
-          errorMessage
-        );
+      if (error.name === 'AbortError') {
+        userMessage = "Request timed out. Please check your connection and try again.";
+      } else if (error.message.includes("Model unavailable")) {
+        userMessage = "AI service is temporarily unavailable. Please try again in a few minutes.";
+      } else if (error.message.includes("Service limit reached")) {
+        userMessage = "We've reached our service limit for now. Please try again later.";
+      } else if (error.message.includes("Access denied")) {
+        userMessage = "Service configuration issue. Please contact support if this continues.";
+      } else if (error.message.includes("Network error") || error.message.includes("Failed to fetch")) {
+        userMessage = "Network connection issue. Please check your internet and try again.";
+      } else if (error.message.includes("Empty response")) {
+        userMessage = "The AI didn't generate any content. Please try again with different details.";
       }
+
+      showErrorAlert("Generation Failed", userMessage);
     } finally {
       setLoading(false);
     }
@@ -204,7 +209,7 @@ export default function HomePage() {
 
   const handleDownloadPDF = () => {
     if (!coverLetter) {
-      showWarningAlert("No Content", "Please generate a cover letter first before downloading.");
+      showErrorAlert("No Content", "Please generate a cover letter first.");
       return;
     }
 
@@ -212,161 +217,243 @@ export default function HomePage() {
       console.log("📄 Starting PDF generation");
       
       const doc = new jsPDF();
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(12);
       
+      // Add professional styling
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(16);
+      doc.setTextColor(44, 62, 80);
+      
+      // Header
+      doc.text("COVER LETTER", 105, 30, { align: 'center' });
+      doc.setLineWidth(0.5);
+      doc.line(20, 35, 190, 35);
+      
+      // Content
+      doc.setFontSize(11);
+      doc.setTextColor(33, 37, 41);
       const margin = 20;
       const pageWidth = doc.internal.pageSize.getWidth();
       const maxWidth = pageWidth - margin * 2;
       
       const lines = doc.splitTextToSize(coverLetter, maxWidth);
-      doc.text(lines, margin, margin);
+      let yPosition = 50;
       
-      const fileName = `${formData.companyName || 'Cover'}_Letter.pdf`;
+      for (let i = 0; i < lines.length; i++) {
+        if (yPosition > 270) {
+          doc.addPage();
+          yPosition = 20;
+        }
+        doc.text(lines[i], margin, yPosition);
+        yPosition += 6;
+      }
+      
+      // Footer
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text(`Generated by CoverAI - ${new Date().toLocaleDateString()}`, 105, 280, { align: 'center' });
+      
+      const fileName = `${formData.companyName.replace(/[^a-zA-Z0-9]/g, '_')}_Cover_Letter.pdf`;
       doc.save(fileName);
       
       console.log("✅ PDF downloaded successfully:", fileName);
       showSuccessAlert("PDF Downloaded", "Your cover letter has been saved as PDF.");
-      
+
     } catch (error) {
       console.error("❌ PDF download failed:", error);
       showErrorAlert(
         "Download Failed", 
-        "Failed to download PDF. Please try again or use the text download option."
+        "Failed to create PDF. Please try the text download option."
       );
     }
   };
 
   const handleDownloadText = () => {
     if (!coverLetter) {
-      showWarningAlert("No Content", "Please generate a cover letter first before downloading.");
+      showErrorAlert("No Content", "Please generate a cover letter first.");
       return;
     }
 
     try {
       console.log("📝 Starting text download");
       
-      const blob = new Blob([coverLetter], { type: "text/plain" });
+      const textContent = `COVER LETTER\n\n${coverLetter}\n\n---\nGenerated by CoverAI - ${new Date().toLocaleDateString()}`;
+      const blob = new Blob([textContent], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.href = window.URL.createObjectURL(blob);
-      link.download = `${formData.companyName || 'Cover'}_Letter.txt`;
+      link.href = url;
+      link.download = `${formData.companyName.replace(/[^a-zA-Z0-9]/g, '_')}_Cover_Letter.txt`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(link.href);
+      URL.revokeObjectURL(url);
       
       console.log("✅ Text file downloaded successfully");
-      showSuccessAlert("Text File Downloaded", "Your cover letter has been saved as text file.");
-      
+      showSuccessAlert("Text File Saved", "Your cover letter has been downloaded.");
+
     } catch (error) {
       console.error("❌ Text download failed:", error);
       showErrorAlert(
         "Download Failed", 
-        "Failed to download text file. Please try again."
+        "Failed to download text file. Please check your browser permissions."
       );
     }
   };
 
   return (
     <PrivateRoute>
-      <main className="min-h-screen bg-gray-100 dark:bg-gray-950 flex items-center justify-center p-6 transition-colors">
-        <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-8 rounded-2xl shadow-lg max-w-2xl w-full">
-          <h1 className="text-3xl font-bold text-center mb-6">
-            Cover Letter Generator 🤖
-          </h1>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <input
-              type="text"
-              name="name"
-              placeholder="Your Name *"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            />
-            <input
-              type="text"
-              name="jobTitle"
-              placeholder="Job Title You're Applying For *"
-              value={formData.jobTitle}
-              onChange={handleChange}
-              required
-              className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            />
-            <input
-              type="text"
-              name="companyName"
-              placeholder="Company Name *"
-              value={formData.companyName}
-              onChange={handleChange}
-              required
-              className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            />
-            <textarea
-              name="skills"
-              placeholder="Your Key Skills (e.g., JavaScript, Project Management, Team Leadership) *"
-              value={formData.skills}
-              onChange={handleChange}
-              required
-              className="p-3 border rounded-lg h-24 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical transition-all"
-            />
-            <textarea
-              name="experience"
-              placeholder="Briefly describe your relevant experience and achievements *"
-              value={formData.experience}
-              onChange={handleChange}
-              required
-              className="p-3 border rounded-lg h-24 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical transition-all"
-            />
-
-            <Button
-              type="submit"
-              disabled={loading}
-              className="font-semibold py-3 rounded-lg transition disabled:opacity-50 bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  Generating...
-                </span>
-              ) : (
-                "Generate Cover Letter"
-              )}
-            </Button>
-          </form>
-
-          {/* Generated Cover Letter */}
-          {coverLetter && (
-            <div className="mt-8 p-6 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <span>📄</span>
-                Your Generated Cover Letter
-              </h2>
-              <div className="whitespace-pre-wrap bg-white dark:bg-gray-900 p-4 rounded border max-h-96 overflow-y-auto text-sm leading-relaxed">
-                {coverLetter}
+      <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 sm:p-8">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-2xl mb-4">
+                <span className="text-2xl">📝</span>
               </div>
-
-              {/* Download Buttons */}
-              <div className="flex gap-4 mt-6 flex-wrap">
-                <Button
-                  onClick={handleDownloadPDF}
-                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded transition flex items-center gap-2"
-                >
-                  <span>📥</span>
-                  Download PDF
-                </Button>
-                <Button
-                  onClick={handleDownloadText}
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded transition flex items-center gap-2"
-                >
-                  <span>📝</span>
-                  Download TXT
-                </Button>
-              </div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                Cover Letter Generator
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300">
+                Create a professional cover letter tailored to your dream job
+              </p>
             </div>
-          )}
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Your Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="John Doe"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    disabled={loading}
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:opacity-50"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Job Title *
+                  </label>
+                  <input
+                    type="text"
+                    name="jobTitle"
+                    placeholder="Senior Developer"
+                    value={formData.jobTitle}
+                    onChange={handleChange}
+                    required
+                    disabled={loading}
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:opacity-50"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Company Name *
+                </label>
+                <input
+                  type="text"
+                  name="companyName"
+                  placeholder="Tech Company Inc."
+                  value={formData.companyName}
+                  onChange={handleChange}
+                  required
+                  disabled={loading}
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:opacity-50"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Your Skills *
+                </label>
+                <textarea
+                  name="skills"
+                  placeholder="JavaScript, React, Node.js, Team Leadership, Project Management..."
+                  value={formData.skills}
+                  onChange={handleChange}
+                  required
+                  disabled={loading}
+                  rows={3}
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical transition-all disabled:opacity-50"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Your Experience *
+                </label>
+                <textarea
+                  name="experience"
+                  placeholder="5+ years in software development, led a team of 5 developers, delivered multiple successful projects..."
+                  value={formData.experience}
+                  onChange={handleChange}
+                  required
+                  disabled={loading}
+                  rows={4}
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical transition-all disabled:opacity-50"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                    Generating Cover Letter...
+                  </div>
+                ) : (
+                  "Generate Cover Letter"
+                )}
+              </Button>
+            </form>
+
+            {/* Results Section */}
+            {coverLetter && (
+              <div className="mt-8 p-6 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span>📄</span>
+                    Your Cover Letter
+                  </h2>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    {wordCount} words
+                  </span>
+                </div>
+
+                <div className="bg-white dark:bg-gray-900 rounded-lg p-4 max-h-96 overflow-y-auto">
+                  <pre className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-sans">
+                    {coverLetter}
+                  </pre>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                  <Button
+                    onClick={handleDownloadPDF}
+                    className="flex-1 h-11 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all"
+                  >
+                    📥 Download PDF
+                  </Button>
+                  <Button
+                    onClick={handleDownloadText}
+                    variant="outline"
+                    className="flex-1 h-11 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-all"
+                  >
+                    📝 Download Text
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </main>
     </PrivateRoute>
