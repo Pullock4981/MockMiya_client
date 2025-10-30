@@ -5,11 +5,12 @@ import { motion } from "framer-motion";
 
 type Props = {
   email: string;
+  otp?: string; // optional
   onResetSuccess: () => void;
   onBack?: () => void;
 };
 
-export default function ResetPasswordForm({ email, onResetSuccess, onBack }: Props) {
+export default function ResetPasswordForm({ email, otp, onResetSuccess, onBack }: Props) {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -36,25 +37,18 @@ export default function ResetPasswordForm({ email, onResetSuccess, onBack }: Pro
     if (!validate()) return;
 
     setLoading(true);
-
-    // 🔹 Debug log: what we are sending
-    // console.log("🔹 ResetPasswordForm submitting:", { email, newPassword: password.trim() });
-
     try {
       const res = await fetch("/api/reset-password", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, newPassword: password.trim() }), // no OTP sent
+        body: JSON.stringify({ email, newPassword: password.trim(), otp }),
       });
 
-      // console.log("🔹 Raw response status:", res.status);
-
       const data = await res.json();
-      // console.log("🔹 ResetPasswordForm response:", data);
 
       if (!res.ok) return alert(data.error || "Failed to reset password");
 
-      alert("Password reset successfully!");
+      alert(data.message || "Password reset successfully!");
       onResetSuccess();
     } catch (err) {
       console.error("🔹 ResetPasswordForm catch error:", err);

@@ -5,6 +5,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { HelpCircle } from "lucide-react";
+import { Button } from "../ui/button";
+import Link from "next/link";
 
 const faqs = [
   {
@@ -40,9 +42,9 @@ const FAQSection = () => {
           <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
             <HelpCircle className="h-8 w-8 text-primary" />
           </div>
-          
+
           <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-            Frequently Asked 
+            Frequently Asked
             <span className="text-gradient">Questions</span>
           </h2>
           <p className="text-xl text-foreground-secondary max-w-2xl mx-auto">
@@ -53,8 +55,8 @@ const FAQSection = () => {
         <div className="max-w-3xl mx-auto">
           <Accordion type="single" collapsible className="space-y-4">
             {faqs.map((faq, index) => (
-              <AccordionItem 
-                key={index} 
+              <AccordionItem
+                key={index}
                 value={`item-${index}`}
                 className="border border-border rounded-2xl bg-card-gradient px-6 hover:border-primary/30 transition-colors"
               >
@@ -74,9 +76,11 @@ const FAQSection = () => {
           <p className="text-foreground-secondary mb-4">
             Still have questions?
           </p>
-          <div className="inline-flex items-center px-6 py-3 rounded-full bg-card border border-border text-primary hover:border-primary/50 transition-colors cursor-pointer">
-            Contact our support team
-          </div>
+          <Link href="/contact">
+            <Button className="inline-flex items-center px-6 py-3 rounded-full bg-card border border-border text-primary hover:border-primary/50 transition-colors cursor-pointer">
+              Contact our support team
+            </Button>
+          </Link>
         </div>
       </div>
     </section>

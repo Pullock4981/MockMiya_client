@@ -43,16 +43,16 @@ const AdminConsole = () => {
                 <div className="text-green-primary mt-4">admin@mockmiya:~$ <span className="animate-pulse">|</span></div>
               </div>
 
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
+              <div className="flex gap-2 flex-wrap">
+                <Button variant="secondary" size="sm">
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Refresh Status
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="secondary" size="sm">
                   <Database className="h-4 w-4 mr-2" />
                   DB Health Check
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="secondary" size="sm">
                   <Server className="h-4 w-4 mr-2" />
                   Restart Services
                 </Button>
@@ -94,16 +94,16 @@ const AdminConsole = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start text-sm">
+                <div className="flex flex-wrap">
+                  <Button variant="outline" className="  text-sm">
                     <Code className="h-4 w-4 mr-2" />
                     Execute Query
                   </Button>
-                  <Button variant="outline" className="w-full justify-start text-sm">
+                  <Button variant="outline" className="  text-sm">
                     <Database className="h-4 w-4 mr-2" />
                     Backup Database
                   </Button>
-                  <Button variant="outline" className="w-full justify-start text-sm">
+                  <Button variant="outline" className=" text-sm">
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Optimize Indexes
                   </Button>
@@ -249,15 +249,15 @@ const AdminConsole = () => {
                 />
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button className="btn-hero">
                   <Code className="h-4 w-4 mr-2" />
                   Execute Query
                 </Button>
-                <Button variant="outline">
+                <Button variant="secondary">
                   Explain Plan
                 </Button>
-                <Button variant="outline">
+                <Button variant="secondary">
                   Clear
                 </Button>
               </div>
@@ -303,15 +303,15 @@ const AdminConsole = () => {
               </div>
             </div>
 
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2 mt-4 flex-wrap">
               <Button size="sm" variant="outline">
                 <RefreshCw className="h-3 w-3 mr-1" />
                 Auto-refresh
               </Button>
-              <Button size="sm" variant="outline">
+              <Button size="sm" variant="secondary">
                 Clear Logs
               </Button>
-              <Button size="sm" variant="outline">
+              <Button size="sm" variant="secondary">
                 Export Logs
               </Button>
             </div>

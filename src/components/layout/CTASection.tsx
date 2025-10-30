@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
+import Link from "next/link";
 
 const CTASection = () => {
   return (
-    <section className="py-24 bg-background relative overflow-hidden">
+    <section className="py-24 pb-56 bg-background relative overflow-hidden">
       {/* Background effects */}
       <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5"></div>
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
@@ -17,7 +18,7 @@ const CTASection = () => {
 
           {/* Headline */}
           <h2 className="text-5xl lg:text-6xl font-bold mb-6">
-            Ready to Land Your 
+            Ready to Land Your
             <span className="text-gradient block">Dream Tech Job?</span>
           </h2>
 
@@ -28,14 +29,12 @@ const CTASection = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-primary-foreground font-semibold px-12 py-4 rounded-xl glow-strong group text-lg">
-              Start Free Today
-              <ArrowRight className="ml-2 h-6 w-6 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            
-            <Button variant="outline" size="lg" className="border-border-light hover:bg-card-secondary px-12 py-4 rounded-xl text-lg">
-              Book a Demo
-            </Button>
+            <Link href="/dashboard">
+              <Button size="lg" className="bg-primary hover:bg-primary-dark text-primary-foreground font-semibold px-12 py-4 rounded-xl glow-strong group text-lg cursor-pointer">
+                Start Free Today
+                <ArrowRight className="ml-2 h-6 w-6 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
           </div>
 
           {/* Trust indicators */}
