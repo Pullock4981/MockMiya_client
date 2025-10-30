@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext/AuthContext';
 import { LoadingSpinner } from '../dashboard/components/Loading';
 
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {

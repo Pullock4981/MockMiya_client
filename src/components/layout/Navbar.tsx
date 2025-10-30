@@ -14,7 +14,7 @@ import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import ThemeSwitch from "../ui/ThemeSwitch";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext/AuthContext";
 import Swal from "sweetalert2";
 
 const Navbar = () => {

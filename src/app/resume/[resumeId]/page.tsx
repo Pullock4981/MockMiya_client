@@ -16,7 +16,7 @@ import ResumePreview from "@/components/resumePreview/ResumePreview";
 import { exportResumeHandler } from "@/utils/exportResume";
 import { ResumeNavbar } from "@/components/resumePreview/ResumeNavbar";
 import { ResumeForm } from "@/components/forms/ResumeForms/ResumeForm";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext/AuthContext";
 import { useResumeThumbnail } from "@/hooks/useResumeThumbnail";
 
 const ResumePageById = () => {

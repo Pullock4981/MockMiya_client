@@ -12,7 +12,7 @@ import { Plus, Trash2, Edit3, Printer, CloudUpload } from "lucide-react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Image from "next/image";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext/AuthContext";
 import PrivateRoute from "@/app/Routes/PrivateRoute";
 
 const MySwal = withReactContent(Swal);

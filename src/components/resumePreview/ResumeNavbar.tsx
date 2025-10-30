@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext/AuthContext';
 import { motion } from 'framer-motion';
 import { ChevronDown, LogOut, Settings, User } from 'lucide-react';
 import Link from 'next/link';

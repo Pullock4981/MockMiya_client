@@ -52,7 +52,7 @@ export default function InterviewAppClient({ config, onEnd }: Props) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-black p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <h1 className="text-3xl font-bold mb-6">AI Live Interview</h1>
 
       <div className="flex w-full max-w-4xl gap-6">
