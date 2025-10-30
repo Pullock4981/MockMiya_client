@@ -1,4 +1,3 @@
-
 "use client";
 
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
@@ -12,7 +11,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { AuthProvider } from "@/context/AuthContext/AuthContext";
 import StripeProvider from "./providers/StripeProvider";
-
+import { usePathname } from "next/navigation";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -31,6 +30,16 @@ interface RootLayoutProps {
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
+  const pathname = usePathname();
+
+  // যেসব রুটে Navbar/Footer দেখানো হবে না
+  const noLayoutRoutes = ["/dashboard", "/auth", "/checkout", "/resume"];
+
+  // চেক করি বর্তমান রুট ওইগুলোর মধ্যে পড়ে কিনা
+  const hideLayout = noLayoutRoutes.some((path) =>
+    pathname.startsWith(path)
+  );
+
   return (
     <html lang="en" className="antialiased" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
@@ -38,10 +47,13 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <AuthProvider>
             <ThemeProvider>
               <StripeProvider>
-              <Navbar />
-              {children}
-              <Footer />
+                {/* শুধু রুট রুটগুলোতে Navbar/Footer দেখাবে */}
+                {!hideLayout && <Navbar />}
+                {children}
+                {!hideLayout && <Footer />}
               </StripeProvider>
+
+              {/* Toast notification container */}
               <ToastContainer position="top-center" autoClose={3000} />
             </ThemeProvider>
           </AuthProvider>

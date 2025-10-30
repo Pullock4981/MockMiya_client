@@ -15,6 +15,13 @@ export function DashboardHeader() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
 
+  // Dashboard path determination
+const dashboardPath =
+  user?.role === 'Admin' || user?.role === 'System Admin'
+    ? '/dashboard/admin/panel'
+    : '/dashboard';
+
+
   // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -74,7 +81,7 @@ export function DashboardHeader() {
     >
 
       {/* Center: Search */}
-      <div className="flex justify-center flex-1 px-2 md:px-0">
+      <div className="hidden md:flex justify-center flex-1 px-2 md:px-0">
         <form onSubmit={handleSearch} className="relative w-full">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground-muted w-4 h-4" />
           <input
@@ -87,6 +94,11 @@ export function DashboardHeader() {
                        hover:bg-input-hover transition-colors"
           />
         </form>
+      </div>
+
+
+      <div className='block md:hidden'>
+        <Link href="/"> <Button>Home</Button> </Link>
       </div>
 
       {/* Right: Actions */}
@@ -128,7 +140,7 @@ export function DashboardHeader() {
                   Profile
                 </Link>
                 <Link
-                  href="/dashboard"
+                  href={dashboardPath}
                   className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-secondary rounded-md transition-colors"
                 >
                   <LayoutDashboard className="w-4 h-4" />

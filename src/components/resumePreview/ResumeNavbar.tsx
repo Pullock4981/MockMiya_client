@@ -1,6 +1,5 @@
 'use client';
 
-
 import { motion } from 'framer-motion';
 import { ChevronDown, LogOut, Settings, User } from 'lucide-react';
 import Link from 'next/link';
@@ -67,7 +66,10 @@ const handleLogout = async () => {
       {/* Left: Home Button */}
       <div>
         <Link href="/">
-          <Button variant="secondary">🏠 Home</Button>
+          <Button variant="default">🏠 Home</Button>
+        </Link>
+        <Link href="/dashboard/resume">
+          <Button variant="secondary">📋 Resume</Button>
         </Link>
       </div>
 
@@ -86,11 +88,7 @@ const handleLogout = async () => {
             <div className="text-right hidden md:block">
               <div className="text-sm font-medium">{user?.name}</div>
             </div>
-            <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
-              <span className="text-sm font-medium text-white">
-                {user?.name?.charAt(0).toUpperCase() ?? 'U'}
-              </span>
-            </div>
+           
             <ChevronDown className="w-4 h-4 text-foreground-muted" />
           </button>
 

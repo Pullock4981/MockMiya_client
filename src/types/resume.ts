@@ -50,11 +50,17 @@ export enum SkillLevel {
 }
 
 export enum SkillCategory {
+  Frontend = "Frontend",
+  Backend = "Backend",
+  Database = "Database",
+  Tools = "Tools",
+  Platforms = "Platforms",
   Technical = "Technical",
   Soft = "Soft",
   Language = "Language",
   Other = "Other",
 }
+
 
 export interface Skill {
   id: string;
