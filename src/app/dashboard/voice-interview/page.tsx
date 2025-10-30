@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -6,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Mic, StopCircle, RotateCcw, Download, User, Bot, Clock, Star, CheckCircle, XCircle, HelpCircle, Volume2, VolumeX, Building, Award, Play } from 'lucide-react';
+import { LoadingSpinner } from '../components/Loading';
 
 interface InterviewMessage {
   role: 'user' | 'assistant';
@@ -1033,4 +1035,18 @@ export default function VoiceInterviewPage() {
       </div>
     </div>
   );
+
+    // Loading
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300 p-4">
+        <div className="text-3xl sm:text-4xl mb-3 sm:mb-4 animate-pulse">
+          💼
+        </div>
+        <p className="text-[var(--foreground-muted)] font-medium mb-3 sm:mb-4 text-sm sm:text-base text-center">
+          Preparing your interview...
+        </p>
+        <LoadingSpinner />
+      </div>
+    );
+
 }

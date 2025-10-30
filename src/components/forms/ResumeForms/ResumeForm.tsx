@@ -71,7 +71,7 @@ const ResumePrintOverlay = ({
       />
       <button
         onClick={onClose}
-        className="fixed top-25 right-25 bg-muted/30 px-3 py-2 rounded-md cursor-pointer z-[10000] shadow-md hover:bg-muted/50 transition"
+        className="fixed top-25 right-25 bg-muted/30 px-3 py-2 rounded-md cursor-pointer z-10000 shadow-md hover:bg-muted/50 transition"
       >
         Close
       </button>
