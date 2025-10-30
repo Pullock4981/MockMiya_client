@@ -1,4 +1,6 @@
-import { Github, Twitter, Linkedin, Mail } from "lucide-react";
+import { Github, Linkedin, Mail } from "lucide-react";
+import { FaXTwitter } from "react-icons/fa6";
+import Logo from "./Logo";
 
 const Footer = () => {
   return (
@@ -8,10 +10,7 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="flex items-center mb-4">
-              <div className="w-8 h-8 rounded-lg bg-primary mr-3 flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">M</span>
-              </div>
-              <span className="text-2xl font-bold text-foreground">MockMiya</span>
+              <Logo></Logo>
             </div>
             <p className="text-foreground-secondary mb-6 max-w-sm">
               AI-powered platform helping developers ace technical interviews and build amazing careers.
@@ -20,7 +19,7 @@ const Footer = () => {
             {/* Social links */}
             <div className="flex space-x-4">
               <a href="#" className="w-10 h-10 rounded-lg bg-card border border-border flex items-center justify-center hover:border-primary/50 hover:bg-primary/10 transition-colors">
-                <Twitter className="h-4 w-4 text-foreground-secondary" />
+                <FaXTwitter className="h-4 w-4 text-foreground-secondary" />
               </a>
               <a href="#" className="w-10 h-10 rounded-lg bg-card border border-border flex items-center justify-center hover:border-primary/50 hover:bg-primary/10 transition-colors">
                 <Github className="h-4 w-4 text-foreground-secondary" />
@@ -54,7 +53,6 @@ const Footer = () => {
               <li><a href="#" className="text-foreground-secondary hover:text-primary transition-colors">Blog</a></li>
               <li><a href="#" className="text-foreground-secondary hover:text-primary transition-colors">Careers</a></li>
               <li><a href="#" className="text-foreground-secondary hover:text-primary transition-colors">Contact</a></li>
-              <li><a href="#" className="text-foreground-secondary hover:text-primary transition-colors">Press</a></li>
             </ul>
           </div>
 
@@ -74,7 +72,7 @@ const Footer = () => {
         {/* Bottom bar */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center">
           <p className="text-foreground-muted text-sm">
-            © 2024 MockMiya. All rights reserved.
+            © 2025 MockMiya. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a href="#" className="text-foreground-muted hover:text-primary text-sm transition-colors">Terms</a>

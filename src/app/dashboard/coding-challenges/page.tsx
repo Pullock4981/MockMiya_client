@@ -1064,6 +1064,7 @@ import QuizConfigPanel from './components/QuizConfigPanel';
 import QuizReviewPanel from './components/QuizReviewPanel';
 import QuizResults from './components/QuizResults';
 import QuizInterface from './components/QuizInterface';
+import { useAuth } from '@/context/AuthContext/AuthContext';
 
 export default function CodingChallenges() {
   const [config, setConfig] = useState<QuizConfig>({
@@ -1077,6 +1078,8 @@ export default function CodingChallenges() {
   const [isLoading, setIsLoading] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [showLeftPanel, setShowLeftPanel] = useState(true);
+
+  const {user} = useAuth();
 
   // Save button loading state
   const [saveLoading, setSaveLoading] = useState(false);
@@ -1335,6 +1338,7 @@ export default function CodingChallenges() {
       const payload = {
         // human-friendly title, change as you like
         title: `${selectedRole?.name || 'Role'} Quiz - ${new Date().toISOString()}`,
+         userEmail: user?.email, // Add current user
         description: `Auto-saved quiz for ${selectedRole?.name || 'Role'} — ${questions.length} questions.`,
         role: selectedRole?.id || config.role,
         category: config.category ?? null,
