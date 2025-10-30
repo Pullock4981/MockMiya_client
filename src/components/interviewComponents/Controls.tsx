@@ -3,6 +3,8 @@
 
 "use client";
 
+import { Button } from "../ui/button";
+
 type Props = {
   onLeave: () => void;
 };
@@ -10,12 +12,12 @@ type Props = {
 export default function Controls({ onLeave }: Props) {
   return (
     <div className="mt-4">
-      <button
+      <Button
         onClick={onLeave}
-        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        className=" bg-red-600 text-white hover:bg-red-700 py-2 px-4 rounded-lg"
       >
         Leave Interview
-      </button>
+      </Button>
     </div>
   );
 }
