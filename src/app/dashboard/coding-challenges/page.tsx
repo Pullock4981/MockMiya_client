@@ -1051,29 +1051,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -1081,6 +1058,7 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QuizConfig, QuizState, Question, QuestionCategory, Role } from '../../dashboard/coding-challenges/types/quiz';
 import { quizRoles, defaultQuizConfigs, questionCategories } from '../../dashboard/coding-challenges/data/quizData';
+import { useAuth } from '@/context/AuthContext/AuthContext';
 
 interface IncorrectAnswer {
   question: Question;
@@ -1110,6 +1088,8 @@ export default function CodingChallenges() {
   const [isLoading, setIsLoading] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [showLeftPanel, setShowLeftPanel] = useState(true);
+
+  const{user} = useAuth();
 
   const selectedRole = quizRoles.find(role => role.id === config.role);
   const selectedCategory = questionCategories.find(cat => cat.id === config.category);
@@ -1365,6 +1345,7 @@ export default function CodingChallenges() {
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--card-foreground)]">
               Quizing Challenges
             </h1>
+            
           </div>
           <p className="text-sm sm:text-base lg:text-lg text-[var(--foreground-muted)] max-w-2xl mx-auto px-4">
             Test your skills with role-based assessments
@@ -1730,7 +1711,7 @@ export default function CodingChallenges() {
                         onClick={() => setShowReview(true)}
                         className={`flex-1 py-3 font-semibold border-b-2 text-sm sm:text-base ${
                           showReview 
-                            ? 'border-[var(--primary)] text-[var(--primary)]' 
+                            ? 'border-primary text-primary' 
                             : 'border-transparent text-[var(--foreground-muted)]'
                         }`}
                       >

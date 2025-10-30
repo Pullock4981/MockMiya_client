@@ -19,7 +19,7 @@ export const LoadingSpinner = ({
 
   return (
     <div
-      className={`flex items-center justify-center min-h-screen ${className}`}
+      className={`flex items-center justify-center ${className}`}
     >
       <motion.div
         className={`${sizeClasses[size]} border-2 border-primary/30 border-t-primary rounded-full`}
