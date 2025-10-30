@@ -198,6 +198,7 @@ import {
 } from 'recharts';
 import { useAuth } from '@/context/AuthContext/AuthContext';
 import { LoadingSpinner } from './components/Loading';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type SafePieLabelRenderProps = {
   cx?: number | string;
@@ -262,13 +263,9 @@ const Dashboard = ({ setActiveTab }: OverviewProps) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (authLoading) return;
-    if (!user) {
-      setLoading(false);
-      setApiData(null);
-      return;
-    }
+  if (authLoading || !user) return;
 
+  if (!apiData) { // 👈 already fetched কিনা চেক
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -279,14 +276,15 @@ const Dashboard = ({ setActiveTab }: OverviewProps) => {
       } catch (err) {
         console.error(err);
         setError('Failed to load dashboard data');
-        setApiData(null);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [user, authLoading]);
+  }
+}, [user, authLoading]);
+
 
   const renderCustomizedLabel = ({
     cx, cy, midAngle, innerRadius, outerRadius, percent,
@@ -355,8 +353,44 @@ const Dashboard = ({ setActiveTab }: OverviewProps) => {
         </div>
 
         {loading ? (
-          <LoadingSpinner/>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i} className="border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <Skeleton className="h-4 w-24 mb-2 bg-card/20" />
+                      <Skeleton className="h-6 w-16" />
+                    </div>
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+
+            <Card className="col-span-1 md:col-span-2 lg:col-span-2 border-0 shadow-lg">
+              <CardContent className="p-6">
+                <Skeleton className="h-80 w-full rounded-xl" />
+              </CardContent>
+            </Card>
+
+            <Card className="col-span-1 md:col-span-2 lg:col-span-2 border-0 shadow-lg">
+              <CardContent className="p-6">
+                <Skeleton className="h-80 w-full rounded-xl" />
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-lg col-span-full">
+              <CardContent className="p-6 space-y-3">
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-4 w-1/4" />
+                <Skeleton className="h-2 w-full rounded-full" />
+              </CardContent>
+            </Card>
+          </div>
         ) : error ? (
+
           <div className="p-6 bg-red-50 text-red-700 rounded shadow">{error}</div>
         ) : !apiData ? (
           <div className="p-6 bg-yellow-50 text-yellow-800 rounded shadow">No dashboard data available for this user.</div>
@@ -406,7 +440,7 @@ const Dashboard = ({ setActiveTab }: OverviewProps) => {
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
-                        <Tooltip formatter={(value:number)=>[value,'Count']} />
+                        <Tooltip formatter={(value: number) => [value, 'Count']} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -424,20 +458,20 @@ const Dashboard = ({ setActiveTab }: OverviewProps) => {
                 <CardContent>
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={activityData} margin={{top:20, right:20, left:10, bottom:20}}>
-                        <XAxis dataKey="name" tick={{fontSize:12, fill:'#6B7280'}} interval={0} angle={-15} textAnchor="end"/>
-                        <YAxis tick={{fontSize:12, fill:'#6B7280'}}/>
-                        <Tooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} formatter={(value:number)=>[value,'Count']} />
+                      <BarChart data={activityData} margin={{ top: 20, right: 20, left: 10, bottom: 20 }}>
+                        <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#6B7280' }} interval={0} angle={-15} textAnchor="end" />
+                        <YAxis tick={{ fontSize: 12, fill: '#6B7280' }} />
+                        <Tooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} formatter={(value: number) => [value, 'Count']} />
                         <Legend wrapperStyle={{ fontSize: 12 }} />
-                        {activityData.map((entry,index)=>(
+                        {activityData.map((entry, index) => (
                           <Bar
                             key={entry.name}
                             dataKey="value"
                             name={entry.name}
                             fill={entry.color}
                             barSize={24}
-                            radius={[6,6,0,0]}
-                            background={{ fill:'rgba(0,0,0,0.05)' }}
+                            radius={[6, 6, 0, 0]}
+                            background={{ fill: 'rgba(0,0,0,0.05)' }}
                           />
                         ))}
                       </BarChart>
@@ -463,7 +497,7 @@ const Dashboard = ({ setActiveTab }: OverviewProps) => {
                   <div className="mt-4">
                     <div className="text-xs ">Profile completion</div>
                     <div className="h-2 rounded-full mt-1 overflow-hidden">
-                      <div style={{width:`${stats.profileCompletion}%`}} className="h-full bg-green-500 transition-all duration-500" />
+                      <div style={{ width: `${stats.profileCompletion}%` }} className="h-full bg-green-500 transition-all duration-500" />
                     </div>
                   </div>
                 </div>
@@ -483,16 +517,16 @@ const Dashboard = ({ setActiveTab }: OverviewProps) => {
                   {(apiData?.recentActivities?.length ?? 0) === 0 ? (
                     <p className="text-sm text-gray-500">No recent activities found.</p>
                   ) : (
-                    apiData.recentActivities!.map((a,i)=>(
+                    apiData.recentActivities!.map((a, i) => (
                       <div key={i} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200">
                         <div className="p-2 rounded-full bg-gray-100"><Clock className="h-4 w-4 " /></div>
                         <div className="flex-1 min-w-0">
                           <p className="font-medium  truncate">{a.title}</p>
                           <p className="text-sm text-gray-500">{formatTs(a.timestamp)}</p>
-                          {a.type==='coding' && a.meta && (
+                          {a.type === 'coding' && a.meta && (
                             <div className="mt-1 text-xs text-gray-500">
-                              {a.meta.accuracy!=null ? `Accuracy: ${a.meta.accuracy}%` :
-                               a.meta.score!=null && a.meta.total!=null ? `Score: ${a.meta.score}/${a.meta.total}` : null}
+                              {a.meta.accuracy != null ? `Accuracy: ${a.meta.accuracy}%` :
+                                a.meta.score != null && a.meta.total != null ? `Score: ${a.meta.score}/${a.meta.total}` : null}
                             </div>
                           )}
                         </div>

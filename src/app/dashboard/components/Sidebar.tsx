@@ -27,15 +27,19 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext/AuthContext';
 import Swal from 'sweetalert2';
 import Logo from '@/components/layout/Logo';
+import { usePathname } from 'next/navigation';
 
 interface SidebarProps {
   collapsed?: boolean;
   setCollapsed?: (value: boolean) => void;
 }
 
+const MOBILE_QUERY = '(max-width: 767px)';
+
 const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: SidebarProps) => {
   const { user, logout } = useAuth();
   const { activeTab, setActiveTab } = useActiveTab();
+  const pathname = usePathname();
 
   const sidebarItems = [
     { id: 'overview', name: 'Dashboard', icon: BarChart3, section: 'main', path: '/dashboard' },
@@ -47,7 +51,7 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
     { id: 'video-interview', name: 'Video Interview', icon: Video, section: 'interviews', path: '/dashboard/live-interview' },
     { id: 'coding', name: 'Coding Challenges', icon: Code, section: 'practice', path: '/dashboard/coding-challenges' },
     { id: 'analytics', name: 'Analytics', icon: TrendingUp, section: 'insights', path: '/dashboard/analytics' },
-    { id: 'admin', name: 'Admin', icon: Shield, section: 'admin', path: '/dashboard/admin/panel' },
+    { id: 'admin', name: 'Admin Panel', icon: Shield, section: 'admin', path: '/dashboard/admin/panel' },
     { id: 'admin-console', name: 'Admin Console', icon: Settings, section: 'admin', path: '/dashboard/admin/console' },
     { id: 'user-management', name: 'User Management', icon: Users, section: 'admin', path: '/dashboard/admin/user-management' },
     { id: 'profile', name: 'Profile', icon: User, section: 'account', path: '/dashboard/profile' },
@@ -62,13 +66,22 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
     account: 'Account',
   };
 
-  // Role-based filtering
-  const filteredSidebarItems = sidebarItems.filter(item => {
-    if (item.section === 'admin') {
-      return user?.role === 'System Admin' || user?.role === 'Admin';
-    }
+  const isAdmin = user?.role === 'System Admin' || user?.role === 'Admin';
+
+  // Filter items based on role: hide main dashboard for admins (per your request),
+  // hide admin items for normal users.
+  let filteredSidebarItems = sidebarItems.filter(item => {
+    if (isAdmin && item.path === '/dashboard') return false; // hide main dashboard for admin users
+    if (!isAdmin && item.section === 'admin') return false; // hide admin items for normal users
     return true;
   });
+
+  // move admin items to top when admin
+  if (isAdmin) {
+    const adminItems = filteredSidebarItems.filter(item => item.section === 'admin');
+    const otherItems = filteredSidebarItems.filter(item => item.section !== 'admin');
+    filteredSidebarItems = [...adminItems, ...otherItems];
+  }
 
   const groupedItems = filteredSidebarItems.reduce((acc, item) => {
     if (!acc[item.section]) acc[item.section] = [];
@@ -76,33 +89,88 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
     return acc;
   }, {} as Record<string, typeof filteredSidebarItems>);
 
-  const [collapsed, setCollapsedState] = useState<boolean>(
-    collapsedProp ?? (typeof window !== 'undefined' ? window.innerWidth < 768 : false)
-  );
+  // --- State: mobile detection & collapsed ---
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia(MOBILE_QUERY).matches;
+  });
+
+  const [collapsed, setCollapsedState] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return collapsedProp ?? false;
+    return window.matchMedia(MOBILE_QUERY).matches ? true : (collapsedProp ?? false);
+  });
+
   const [width, setWidth] = useState<number>(collapsed ? 70 : 256);
   const [dragging, setDragging] = useState(false);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
 
+  // keep parent informed if prop is controlled
   useEffect(() => {
     if (collapsedProp !== undefined) {
       setCollapsedState(collapsedProp);
       setWidth(collapsedProp ? 70 : 256);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collapsedProp]);
 
+  // matchMedia listener for mobile (force collapsed on mobile)
   useEffect(() => {
-    const handleResize = () => {
-      const isMobile = window.innerWidth < 768;
-      setCollapsedState(isMobile);
-      setWidth(isMobile ? 70 : 256);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  if (typeof window === 'undefined') return;
 
+  const mq = window.matchMedia(MOBILE_QUERY);
+
+  const handleChange = (e: MediaQueryListEvent) => {
+    const matches = e.matches;
+    setIsMobile(matches);
+
+    if (matches) {
+      setCollapsedState(true);
+      setWidth(70);
+      if (setCollapsedProp) setCollapsedProp(true);
+    } else {
+      if (collapsedProp === undefined) {
+        setCollapsedState(false);
+        setWidth(256);
+        if (setCollapsedProp) setCollapsedProp(false);
+      }
+    }
+  };
+
+  // initial check
+  setIsMobile(mq.matches);
+  if (mq.matches) {
+    setCollapsedState(true);
+    setWidth(70);
+  } else {
+    if (collapsedProp === undefined) {
+      setCollapsedState(false);
+      setWidth(256);
+    }
+  }
+
+  // modern API
+  if (mq.addEventListener) {
+    mq.addEventListener('change', handleChange);
+  } else {
+    // legacy Safari support
+    mq.addListener(handleChange);
+  }
+
+  return () => {
+    if (mq.removeEventListener) {
+      mq.removeEventListener('change', handleChange);
+    } else {
+      mq.removeListener(handleChange);
+    }
+  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
+
+
+  // Drag behaviour: disabled on mobile
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (dragging && sidebarRef.current) {
+      if (dragging && sidebarRef.current && !isMobile) {
         document.body.style.userSelect = 'none';
         let newWidth = e.clientX - sidebarRef.current.getBoundingClientRect().left;
         if (newWidth < 70) newWidth = 70;
@@ -114,7 +182,7 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
       }
     };
     const handleMouseUp = () => {
-      setDragging(false);
+      if (!isMobile) setDragging(false);
       document.body.style.userSelect = 'auto';
     };
     window.addEventListener('mousemove', handleMouseMove);
@@ -124,9 +192,11 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
       window.removeEventListener('mouseup', handleMouseUp);
       document.body.style.userSelect = 'auto';
     };
-  }, [dragging, setCollapsedProp]);
+  }, [dragging, isMobile, setCollapsedProp]);
 
+  // Toggle (disabled on mobile)
   const toggleCollapsed = () => {
+    if (isMobile) return;
     const newCollapsed = !collapsed;
     setCollapsedState(newCollapsed);
     setWidth(newCollapsed ? 70 : 256);
@@ -161,6 +231,28 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
     }
   };
 
+  // ----------- AUTO-ACTIVE: sync activeTab with current pathname ------------
+  useEffect(() => {
+    if (!pathname) return;
+
+    // choose the best match: the sidebar item whose path is a prefix of pathname
+    // and has the longest matching path (so /dashboard/admin/panel matches that item, not /dashboard)
+    let bestMatch: (typeof filteredSidebarItems)[number] | undefined = undefined;
+    for (const item of filteredSidebarItems) {
+      if (!item.path) continue;
+      const p = item.path.endsWith('/') ? item.path.slice(0, -1) : item.path;
+      if (pathname === p || pathname.startsWith(p + '/') || pathname.startsWith(p)) {
+        if (!bestMatch || (item.path.length > bestMatch.path.length)) {
+          bestMatch = item;
+        }
+      }
+    }
+    if (bestMatch) {
+      setActiveTab(bestMatch.id);
+    }
+    // if nothing matches, don't change activeTab
+  }, [pathname, filteredSidebarItems, setActiveTab]);
+
   return (
     <aside
       ref={sidebarRef}
@@ -169,15 +261,18 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
     >
       {/* Logo + Toggle */}
       <div className="flex items-center justify-between h-[75px] px-4 border-b border-border relative">
-        <div className="flex items-center ">
+        <div className="flex items-center">
           <div className="w-8 h-8 bg-gradient-to-r from-green-primary to-green-accent rounded-lg flex items-center justify-center">
             <Bot className="h-5 w-5 text-primary-foreground" />
           </div>
-          {!collapsed && <Logo/>}
+          {!collapsed && <Logo />}
         </div>
+
         <button
           onClick={toggleCollapsed}
-          className={`p-2 rounded-md hover:bg-muted/30 transition ${collapsed ? 'absolute top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2' : ''}`}
+          aria-label={isMobile ? 'Toggle disabled on mobile' : (collapsed ? 'Expand sidebar' : 'Collapse sidebar')}
+          disabled={isMobile}
+          className={`p-2 rounded-md transition ${collapsed ? 'absolute top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2' : ''} ${isMobile ? 'opacity-40 cursor-not-allowed' : 'hover:bg-muted/30'}`}
         >
           {collapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
         </button>
@@ -192,17 +287,17 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
                 {sections[sectionKey as keyof typeof sections]}
               </h3>
             )}
-            {items.map(item => (
-              <Link key={item.id} href={item.path} passHref>
-                <button
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full sidebar-button flex items-center rounded-lg px-3 py-2 text-sm transition-colors ${activeTab === item.id ? ' bg-primary text-black' : ' hover:text-foreground hover:bg-primary/30'} ${collapsed ? 'justify-center' : ''}`}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {!collapsed && <span className="ml-3">{item.name}</span>}
-                </button>
-              </Link>
-            ))}
+            {items.map(item => {
+              const isActive = activeTab === item.id;
+              return (
+                <Link key={item.id} href={item.path}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`w-full sidebar-button flex items-center rounded-lg px-3 py-2 text-sm transition-colors ${isActive ? ' bg-primary text-black' : ' hover:text-foreground hover:bg-primary/30'} ${collapsed ? 'justify-center' : ''}`}>
+                    <item.icon className="h-4 w-4" />
+                    {!collapsed && <span className="ml-3">{item.name}</span>}
+                </Link>
+              );
+            })}
           </div>
         ))}
       </nav>
@@ -212,7 +307,9 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
         {!collapsed && (
           <div className="flex items-center space-x-3 mb-4">
             <Avatar>
-              <AvatarFallback className="bg-green-primary text-primary-foreground">JD</AvatarFallback>
+              <AvatarFallback className="bg-green-primary text-primary-foreground">
+                {user?.name?.[0] || 'U'}
+              </AvatarFallback>
             </Avatar>
             <div>
               <p className="font-medium text-sm">{user?.name}</p>
@@ -226,10 +323,13 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
         </Button>
       </div>
 
-      {/* Drag Handle */}
+      {/* Drag Handle (disabled on mobile) */}
       <div
-        onMouseDown={() => setDragging(true)}
-        className={`w-1 cursor-col-resize h-full absolute right-0 top-0 z-10 ${dragging ? 'bg-indigo-500' : 'hover:bg-indigo-300'}`}
+        onMouseDown={() => {
+          if (!isMobile) setDragging(true);
+        }}
+        className={`w-1 cursor-col-resize h-full absolute right-0 top-0 z-10 ${dragging && !isMobile ? 'bg-indigo-500' : 'hover:bg-indigo-300'} ${isMobile ? 'pointer-events-none' : ''}`}
+        aria-hidden={isMobile}
       />
     </aside>
   );

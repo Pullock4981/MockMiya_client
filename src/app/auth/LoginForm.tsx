@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { toast } from 'react-toastify';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn, useSession } from 'next-auth/react';
+import { signIn, useSession, getSession } from 'next-auth/react';
 
 import { canAttemptLogin, getBlockedUntil, recordLoginAttempt } from "@/lib/loginRateLimiter";
 
@@ -37,7 +37,8 @@ export default function LoginForm() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectPath = searchParams.get('redirect') || '/dashboard';
+  const redirectParamRaw = searchParams.get('redirect') || null; // keep raw so we can decode later
+  const defaultRedirect = '/dashboard';
 
   const { register, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -88,6 +89,50 @@ export default function LoginForm() {
     if (status !== 'loading') setLoading(false);
   }, [status]);
 
+  // Helper: safe extractor for role from a session-like object (avoids any)
+  function getRoleFromSessionObj(sess: unknown): string | undefined {
+    if (!sess || typeof sess !== 'object') return undefined;
+    const s = sess as Record<string, unknown>;
+    const user = s.user;
+    if (!user || typeof user !== 'object') return undefined;
+    const u = user as Record<string, unknown>;
+    const role = u.role;
+    return typeof role === 'string' ? role : undefined;
+  }
+
+  // Helper: compute redirect after we get user role (admin override rules)
+  function computeRedirectAfterLogin(userRole: string | undefined | null, redirectParam: string | null) {
+    const isAdmin = userRole === 'System Admin' || userRole === 'Admin';
+
+    if (redirectParam) {
+      try {
+        const decoded = decodeURIComponent(redirectParam);
+
+        // Normalize: only allow internal absolute paths
+        if (!decoded.startsWith('/')) {
+          return isAdmin ? '/dashboard/admin/panel' : '/dashboard';
+        }
+
+        if (isAdmin) {
+          // Admin override: if redirect === '/dashboard' then send to admin panel
+          if (decoded === '/dashboard') return '/dashboard/admin/panel';
+          // If requested admin path -> respect it
+          if (decoded.startsWith('/dashboard/admin')) return decoded;
+          // Any other requested path -> send admin to admin panel by default
+          return '/dashboard/admin/panel';
+        } else {
+          // Non-admin -> allow whatever internal path was requested
+          return decoded;
+        }
+      } catch {
+        return isAdmin ? '/dashboard/admin/panel' : '/dashboard';
+      }
+    }
+
+    // no redirect param
+    return isAdmin ? '/dashboard/admin/panel' : '/dashboard';
+  }
+
   // ----------------- Login submission -----------------
   const onSubmitLogin = async (data: LoginFormData) => {
     if (blockedUntil && blockedUntil > Date.now()) return;
@@ -117,9 +162,31 @@ export default function LoginForm() {
       if (data.remember) localStorage.setItem('rememberedEmail', data.email);
       else localStorage.removeItem('rememberedEmail');
 
+      // Wait for session to be available (role is inside session.user)
+      let finalSession = await getSession();
+      // poll briefly if not yet available
+      const maxAttempts = 20;
+      let attempts = 0;
+      while (!finalSession?.user && attempts < maxAttempts) {
+        // small delay
+        await new Promise((r) => setTimeout(r, 150));
+        finalSession = await getSession();
+        attempts++;
+      }
+
+      // extract role (if missing, default to 'user') using safe helper
+      const userRole = getRoleFromSessionObj(finalSession) ?? getRoleFromSessionObj(session) ?? 'user';
+
+      const target = computeRedirectAfterLogin(userRole, redirectParamRaw);
+
       toast.success(`Welcome ${data.email}!`);
       setStep('success');
-      setTimeout(() => router.push(redirectPath), 1500);
+
+      // short delay to show success then redirect
+      setTimeout(() => {
+        // use replace to avoid stacking history
+        router.replace(target);
+      }, 1200);
 
     } catch (err: unknown) {
       recordLoginAttempt(data.email, false);
@@ -214,7 +281,7 @@ export default function LoginForm() {
 
         {/* Remember & Forgot */}
         <div className="flex items-center justify-between space-x-2">
-          <div className='flex items-center'>
+          <div className='flex items-center gap-2'>
             <input
               type="checkbox"
               id="remember"

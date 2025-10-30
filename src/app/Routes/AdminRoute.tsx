@@ -16,7 +16,7 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
       if (!user) {
         router.replace(`/auth?redirect=${encodeURIComponent(pathname)}`);
       } else if (!['System Admin', 'Admin'].includes(user.role)) {
-        router.replace(`/dashboard?redirect=${encodeURIComponent(pathname)}`);
+        router.replace(`/dashboard/admin/panel?redirect=${encodeURIComponent(pathname)}`);
       }
     }
   }, [user, loading, pathname, router]);
