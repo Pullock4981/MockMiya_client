@@ -6,7 +6,7 @@ import Lottie from 'lottie-react';
 import { ArrowLeft, User2, UserStar } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { getSession, signIn } from 'next-auth/react';
 
 import loginAnimation from '@/assets/lottie/login.json';
 import signupAnimation from '@/assets/lottie/signup.json';
@@ -15,6 +15,7 @@ import LoginForm from './LoginForm';
 import SignupFormComponent from './SignupForm'; // আলাদা SignupForm
 import GoogleLoginButton from './socialAuth/GoogleLogin';
 import { Button } from '@/components/ui/button';
+import { toast } from 'react-toastify';
 
 function AuthPageInner() {
   const searchParams = useSearchParams();
@@ -32,7 +33,21 @@ function AuthPageInner() {
   const tabX = activeTab === 'signin' ? '0%' : '100%';
   const handleSwitchToLogin = () => setActiveTab('signin');
 
-  // Programmatic login using next-auth credentials provider (same approach as LoginForm)
+
+  // Helper: safe extractor for role from a session-like object (avoids any)
+function getRoleFromSessionObj(sess: unknown): string | undefined {
+  if (!sess || typeof sess !== 'object') return undefined;
+  const s = sess as Record<string, unknown>;
+  const user = s.user;
+  if (!user || typeof user !== 'object') return undefined;
+  const u = user as Record<string, unknown>;
+  const role = u.role;
+  return typeof role === 'string' ? role : undefined;
+}
+
+
+
+  // Programmatic login using next-auth credentials provider
   const loginUser = async (email: string, password: string) => {
     setAutoError(null);
     setAutoLoading(true);
@@ -45,16 +60,33 @@ function AuthPageInner() {
       });
 
       if (!res || res.error) {
-        // show error from next-auth or fallback message
         setAutoError(res?.error ?? 'Login failed. Please check credentials.');
         setAutoLoading(false);
         return;
       }
 
-      // success -> redirect to dashboard (or use redirect query param if you want)
-      router.push('/dashboard');
+      // wait for session
+      let finalSession = await getSession();
+      const maxAttempts = 20;
+      let attempts = 0;
+      while (!finalSession?.user && attempts < maxAttempts) {
+        await new Promise((r) => setTimeout(r, 150));
+        finalSession = await getSession();
+        attempts++;
+      }
+
+      const userRole = getRoleFromSessionObj(finalSession) ?? 'user';
+
+      const target = userRole === 'Admin' || userRole === 'System Admin'
+        ? '/dashboard/admin/panel'
+        : '/dashboard';
+
+      toast(`Welcome ${email}!`);
+      router.replace(target);
+
     } catch (err: unknown) {
       setAutoError(err instanceof Error ? err.message : 'Login failed');
+    } finally {
       setAutoLoading(false);
     }
   };
@@ -68,7 +100,7 @@ function AuthPageInner() {
           className="inline-flex items-center space-x-2 text-green-400 hover:text-green-300 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          <span>Back to Home</span>
+          <Button variant={'outline'}>Back to Home</Button>
         </Link>
 
         <div className="bg-[#0f1412]/90 backdrop-blur-xl border border-green-900/50 p-8 rounded-3xl">
@@ -87,17 +119,15 @@ function AuthPageInner() {
             <div className="grid w-full grid-cols-2 relative bg-[#1a231f]/80 rounded-xl overflow-hidden border border-green-900/40">
               <button
                 onClick={() => setActiveTab('signin')}
-                className={`relative z-10 text-green-300 px-6 py-3 font-bold uppercase tracking-wide ${
-                  activeTab === 'signin' ? 'scale-105' : 'hover:text-green-200'
-                }`}
+                className={`relative z-10 text-green-300 px-6 py-3 font-bold uppercase tracking-wide ${activeTab === 'signin' ? 'scale-105' : 'hover:text-green-200'
+                  }`}
               >
                 Sign In
               </button>
               <button
                 onClick={() => setActiveTab('signup')}
-                className={`relative z-10 text-green-300 px-6 py-3 font-bold uppercase tracking-wide ${
-                  activeTab === 'signup' ? 'scale-105' : 'hover:text-green-200'
-                }`}
+                className={`relative z-10 text-green-300 px-6 py-3 font-bold uppercase tracking-wide ${activeTab === 'signup' ? 'scale-105' : 'hover:text-green-200'
+                  }`}
               >
                 Sign Up
               </button>

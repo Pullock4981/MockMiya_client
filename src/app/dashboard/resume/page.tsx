@@ -104,7 +104,7 @@ const UploadBanner: React.FC<{
         </div>
         <div className="text-left hidden md:block">
           <p className="font-semibold text-lg">Upload or Drag & Drop your resume</p>
-          <p className="text-sm text-muted-foreground mt-1 max-w-md">We accept PDF, DOC and DOCX files. Max 10MB. We’ll auto-fill your resume — you can edit after upload.</p>
+          <p className="text-sm text-muted-foreground mt-1 max-w-md">We accept PDF files. Max 10MB. We’ll auto-fill your resume — you can edit after upload.</p>
           <div className="mt-2">
             {uploading && currentFileName ? (
               <div className="space-y-1">
@@ -131,11 +131,11 @@ const UploadBanner: React.FC<{
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="hidden md:block text-sm text-muted-foreground">Accept: PDF, DOC, DOCX</div>
+        <div className="hidden md:block text-sm text-muted-foreground">Accept: PDF</div>
         <input
           ref={fileInputRef}
           type="file"
-          accept=".pdf,.doc,.docx"
+          accept=".pdf"
           className="hidden"
           onChange={(e) => handleFiles(e.target.files)}
         />

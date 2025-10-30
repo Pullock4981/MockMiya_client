@@ -17,7 +17,7 @@ const CTASection = () => {
           </div>
 
           {/* Headline */}
-          <h2 className="text-5xl lg:text-6xl font-bold mb-6">
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6">
             Ready to Land Your
             <span className="text-gradient block">Dream Tech Job?</span>
           </h2>

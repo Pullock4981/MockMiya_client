@@ -6,7 +6,7 @@ import Link from "next/link";
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-hero pt-16">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-hero pt-24 lg:pt-0">
       {/* Background glow effects */}
       <div className="absolute inset-0 bg-gradient-glow opacity-30"></div>
       <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
@@ -17,7 +17,7 @@ const HeroSection = () => {
           {/* Content */}
           <div className="space-y-8">
             <div className="space-y-4">
-              <div className="inline-flex items-center px-4 py-2 pt-24 md:pt-0 rounded-full bg-card border border-border text-sm text-foreground-secondary">
+              <div className="inline-flex items-center px-4 py-2 md:pt-0 rounded-full bg-card border border-border text-sm text-foreground-secondary">
                 <span className="w-2 h-2 bg-primary rounded-full mr-2 animate-pulse"></span>
                 AI-Powered Interview Platform
               </div>
