@@ -33,7 +33,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   const pathname = usePathname();
 
   // যেসব রুটে Navbar/Footer দেখানো হবে না
-  const noLayoutRoutes = ["/dashboard", "/auth", "/checkout"];
+  const noLayoutRoutes = ["/dashboard", "/auth", "/checkout", "/resume"];
 
   // চেক করি বর্তমান রুট ওইগুলোর মধ্যে পড়ে কিনা
   const hideLayout = noLayoutRoutes.some((path) =>
