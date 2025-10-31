@@ -46,7 +46,7 @@ export default function VideoInterviewSetup({ onStart }: Props) {
 
       {/* Configuration Card */}
       <div className="max-w-2xl mx-auto px-2 sm:px-0">
-        <Card className="border-[var(--border)] bg-[var(--card)] shadow-lg sm:shadow-xl rounded-xl sm:rounded-2xl overflow-hidden">
+        <div className="border-[var(--border)] bg-[var(--card)] shadow-lg sm:shadow-xl rounded-xl sm:rounded-2xl overflow-hidden">
           <CardHeader className="text-center p-4 sm:p-6 lg:p-8 bg-gradient-to-r from-[var(--primary)]/5 to-[var(--primary-light)]/5 border-b border-[var(--border)]">
             <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--card-foreground)] flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
               <div className="p-2 sm:p-3 bg-[var(--primary)] text-[var(--primary-foreground)] rounded-lg sm:rounded-xl">
@@ -151,7 +151,7 @@ export default function VideoInterviewSetup({ onStart }: Props) {
               Start Video Interview
             </Button>
           </CardContent>
-        </Card>
+        </div>
       </div>
     </div>
   )
