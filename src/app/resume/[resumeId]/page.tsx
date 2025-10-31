@@ -158,15 +158,6 @@ const ResumePageById = () => {
               >
                 <Download className="h-4 w-4" /> Export PDF
               </Button>
-
-              <Button
-                variant="default"
-                size="sm"
-                onClick={handleSaveThumbnail}
-                disabled={thumbnailGenerating}
-              >
-                {thumbnailGenerating ? "Generating Thumbnail..." : "Save Thumbnail"}
-              </Button>
             </div>
           </div>
 
