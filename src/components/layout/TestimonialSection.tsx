@@ -2,7 +2,7 @@ import { Star, Quote } from "lucide-react";
 
 const testimonials = [
   {
-    name: "Sarah Chen",
+    name: "Abdullah Sheikh",
     role: "Senior Frontend Developer",
     company: "Google",
     content: "MockMiya transformed my interview prep. The AI feedback was incredibly detailed and helped me identify areas I never knew I needed to improve. Landed my dream job in just 3 weeks!",
@@ -10,7 +10,7 @@ const testimonials = [
     avatar: "SC"
   },
   {
-    name: "Marcus Rodriguez",
+    name: "Shahin Naik",
     role: "Full Stack Engineer", 
     company: "Microsoft",
     content: "The mock interviews felt so realistic. The voice interview feature especially helped me gain confidence. The resume builder is also top-notch - created a perfect tech resume in minutes.",
@@ -18,7 +18,7 @@ const testimonials = [
     avatar: "MR"
   },
   {
-    name: "Emily Zhang",
+    name: "Jahangir Alam",
     role: "DevOps Engineer",
     company: "Amazon",
     content: "As someone who struggled with technical interviews, MockMiya was a game-changer. The coding challenges and real-time feedback helped me practice efficiently. Highly recommend!",
@@ -26,53 +26,46 @@ const testimonials = [
     avatar: "EZ"
   },
   {
-    name: "Alex Johnson",
-    role: "Backend Developer",
+    name: "Jahid Hossen",
+    role: "Frontend Developer",
     company: "Stripe",
     content: "The platform is incredibly intuitive and the AI is surprisingly accurate. It helped me prepare for system design questions and coding challenges. Worth every penny!",
     rating: 5,
     avatar: "AJ"
   },
     {
-    name: "Alex Johnson",
+    name: "Tauhidur Rahman",
     role: "Backend Developer",
-    company: "Stripe",
-    content: "The platform is incredibly intuitive and the AI is surprisingly accurate. It helped me prepare for system design questions and coding challenges. Worth every penny!",
+    company: "Brain Station 23",
+    content: "MockMiya was a game-changer for me! The AI interview sessions felt so realistic, and the instant feedback helped me fix my weak points. I gained so much confidence and cracked my first job interview!",
     rating: 5,
     avatar: "AJ"
   },
     {
-    name: "Alex Johnson",
-    role: "Backend Developer",
-    company: "Stripe",
-    content: "The platform is incredibly intuitive and the AI is surprisingly accurate. It helped me prepare for system design questions and coding challenges. Worth every penny!",
+    name: "Ashik Mahmud",
+    role: "Full Stack Developer",
+    company: "Programming Hero",
+    content: "I used MockMiya to prepare for my frontend interview. The feedback was so detailed and specific that I knew exactly what to improve. Got selected at my dream company within a month!",
     rating: 5,
     avatar: "AJ"
   },
     {
-    name: "Alex Johnson",
-    role: "Backend Developer",
-    company: "Stripe",
-    content: "The platform is incredibly intuitive and the AI is surprisingly accurate. It helped me prepare for system design questions and coding challenges. Worth every penny!",
+    name: "Mahir Mubtasim",
+    role: "Frontend Developer",
+    company: "Devskill",
+    content: "Honestly, I was nervous about interviews before using MockMiya. After just a few practice sessions, I noticed huge progress. The score and suggestions really guided me to perform better each time.",
     rating: 5,
     avatar: "AJ"
   },
     {
-    name: "Alex Johnson",
+    name: "Mohummad Hridoy",
     role: "Backend Developer",
-    company: "Stripe",
-    content: "The platform is incredibly intuitive and the AI is surprisingly accurate. It helped me prepare for system design questions and coding challenges. Worth every penny!",
-    rating: 5,
-    avatar: "AJ"
-  },
-    {
-    name: "Alex Johnson",
-    role: "Backend Developer",
-    company: "Stripe",
-    content: "The platform is incredibly intuitive and the AI is surprisingly accurate. It helped me prepare for system design questions and coding challenges. Worth every penny!",
+    company: "Reve Systems",
+    content: "MockMiya helped me overcome my fear of interviews. The AI questions were challenging but realistic, and the personalized feedback made all the difference. I finally landed a remote job!",
     rating: 5,
     avatar: "AJ"
   }
+
 ];
 
 const TestimonialsSection = () => {
@@ -111,7 +104,7 @@ const TestimonialsSection = () => {
               </div>
 
               {/* Content */}
-              <p className="text-foreground-secondary mb-6 leading-relaxed">
+              <p className="text-foreground-secondary mb-6 leading-relaxed h-50 overflow-hidden">
                 {testimonial.content}
               </p>
 
