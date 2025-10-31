@@ -3,7 +3,6 @@
 
 import React, { useRef, useEffect, useState, FC } from "react";
 import { useResume } from "@/hooks/useResume";
-import { useResumeThumbnail } from "@/hooks/useResumeThumbnail";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -24,6 +23,7 @@ import { ProfessionalLinksForm } from "./ProfessionalLinksForm";
 import { AdditionalInfoForm } from "./AdditionalInfoForm";
 import { AIReTouchForm } from "./AIReTouchForm";
 import { CertificationsForm } from "./CertificationsForm";
+import { useResumeThumbnailClient } from "@/hooks/useResumeThumbnail";
 
 // ---------------- PDF Overlay Component ----------------
 const ResumePrintOverlay = ({
@@ -91,7 +91,7 @@ export const ResumeForm: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null); // PDF Overlay
 
-  const { generateThumbnail, generating: thumbnailGenerating, error: thumbnailError } = useResumeThumbnail();
+  const { generateThumbnail, generating: thumbnailGenerating, error: thumbnailError } = useResumeThumbnailClient();
   const { currentStep, nextStep, previousStep, goToStep, getAISuggestions, resumeData, resumeId } = useResume();
 
   const formSteps: FormStepType[] = [
