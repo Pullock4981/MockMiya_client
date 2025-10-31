@@ -115,56 +115,56 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
 
   // matchMedia listener for mobile (force collapsed on mobile)
   useEffect(() => {
-  if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return;
 
-  const mq = window.matchMedia(MOBILE_QUERY);
+    const mq = window.matchMedia(MOBILE_QUERY);
 
-  const handleChange = (e: MediaQueryListEvent) => {
-    const matches = e.matches;
-    setIsMobile(matches);
+    const handleChange = (e: MediaQueryListEvent) => {
+      const matches = e.matches;
+      setIsMobile(matches);
 
-    if (matches) {
+      if (matches) {
+        setCollapsedState(true);
+        setWidth(70);
+        if (setCollapsedProp) setCollapsedProp(true);
+      } else {
+        if (collapsedProp === undefined) {
+          setCollapsedState(false);
+          setWidth(256);
+          if (setCollapsedProp) setCollapsedProp(false);
+        }
+      }
+    };
+
+    // initial check
+    setIsMobile(mq.matches);
+    if (mq.matches) {
       setCollapsedState(true);
       setWidth(70);
-      if (setCollapsedProp) setCollapsedProp(true);
     } else {
       if (collapsedProp === undefined) {
         setCollapsedState(false);
         setWidth(256);
-        if (setCollapsedProp) setCollapsedProp(false);
       }
     }
-  };
 
-  // initial check
-  setIsMobile(mq.matches);
-  if (mq.matches) {
-    setCollapsedState(true);
-    setWidth(70);
-  } else {
-    if (collapsedProp === undefined) {
-      setCollapsedState(false);
-      setWidth(256);
-    }
-  }
-
-  // modern API
-  if (mq.addEventListener) {
-    mq.addEventListener('change', handleChange);
-  } else {
-    // legacy Safari support
-    mq.addListener(handleChange);
-  }
-
-  return () => {
-    if (mq.removeEventListener) {
-      mq.removeEventListener('change', handleChange);
+    // modern API
+    if (mq.addEventListener) {
+      mq.addEventListener('change', handleChange);
     } else {
-      mq.removeListener(handleChange);
+      // legacy Safari support
+      mq.addListener(handleChange);
     }
-  };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, []);
+
+    return () => {
+      if (mq.removeEventListener) {
+        mq.removeEventListener('change', handleChange);
+      } else {
+        mq.removeListener(handleChange);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
 
   // Drag behaviour: disabled on mobile
@@ -291,10 +291,10 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
               const isActive = activeTab === item.id;
               return (
                 <Link key={item.id} href={item.path}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`w-full sidebar-button flex items-center rounded-lg px-3 py-2 text-sm transition-colors ${isActive ? ' bg-primary text-black' : ' hover:text-foreground hover:bg-primary/30'} ${collapsed ? 'justify-center' : ''}`}>
-                    <item.icon className="h-4 w-4" />
-                    {!collapsed && <span className="ml-3">{item.name}</span>}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full sidebar-button flex items-center rounded-lg px-3 py-2 text-sm transition-colors ${isActive ? ' bg-primary text-black' : ' hover:text-foreground hover:bg-primary/30'} ${collapsed ? 'justify-center' : ''}`}>
+                  <item.icon className="h-4 w-4" />
+                  {!collapsed && <span className="ml-3">{item.name}</span>}
                 </Link>
               );
             })}
@@ -317,10 +317,13 @@ const Sidebar = ({ collapsed: collapsedProp, setCollapsed: setCollapsedProp }: S
             </div>
           </div>
         )}
-        <Button variant="outline" size="sm" className="w-full hover:scale-105 transition-transform" onClick={handleLogout}>
-          <LogOut className="h-3 w-3 mr-2" />
-          {!collapsed && 'Sign Out'}
-        </Button>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-3 px-3 py-2 text-sm text-error hover:bg-warning/50 rounded-md hover:scale-105 transition-transform"
+        >
+          <LogOut className="w-4 h-4" />
+          Logout
+        </button>
       </div>
 
       {/* Drag Handle (disabled on mobile) */}
