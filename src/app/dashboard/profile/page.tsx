@@ -233,7 +233,7 @@ export default function Profile() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-green-800">Professional Profile</h1>
+          <h1 className="text-3xl font-bold ">Professional Profile</h1>
           <p className="text-muted-foreground mt-2">
             Manage your professional identity and career information
           </p>
@@ -247,7 +247,7 @@ export default function Profile() {
               <Button 
                 onClick={form.handleSubmit(onSubmit)} 
                 disabled={isSaving || !form.formState.isValid}
-                className="bg-green-600 hover:bg-green-700"
+                className=""
               >
                 {isSaving ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -260,7 +260,7 @@ export default function Profile() {
           ) : (
             <Button 
               onClick={() => setIsEditing(true)}
-              className="bg-green-600 hover:bg-green-700"
+              className=""
             >
               <Edit3 className="h-4 w-4 mr-2" />
               Edit Profile
@@ -272,9 +272,9 @@ export default function Profile() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Profile Overview Card */}
-          <Card className="border-green-200">
-            <CardHeader className="bg-green-50">
-              <CardTitle className="flex items-center text-green-800">
+          <Card className="">
+            <CardHeader className="">
+              <CardTitle className="flex items-center ">
                 <User className="h-5 w-5 mr-2" />
                 Profile Overview
               </CardTitle>
@@ -286,9 +286,9 @@ export default function Profile() {
               {/* Avatar & Basic Info */}
               <div className="flex flex-col sm:flex-row items-start gap-6">
                 <div className="flex flex-col items-center gap-4">
-                  <Avatar className="h-24 w-24 border-4 border-green-100 shadow-lg">
+                  <Avatar className="h-12 w-12 md:w-24 md:h-24 border-2 shadow-lg">
                     <AvatarImage src={userData?.profile?.avatar} alt={userData?.name || 'User avatar'} />
-                    <AvatarFallback className="text-xl bg-gradient-to-br from-green-500 to-green-600 text-white">
+                    <AvatarFallback className="text-xl bg-primary text-black">
                       {getUserInitials(userData?.name || session.user?.name || session.user?.email || 'U')}
                     </AvatarFallback>
                   </Avatar>
@@ -301,7 +301,7 @@ export default function Profile() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center text-sm font-semibold">
-                          <User className="h-4 w-4 mr-2 text-green-600" />
+                          <User className="h-4 w-4 mr-2 " />
                           Full Name *
                         </FormLabel>
                         <FormControl>
@@ -309,7 +309,7 @@ export default function Profile() {
                             placeholder="John Doe" 
                             {...field} 
                             disabled={!isEditing}
-                            className="border-green-200 focus:border-green-500"
+                            className=""
                           />
                         </FormControl>
                         <FormMessage />
@@ -320,7 +320,7 @@ export default function Profile() {
                   {/* Email Field - Read Only */}
                   <FormItem>
                     <FormLabel className="flex items-center text-sm font-semibold">
-                      <Mail className="h-4 w-4 mr-2 text-green-600" />
+                      <Mail className="h-4 w-4 mr-2" />
                       Email Address
                     </FormLabel>
                     <div className="relative">
@@ -328,13 +328,13 @@ export default function Profile() {
                         type={showEmail ? "text" : "password"}
                         value={session.user?.email || ''}
                         disabled
-                        className="pr-10 font-mono text-sm border-green-200"
+                        className="pr-10 font-mono text-sm"
                       />
                       <Button
                         type="button"
-                        variant="ghost"
+                        variant="secondary"
                         size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-green-600"
+                        className="absolute right-0 top-0 h-full px-3 py-2 cursor-pointer"
                         onClick={() => setShowEmail(!showEmail)}
                       >
                         {showEmail ? (
@@ -355,7 +355,7 @@ export default function Profile() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center text-sm font-semibold">
-                          <Phone className="h-4 w-4 mr-2 text-green-600" />
+                          <Phone className="h-4 w-4 mr-2 " />
                           Phone Number
                         </FormLabel>
                         <FormControl>
@@ -363,7 +363,7 @@ export default function Profile() {
                             placeholder="+1 (555) 123-4567" 
                             {...field} 
                             disabled={!isEditing}
-                            className="border-green-200 focus:border-green-500"
+                            className=""
                           />
                         </FormControl>
                         <FormMessage />
@@ -377,7 +377,7 @@ export default function Profile() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center text-sm font-semibold">
-                          <MapPin className="h-4 w-4 mr-2 text-green-600" />
+                          <MapPin className="h-4 w-4 mr-2" />
                           Location
                         </FormLabel>
                         <FormControl>
@@ -385,7 +385,7 @@ export default function Profile() {
                             placeholder="San Francisco, CA" 
                             {...field} 
                             disabled={!isEditing}
-                            className="border-green-200 focus:border-green-500"
+                            className=" "
                           />
                         </FormControl>
                         <FormMessage />
@@ -398,9 +398,9 @@ export default function Profile() {
           </Card>
 
           {/* Professional Details */}
-          <Card className="border-green-200">
-            <CardHeader className="bg-green-50">
-              <CardTitle className="flex items-center text-green-800">
+          <Card className="">
+            <CardHeader className="">
+              <CardTitle className="flex items-center ">
                 Professional Details
               </CardTitle>
               <CardDescription>
@@ -420,7 +420,7 @@ export default function Profile() {
                           placeholder="Senior Software Engineer" 
                           {...field} 
                           disabled={!isEditing}
-                          className="border-green-200 focus:border-green-500"
+                          className=""
                         />
                       </FormControl>
                       <FormMessage />
@@ -439,7 +439,7 @@ export default function Profile() {
                           placeholder="Tech Corporation Inc." 
                           {...field} 
                           disabled={!isEditing}
-                          className="border-green-200 focus:border-green-500"
+                          className=""
                         />
                       </FormControl>
                       <FormMessage />
@@ -459,7 +459,7 @@ export default function Profile() {
                         placeholder="Bachelor of Science in Computer Science" 
                         {...field} 
                         disabled={!isEditing}
-                        className="border-green-200 focus:border-green-500"
+                        className=""
                       />
                     </FormControl>
                     <FormMessage />
@@ -478,7 +478,7 @@ export default function Profile() {
                         placeholder="5+ years in software development" 
                         {...field} 
                         disabled={!isEditing}
-                        className="border-green-200 focus:border-green-500"
+                        className=""
                       />
                     </FormControl>
                     <FormMessage />
@@ -495,7 +495,7 @@ export default function Profile() {
                     <FormControl>
                       <Textarea
                         placeholder="Describe your professional background, skills, and career aspirations..."
-                        className="min-h-32 resize-none border-green-200 focus:border-green-500"
+                        className="min-h-32 resize-none"
                         {...field}
                         disabled={!isEditing}
                       />
@@ -517,7 +517,7 @@ export default function Profile() {
                     <FormControl>
                       <Textarea
                         placeholder="JavaScript, React, Node.js, TypeScript, Python, AWS, Docker..."
-                        className="border-green-200 focus:border-green-500"
+                        className=""
                         {...field}
                         disabled={!isEditing}
                       />
@@ -533,9 +533,9 @@ export default function Profile() {
           </Card>
 
           {/* Account Information */}
-          <Card className="border-green-200">
-            <CardHeader className="bg-green-50">
-              <CardTitle className="flex items-center text-green-800">
+          <Card className="">
+            <CardHeader className="">
+              <CardTitle className="flex items-center ">
                 Account Information
               </CardTitle>
               <CardDescription>
@@ -543,23 +543,23 @@ export default function Profile() {
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-green-50 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4  rounded-lg">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold flex items-center">
-                    <User className="h-4 w-4 mr-2 text-green-600" />
+                    <User className="h-4 w-4 mr-2 " />
                     User ID
                   </label>
-                  <Input value={userData?._id || userData?.id || 'N/A'} disabled className="font-mono text-xs border-green-200" />
+                  <Input value={userData?._id || userData?.id || 'N/A'} disabled className="font-mono text-xs " />
                 </div>
                 
                 <div className="space-y-2">
                   <label className="text-sm font-semibold">Account Role</label>
-                  <Input value={userData?.role || 'user'} disabled className="capitalize border-green-200" />
+                  <Input value={userData?.role || 'user'} disabled className="capitalize " />
                 </div>
                 
                 <div className="space-y-2">
                   <label className="text-sm font-semibold">Membership Type</label>
-                  <Input value={userData?.membershipType || "Free Tier"} disabled className="capitalize border-green-200" />
+                  <Input value={userData?.membershipType || "Free Tier"} disabled className="capitalize " />
                 </div>
                 
                 <div className="space-y-2">
@@ -567,7 +567,7 @@ export default function Profile() {
                   <Input 
                     value={userData?.isVerified ? "Verified" : "Pending Verification"} 
                     disabled 
-                    className="border-green-200"
+                    className=""
                   />
                 </div>
               </div>
@@ -575,13 +575,13 @@ export default function Profile() {
               <Separator className="my-6" />
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button variant="outline" className="flex-1 border-green-200 text-green-700 hover:bg-green-50">
+                <Button variant="outline" className="flex-1  ">
                   Change Password
                 </Button>
-                <Button variant="outline" className="flex-1 border-green-200 text-green-700 hover:bg-green-50">
+                <Button variant="outline" className="flex-1  ">
                   Two-Factor Authentication
                 </Button>
-                <Button variant="outline" className="flex-1 text-red-600 border-red-200 hover:text-red-700 hover:bg-red-50">
+                <Button variant="outline" className="flex-1">
                   Delete Account
                 </Button>
               </div>
