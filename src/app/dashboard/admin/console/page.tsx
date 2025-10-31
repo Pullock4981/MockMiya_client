@@ -30,7 +30,7 @@ const AdminConsole = () => {
           <CardContent>
             <div className="space-y-4">
               <div className="bg-black/90 rounded-lg p-4 font-mono text-sm">
-                <div className="text-green-primary">admin@mockmiya:~$ system status</div>
+                <div className="text-primary">admin@mockmiya:~$ system status</div>
                 <div className="text-white mt-2">
                   ✓ API Gateway: Running (Port 3000)<br />
                   ✓ Database: Connected (MongoDB)<br />
