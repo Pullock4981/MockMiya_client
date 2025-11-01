@@ -63,6 +63,7 @@ import { NextRequest, NextResponse } from "next/server";
 import puppeteerCore from "puppeteer-core";
 import chromium from "@sparticuz/chromium-min";
 import clientPromise from "@/context/MongoDB/mongodb";
+import { existsSync } from "fs";
 
 export const runtime = "nodejs";
 
@@ -91,13 +92,13 @@ async function getChromiumConfig() {
       } else if (platform === "win32") {
         executablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
         // Also check alternative Windows paths
-        if (!require('fs').existsSync(executablePath)) {
+        if (!existsSync(executablePath)) {
           executablePath = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";
         }
       } else {
         executablePath = "/usr/bin/google-chrome";
         // Also check other common Linux paths
-        if (!require('fs').existsSync(executablePath)) {
+        if (!existsSync(executablePath)) {
           executablePath = "/usr/bin/chromium-browser";
         }
       }
@@ -136,8 +137,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (process.env.NODE_ENV === "development") {
-      const fs = require('fs');
-      if (!fs.existsSync(config.executablePath)) {
+      if (!existsSync(config.executablePath)) {
         console.warn(`Chrome not found at: ${config.executablePath}`);
         return NextResponse.json(
           { 
