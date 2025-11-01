@@ -676,21 +676,17 @@ export async function POST(req: NextRequest) {
     let exePath: string | undefined;
 
     if (process.env.NODE_ENV === "production") {
-      // Production: puppeteer-core + serverless chromium
+      // ✅ Production: Use puppeteer-core + @sparticuz/chromium-min
       const chromiumImport = await import("@sparticuz/chromium-min");
       const chromium = chromiumImport.default;
-
       puppeteerModule = await import("puppeteer-core");
 
       exePath = await chromium.executablePath();
 
-      // ✅ Safety check for missing binary
-      if (!existsSync(exePath)) {
-        console.error("❌ Chromium binary missing at", exePath);
-        return NextResponse.json(
-          { success: false, message: "Chromium binary missing in serverless environment" },
-          { status: 500 }
-        );
+      // ✅ Dynamic fallback for Vercel /tmp (in case /var/task/... doesn’t exist)
+      if (!exePath || !existsSync(exePath)) {
+        console.warn("⚠️ chromium.executablePath() not found, using /tmp/chromium fallback");
+        exePath = "/tmp/chromium";
       }
 
       const headless: boolean = chromium.headless === "new" ? true : chromium.headless;
@@ -706,9 +702,9 @@ export async function POST(req: NextRequest) {
         defaultViewport: { width: 1200, height: 800 },
       };
 
-      console.log("Using serverless chromium at:", exePath);
+      console.log("🧠 Using serverless Chromium path:", exePath);
     } else {
-      // Local development
+      // ✅ Local development (Windows, macOS, Linux)
       puppeteerModule = await import("puppeteer-core");
 
       if (process.platform === "win32") {
@@ -725,11 +721,12 @@ export async function POST(req: NextRequest) {
       if (!existsSync(exePath)) {
         const envPath = process.env.CHROME_PATH;
         if (envPath && existsSync(envPath)) exePath = envPath;
-        else
+        else {
           return NextResponse.json(
             { success: false, message: "Local Chrome not found. Set CHROME_PATH env variable." },
             { status: 500 }
           );
+        }
       }
 
       launchOptions = {
@@ -745,11 +742,14 @@ export async function POST(req: NextRequest) {
         defaultViewport: { width: 1200, height: 800 },
       };
 
-      console.log("Using local Chrome at:", exePath);
+      console.log("🧩 Using local Chrome path:", exePath);
     }
 
-    // Launch browser
-    browser = await puppeteerModule.launch(launchOptions) as Browser;
+    // 🧠 Log final path before launching
+    console.log("🧠 Final chromium executable path:", exePath);
+
+    // 🚀 Launch browser
+    browser = (await puppeteerModule.launch(launchOptions)) as Browser;
 
     const page: Page = await browser.newPage();
     page.setDefaultTimeout(60000);
@@ -772,7 +772,7 @@ export async function POST(req: NextRequest) {
 
     console.log("✅ PDF generated, size:", pdfBuffer.length);
 
-    // Save PDF to MongoDB
+    // 💾 Save PDF to MongoDB
     const client = await clientPromise;
     const db = client.db("MockMiya");
     const collection = db.collection("resumes");
