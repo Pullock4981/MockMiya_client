@@ -4,12 +4,11 @@
   "private": true,
   "description": "AI-powered Resume Builder & Interview Simulator built with Next.js, React 19, and Google GenAI.",
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start",
-    "lint": "eslint",
-    "postinstall": "node scripts/install-chromium.js"
-  },
+  "dev": "next dev --turbopack",
+  "build": "node ./scripts/install-chromium.js && next build --turbopack",
+  "start": "next start",
+  "lint": "eslint"
+},
   "dependencies": {
     "@google/genai": "^1.20.0",
     "@google/generative-ai": "^0.24.1",
