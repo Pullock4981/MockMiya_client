@@ -514,53 +514,50 @@
 
 
 
-
-
-
 // src/app/resume/api/pdf/save-pdf/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import clientPromise from "@/context/MongoDB/mongodb";
 import { existsSync } from "fs";
+import type { Browser, Page, LaunchOptions } from "puppeteer-core";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
-  let browser: any = null;
+  let browser: Browser | null = null;
 
   try {
     const { html, resumeId }: { html?: string; resumeId?: string } = await req.json();
+
     if (!html || !resumeId) {
-      return NextResponse.json({ success: false, message: "HTML and resumeId are required" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "HTML and resumeId are required" },
+        { status: 400 }
+      );
     }
 
     console.log("🚀 Starting PDF generation...");
 
-    let puppeteer: any;
-    let launchOptions: any;
+    let launchOptions: LaunchOptions;
+    let puppeteerModule: typeof import("puppeteer-core");
 
     if (process.env.NODE_ENV === "production") {
-      // Vercel production: full puppeteer with bundled Chromium
-      puppeteer = await import("puppeteer");
+      // Vercel: full puppeteer
+      puppeteerModule = await import("puppeteer") as unknown as typeof import("puppeteer-core");
       launchOptions = {
         headless: true,
-        args: [
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--disable-dev-shm-usage",
-          "--disable-gpu",
-        ],
+        args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
         defaultViewport: { width: 1200, height: 800 },
       };
     } else {
-      // Local development: puppeteer-core with installed Chrome
-      puppeteer = await import("puppeteer-core");
-      const platform = process.platform;
+      // Local: puppeteer-core
+      puppeteerModule = await import("puppeteer-core");
       let executablePath = "";
 
-      if (platform === "win32") {
+      if (process.platform === "win32") {
         executablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
-        if (!existsSync(executablePath)) executablePath = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";
-      } else if (platform === "darwin") {
+        if (!existsSync(executablePath)) executablePath =
+          "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";
+      } else if (process.platform === "darwin") {
         executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
       } else {
         executablePath = "/usr/bin/google-chrome-stable";
@@ -583,15 +580,14 @@ export async function POST(req: NextRequest) {
           "--disable-dev-shm-usage",
           "--disable-gpu",
           "--single-process",
-          "--no-zygote",
-          "--no-first-run",
         ],
         defaultViewport: { width: 1200, height: 800 },
       };
     }
 
-    browser = await puppeteer.launch(launchOptions);
-    const page = await browser.newPage();
+    // Launch browser
+    browser = await puppeteerModule.launch(launchOptions) as Browser;
+    const page: Page = await browser.newPage();
     page.setDefaultTimeout(60000);
     page.setDefaultNavigationTimeout(60000);
 
@@ -599,11 +595,8 @@ export async function POST(req: NextRequest) {
     await page.setContent(html, { waitUntil: ["domcontentloaded", "networkidle0"] });
 
     console.log("⏳ Waiting for fonts inside browser...");
-    await page.evaluate(async () => {
-      if (document.fonts) await document.fonts.ready;
-    });
-
-    await new Promise(r => setTimeout(r, 1000)); // extra delay
+    await page.evaluate(async () => document.fonts?.ready);
+    await new Promise((r) => setTimeout(r, 1000));
 
     console.log("🖨️ Generating PDF...");
     const pdfBuffer = await page.pdf({
