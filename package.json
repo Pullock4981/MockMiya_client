@@ -29,6 +29,7 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tabs": "^1.1.13",
     "@sparticuz/chromium": "^141.0.0",
+    "@sparticuz/chromium-min": "^119.0.0",
     "@stripe/react-stripe-js": "^5.3.0",
     "@stripe/stripe-js": "^8.2.0",
     "@types/react-speech-recognition": "^3.9.6",
