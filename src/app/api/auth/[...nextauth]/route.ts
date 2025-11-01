@@ -321,7 +321,8 @@ interface AuthUser {
   role: string;
 }
 
-export const handler = NextAuth({
+// Create the NextAuth handler
+const authHandler = NextAuth({
   providers: [
     // ---------- GOOGLE LOGIN ----------
     GoogleProvider({
@@ -457,7 +458,5 @@ export const handler = NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
 });
 
-export { handler as GET, handler as POST };
-
-
-
+// ✅ FIXED: Export the individual HTTP methods directly
+export { authHandler as GET, authHandler as POST };

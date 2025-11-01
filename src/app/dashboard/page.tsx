@@ -162,7 +162,6 @@
 
 
 
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -209,9 +208,7 @@ type SafePieLabelRenderProps = {
   percent?: number | string;
 };
 
-interface OverviewProps {
-  setActiveTab: (tab: string) => void;
-}
+// Remove the OverviewProps interface since setActiveTab is handled by context
 
 type ApiResponse = {
   user: {
@@ -255,36 +252,34 @@ type ApiResponse = {
   }>;
 };
 
-
-const Dashboard = ({ setActiveTab }: OverviewProps) => {
+const Dashboard = () => { // Remove the props parameter
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [apiData, setApiData] = useState<ApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-  if (authLoading || !user) return;
+    if (authLoading || !user) return;
 
-  if (!apiData) { // 👈 already fetched কিনা চেক
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const email = encodeURIComponent(user.email);
-        const res = await axios.get<ApiResponse>(`/dashboard/api/overview?email=${email}`);
-        setApiData(res.data);
-      } catch (err) {
-        console.error(err);
-        setError('Failed to load dashboard data');
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!apiData) {
+      const fetchData = async () => {
+        try {
+          setLoading(true);
+          setError(null);
+          const email = encodeURIComponent(user.email);
+          const res = await axios.get<ApiResponse>(`/dashboard/api/overview?email=${email}`);
+          setApiData(res.data);
+        } catch (err) {
+          console.error(err);
+          setError('Failed to load dashboard data');
+        } finally {
+          setLoading(false);
+        }
+      };
 
-    fetchData();
-  }
-}, [user, authLoading]);
-
+      fetchData();
+    }
+  }, [user, authLoading, apiData]); // Added apiData to dependencies
 
   const renderCustomizedLabel = ({
     cx, cy, midAngle, innerRadius, outerRadius, percent,
