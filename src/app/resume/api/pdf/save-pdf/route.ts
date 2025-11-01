@@ -217,25 +217,26 @@
 
 
 
-
 // src/app/resume/api/pdf/save-pdf/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import puppeteerCore from "puppeteer-core";
+import puppeteer, { Browser, LaunchOptions, WaitForOptions } from "puppeteer-core";
 import chromium from "@sparticuz/chromium-min";
 import clientPromise from "@/context/MongoDB/mongodb";
 
 export const runtime = "nodejs";
 
-// Force Chromium to run in headless mode
-(chromium as any).setGraphicsMode = false;
+// Safe setGraphicsMode
+if ("setGraphicsMode" in chromium) {
+  (chromium as { setGraphicsMode: boolean }).setGraphicsMode = false;
+}
 
 export async function POST(req: NextRequest) {
-  let browser = null;
-  
+  let browser: Browser | null = null;
+
   try {
-    const body = await req.json();
-    const html = body?.html as string;
-    const resumeId = body?.resumeId as string;
+    const body: { html?: string; resumeId?: string } = await req.json();
+    const html = body.html;
+    const resumeId = body.resumeId;
 
     if (!html || !resumeId) {
       return NextResponse.json(
@@ -246,118 +247,108 @@ export async function POST(req: NextRequest) {
 
     console.log("🚀 Starting PDF generation...");
 
-    let executablePath: string;
-    let args: string[];
+    // Ensure executablePath is always a string
+    const executablePath: string =
+      process.env.NODE_ENV === "production"
+        ? (await (chromium as { executablePath: () => Promise<string> }).executablePath())
+        : getLocalChromePath();
 
-    if (process.env.NODE_ENV === "production") {
-      // Production: Use @sparticuz/chromium-min
-      executablePath = await chromium.executablePath();
-      args = chromium.args;
-    } else {
-      // Development: Use local Chrome
-      executablePath = getLocalChromePath();
-      args = [
-        "--no-sandbox",
-        "--disable-setuid-sandbox", 
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-        "--no-first-run",
-        "--no-zygote",
-        "--single-process",
-      ];
-    }
+    const args: string[] =
+      process.env.NODE_ENV === "production"
+        ? ((chromium as { args: string[] }).args ?? [])
+        : [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--no-first-run",
+            "--no-zygote",
+            "--single-process",
+          ];
 
-    console.log("🔧 Browser config:", {
-      executablePath: executablePath?.substring(0, 50) + '...',
-      environment: process.env.NODE_ENV
-    });
+    console.log("🔧 Browser config:", { executablePath, env: process.env.NODE_ENV });
 
-    // Launch browser
-    browser = await puppeteerCore.launch({
+    const launchOptions: LaunchOptions = {
       args,
       executablePath,
-      headless: chromium.headless === "new" ? true : Boolean(chromium.headless),
-    });
+      headless: true,
+      defaultViewport: { width: 1200, height: 800 },
+    };
 
+    browser = await puppeteer.launch(launchOptions);
     const page = await browser.newPage();
 
-    // Set timeouts
-    page.setDefaultTimeout(30000);
-    page.setDefaultNavigationTimeout(30000);
+    page.setDefaultTimeout(60000);
+    page.setDefaultNavigationTimeout(60000);
 
     console.log("📄 Setting HTML content...");
-    
-    // Set content and wait
-    await page.setContent(html, { 
-      waitUntil: "networkidle0" as any
-    });
+    const waitUntilOptions: WaitForOptions = { waitUntil: "networkidle0" };
+    await page.setContent(html, waitUntilOptions);
 
-    console.log("⏳ Waiting for resources...");
-    
-    // Wait for fonts
+    console.log("⏳ Waiting for fonts and resources...");
     await page.evaluate(async () => {
-      await (document as any).fonts?.ready;
+      const doc = document as Document & { fonts?: FontFaceSet };
+      if (doc.fonts) await doc.fonts.ready;
     });
 
-    // Additional wait
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((r) => setTimeout(r, 750));
 
     console.log("🖨️ Generating PDF...");
-    
-    // Generate PDF
-    const pdfBuffer = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      preferCSSPageSize: true,
-      margin: { top: "10px", bottom: "10px", left: "10px", right: "10px" },
-    });
+// Generate PDF
+const pdfResult = await page.pdf({
+  format: "A4",
+  printBackground: true,
+  preferCSSPageSize: true,
+  margin: { top: "10px", bottom: "10px", left: "10px", right: "10px" },
+});
+
+// Convert to Buffer — works whether pdfResult is Buffer or Uint8Array
+const pdfBuffer = Buffer.from(pdfResult);
+
+console.log("✅ PDF generated, size:", pdfBuffer.length);
+
+
+if (!Buffer.isBuffer(pdfBuffer)) throw new Error("PDF generation returned unexpected type");
 
     console.log("✅ PDF generated, size:", pdfBuffer.length);
 
-    const nodeBuffer = Buffer.isBuffer(pdfBuffer) ? pdfBuffer : Buffer.from(pdfBuffer);
-
     console.log("💾 Saving to MongoDB...");
-    
-    // Save to MongoDB
     const client = await clientPromise;
     const db = client.db("MockMiya");
     const collection = db.collection("resumes");
 
     await collection.updateOne(
       { id: resumeId },
-      { 
-        $set: { 
-          pdf: nodeBuffer, 
+      {
+        $set: {
+          pdf: pdfBuffer,
           pdfGeneratedAt: new Date(),
-          pdfSize: nodeBuffer.length
-        } 
+          pdfSize: pdfBuffer.length,
+        },
       },
       { upsert: true }
     );
 
     console.log("🎉 PDF saved successfully!");
 
-    // FIX: Type assertion for Buffer to BodyInit
-    return new NextResponse(nodeBuffer as unknown as BodyInit, {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
+      status: 200,
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="resume-${resumeId}.pdf"`,
-        "Content-Length": nodeBuffer.length.toString(),
+        "Content-Length": String(pdfBuffer.length),
       },
     });
-
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("❌ PDF generation error:", error);
-    
     return NextResponse.json(
       {
         success: false,
         message: "Failed to generate PDF",
-        detail: error instanceof Error ? error.message : 'Unknown error',
+        detail: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     );
-    
   } finally {
     if (browser) {
       try {
@@ -371,18 +362,16 @@ export async function POST(req: NextRequest) {
 }
 
 function getLocalChromePath(): string {
-  if (process.env.CHROME_PATH) {
-    return process.env.CHROME_PATH;
-  }
+  if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
 
   switch (process.platform) {
-    case 'win32':
-      return 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-    case 'darwin':
-      return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-    case 'linux':
-      return '/usr/bin/google-chrome';
+    case "win32":
+      return "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+    case "darwin":
+      return "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+    case "linux":
+      return "/usr/bin/google-chrome-stable";
     default:
-      return '/usr/bin/chromium-browser';
+      return "/usr/bin/chromium-browser";
   }
 }
