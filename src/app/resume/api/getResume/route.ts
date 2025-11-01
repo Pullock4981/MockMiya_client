@@ -2,7 +2,7 @@ import clientPromise from "@/context/MongoDB/mongodb";
 import { NextRequest, NextResponse } from "next/server";
 import { logAdminActivity } from "@/lib/logAdminActivity";
 
-// Define interfaces for resume structure
+// --- Resume Type Definitions ---
 interface PersonalInfo {
   firstName?: string;
   lastName?: string;
@@ -38,94 +38,88 @@ interface Certification {
   name?: string;
 }
 
-interface Resume {
-  personalInfo?: PersonalInfo;
-  skills?: Skill[] | string[];
-  workExperience?: WorkExperience[];
-  education?: Education[];
-  projects?: Project[];
-  certifications?: Certification[] | string[];
+export interface Resume {
   id?: string;
   userEmail?: string;
   resumeStatus?: string;
   updatedAt?: Date;
+  personalInfo?: PersonalInfo;
+  skills?: Skill[];
+  workExperience?: WorkExperience[];
+  education?: Education[];
+  projects?: Project[];
+  certifications?: Certification[];
+  [key: string]: unknown; // fallback for other fields in DB
 }
 
-// Function to extract text from resume data
+// --- Extract text function ---
 function extractResumeText(resume: Resume): string {
   if (!resume) return "";
-  
+
   let resumeText = "";
-  
+
   // Personal Info
   if (resume.personalInfo) {
     const { firstName, lastName, jobTitle, email, summary } = resume.personalInfo;
-    resumeText += `Name: ${firstName || ''} ${lastName || ''}\n`;
-    resumeText += `Title: ${jobTitle || ''}\n`;
-    resumeText += `Email: ${email || ''}\n`;
-    resumeText += `Summary: ${summary || ''}\n\n`;
+    resumeText += `Name: ${firstName || ""} ${lastName || ""}\n`;
+    resumeText += `Title: ${jobTitle || ""}\n`;
+    resumeText += `Email: ${email || ""}\n`;
+    resumeText += `Summary: ${summary || ""}\n\n`;
   }
-  
+
   // Skills
-  if (resume.skills && Array.isArray(resume.skills)) {
+  if (Array.isArray(resume.skills)) {
     resumeText += "SKILLS:\n";
-    resume.skills.forEach((skill: Skill | string) => {
-      if (typeof skill === 'string') {
-        resumeText += `- ${skill}\n`;
-      } else {
-        resumeText += `- ${skill.name || ''} (${skill.level || 'Proficient'})\n`;
-      }
+    resume.skills.forEach((skill: Skill) => {
+      resumeText += `- ${skill.name || ""} (${skill.level || "Proficient"})\n`;
     });
     resumeText += "\n";
   }
-  
+
   // Work Experience
-  if (resume.workExperience && Array.isArray(resume.workExperience)) {
+  if (Array.isArray(resume.workExperience)) {
     resumeText += "WORK EXPERIENCE:\n";
     resume.workExperience.forEach((exp: WorkExperience) => {
-      resumeText += `- ${exp.position || exp.title || ''} at ${exp.company || ''}\n`;
-      resumeText += `  ${exp.description || ''}\n`;
+      resumeText += `- ${exp.position || exp.title || ""} at ${exp.company || ""}\n`;
+      resumeText += `  ${exp.description || ""}\n`;
     });
     resumeText += "\n";
   }
-  
+
   // Education
-  if (resume.education && Array.isArray(resume.education)) {
+  if (Array.isArray(resume.education)) {
     resumeText += "EDUCATION:\n";
     resume.education.forEach((edu: Education) => {
-      resumeText += `- ${edu.degree || ''} from ${edu.institution || ''}\n`;
+      resumeText += `- ${edu.degree || ""} from ${edu.institution || ""}\n`;
     });
     resumeText += "\n";
   }
-  
+
   // Projects
-  if (resume.projects && Array.isArray(resume.projects)) {
+  if (Array.isArray(resume.projects)) {
     resumeText += "PROJECTS:\n";
     resume.projects.forEach((project: Project) => {
-      resumeText += `- ${project.name || ''}: ${project.description || ''}\n`;
-      if (project.technologies && Array.isArray(project.technologies)) {
-        resumeText += `  Technologies: ${project.technologies.join(', ')}\n`;
+      resumeText += `- ${project.name || ""}: ${project.description || ""}\n`;
+      if (Array.isArray(project.technologies)) {
+        resumeText += `  Technologies: ${project.technologies.join(", ")}\n`;
       }
     });
     resumeText += "\n";
   }
-  
+
   // Certifications
-  if (resume.certifications && Array.isArray(resume.certifications)) {
+  if (Array.isArray(resume.certifications)) {
     resumeText += "CERTIFICATIONS:\n";
-    resume.certifications.forEach((cert: Certification | string) => {
-      if (typeof cert === 'string') {
-        resumeText += `- ${cert}\n`;
-      } else {
-        resumeText += `- ${cert.name || ''}\n`;
-      }
+    resume.certifications.forEach((cert: Certification) => {
+      resumeText += `- ${cert.name || ""}\n`;
     });
     resumeText += "\n";
   }
-  
+
   return resumeText;
 }
 
+// --- Main Route ---
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -137,7 +131,7 @@ export async function GET(req: NextRequest) {
     const db = client.db("MockMiya");
     const resumes = db.collection<Resume>("resumes");
 
-    let resume: Resume | null;
+    let resume: Resume | null = null;
 
     if (resumeId) {
       resume = await resumes.findOne({ id: resumeId });
@@ -147,7 +141,6 @@ export async function GET(req: NextRequest) {
         { sort: { updatedAt: -1 } }
       );
     } else if (userEmail) {
-      // Get the most recent resume (complete or draft)
       resume = await resumes.findOne(
         { userEmail },
         { sort: { updatedAt: -1 } }
@@ -160,17 +153,15 @@ export async function GET(req: NextRequest) {
     }
 
     if (!resume) {
-      return NextResponse.json({ success: false, message: "Resume not found" }, { status: 404 });
+      return NextResponse.json(
+        { success: false, message: "Resume not found" },
+        { status: 404 }
+      );
     }
 
-    // Extract resume text from structured data
+    // Extract text safely
     const resumeText = extractResumeText(resume);
-    
-    // Add the extracted text to the response
-    const resumeWithText = {
-      ...resume,
-      resumeText: resumeText
-    };
+    const resumeWithText = { ...resume, resumeText };
 
     await logAdminActivity(
       `Fetched resume: ${resumeId ?? "latest draft"}`,
@@ -180,14 +171,19 @@ export async function GET(req: NextRequest) {
       { resumeId, resumeTextLength: resumeText.length }
     );
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       resume: resumeWithText,
-      resumeText: resumeText 
+      resumeText,
     });
   } catch (err) {
-    const error = err as Error;
-    await logAdminActivity(`Error fetching resume: ${error.message}`, "error", "resume", null);
+    await logAdminActivity(
+      `Error fetching resume: ${(err as Error).message}`,
+      "error",
+      "resume",
+      null
+    );
+
     return NextResponse.json(
       { success: false, message: "Server error while fetching resume" },
       { status: 500 }

@@ -643,7 +643,6 @@
 
 
 
-
 // src/app/resume/api/pdf/save-pdf/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import clientPromise from "@/context/MongoDB/mongodb";
