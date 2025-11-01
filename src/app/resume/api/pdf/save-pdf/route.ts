@@ -376,44 +376,190 @@
 
 
 
+// import { NextRequest, NextResponse } from "next/server";
+// import puppeteer, { Browser, WaitForOptions } from "puppeteer-core";
+// import chromium from "@sparticuz/chromium-min";
+// import clientPromise from "@/context/MongoDB/mongodb";
+// import { existsSync } from "fs";
+
+// export const runtime = "nodejs";
+
+// export async function POST(req: NextRequest) {
+//   let browser: Browser | null = null;
+
+//   try {
+//     const { html, resumeId }: { html?: string; resumeId?: string } = await req.json();
+
+//     if (!html || !resumeId) {
+//       return NextResponse.json(
+//         { success: false, message: "HTML and resumeId are required" },
+//         { status: 400 }
+//       );
+//     }
+
+//     console.log("🚀 Starting PDF generation...");
+
+//     let executablePath: string;
+//     let args: string[];
+
+//     if (process.env.NODE_ENV === "production") {
+//       // Production on Vercel: use sparticuz chromium
+//       executablePath = await chromium.executablePath();
+//       args = chromium.args ?? [];
+//     } else {
+//       // Local development: use installed Chrome
+//       const platform = process.platform;
+//       if (platform === "win32") {
+//         executablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+//         if (!existsSync(executablePath)) {
+//           executablePath = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";
+//         }
+//       } else if (platform === "darwin") {
+//         executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+//       } else {
+//         executablePath = "/usr/bin/google-chrome-stable";
+//         if (!existsSync(executablePath)) executablePath = "/usr/bin/chromium-browser";
+//       }
+
+//       if (!existsSync(executablePath)) {
+//         return NextResponse.json(
+//           { success: false, message: "Local Chrome not found. Set CHROME_PATH env variable." },
+//           { status: 500 }
+//         );
+//       }
+
+//       args = [
+//         "--no-sandbox",
+//         "--disable-setuid-sandbox",
+//         "--disable-dev-shm-usage",
+//         "--disable-gpu",
+//         "--single-process",
+//         "--no-zygote",
+//         "--no-first-run",
+//       ];
+//     }
+
+//     browser = await puppeteer.launch({
+//       args,
+//       executablePath,
+//       headless: true,
+//       defaultViewport: { width: 1200, height: 800 },
+//     });
+
+//     const page = await browser.newPage();
+//     page.setDefaultTimeout(60000);
+//     page.setDefaultNavigationTimeout(60000);
+
+//     console.log("📄 Setting HTML content...");
+//     await page.setContent(html, { waitUntil: ["domcontentloaded", "networkidle0"] });
+
+//     console.log("⏳ Waiting for fonts...");
+//     await page.evaluate(async () => {
+//       if (document.fonts) await document.fonts.ready;
+//     });
+//     await new Promise(r => setTimeout(r, 1000));
+
+//     console.log("🖨️ Generating PDF...");
+//     const pdfBuffer = await page.pdf({
+//       format: "A4",
+//       printBackground: true,
+//       preferCSSPageSize: true,
+//       margin: { top: "10px", bottom: "10px", left: "10px", right: "10px" },
+//     });
+
+//     console.log("✅ PDF generated, size:", pdfBuffer.length);
+
+//     // Save to MongoDB
+//     const client = await clientPromise;
+//     const db = client.db("MockMiya");
+//     const collection = db.collection("resumes");
+
+//     await collection.updateOne(
+//       { id: resumeId },
+//       {
+//         $set: {
+//           pdf: pdfBuffer,
+//           pdfGeneratedAt: new Date(),
+//           pdfSize: pdfBuffer.length,
+//         },
+//       },
+//       { upsert: true }
+//     );
+
+//     return new NextResponse(new Uint8Array(pdfBuffer), {
+//       status: 200,
+//       headers: {
+//         "Content-Type": "application/pdf",
+//         "Content-Disposition": `attachment; filename="resume-${resumeId}.pdf"`,
+//         "Content-Length": String(pdfBuffer.length),
+//       },
+//     });
+//   } catch (err: unknown) {
+//     console.error("❌ PDF generation error:", err);
+//     return NextResponse.json(
+//       { success: false, message: "Failed to generate PDF", detail: err instanceof Error ? err.message : String(err) },
+//       { status: 500 }
+//     );
+//   } finally {
+//     if (browser) {
+//       try {
+//         await browser.close();
+//         console.log("🔒 Browser closed");
+//       } catch (closeError) {
+//         console.error("Error closing browser:", closeError);
+//       }
+//     }
+//   }
+// }
+
+
+
+
+
+
+// src/app/resume/api/pdf/save-pdf/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import puppeteer, { Browser, WaitForOptions } from "puppeteer-core";
-import chromium from "@sparticuz/chromium-min";
 import clientPromise from "@/context/MongoDB/mongodb";
 import { existsSync } from "fs";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
-  let browser: Browser | null = null;
+  let browser: any = null;
 
   try {
     const { html, resumeId }: { html?: string; resumeId?: string } = await req.json();
-
     if (!html || !resumeId) {
-      return NextResponse.json(
-        { success: false, message: "HTML and resumeId are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: "HTML and resumeId are required" }, { status: 400 });
     }
 
     console.log("🚀 Starting PDF generation...");
 
-    let executablePath: string;
-    let args: string[];
+    let puppeteer: any;
+    let launchOptions: any;
 
     if (process.env.NODE_ENV === "production") {
-      // Production on Vercel: use sparticuz chromium
-      executablePath = await chromium.executablePath();
-      args = chromium.args ?? [];
+      // Vercel production: full puppeteer with bundled Chromium
+      puppeteer = await import("puppeteer");
+      launchOptions = {
+        headless: true,
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-gpu",
+        ],
+        defaultViewport: { width: 1200, height: 800 },
+      };
     } else {
-      // Local development: use installed Chrome
+      // Local development: puppeteer-core with installed Chrome
+      puppeteer = await import("puppeteer-core");
       const platform = process.platform;
+      let executablePath = "";
+
       if (platform === "win32") {
         executablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
-        if (!existsSync(executablePath)) {
-          executablePath = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";
-        }
+        if (!existsSync(executablePath)) executablePath = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";
       } else if (platform === "darwin") {
         executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
       } else {
@@ -428,24 +574,23 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      args = [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-        "--single-process",
-        "--no-zygote",
-        "--no-first-run",
-      ];
+      launchOptions = {
+        headless: true,
+        executablePath,
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-gpu",
+          "--single-process",
+          "--no-zygote",
+          "--no-first-run",
+        ],
+        defaultViewport: { width: 1200, height: 800 },
+      };
     }
 
-    browser = await puppeteer.launch({
-      args,
-      executablePath,
-      headless: true,
-      defaultViewport: { width: 1200, height: 800 },
-    });
-
+    browser = await puppeteer.launch(launchOptions);
     const page = await browser.newPage();
     page.setDefaultTimeout(60000);
     page.setDefaultNavigationTimeout(60000);
@@ -453,11 +598,12 @@ export async function POST(req: NextRequest) {
     console.log("📄 Setting HTML content...");
     await page.setContent(html, { waitUntil: ["domcontentloaded", "networkidle0"] });
 
-    console.log("⏳ Waiting for fonts...");
+    console.log("⏳ Waiting for fonts inside browser...");
     await page.evaluate(async () => {
       if (document.fonts) await document.fonts.ready;
     });
-    await new Promise(r => setTimeout(r, 1000));
+
+    await new Promise(r => setTimeout(r, 1000)); // extra delay
 
     console.log("🖨️ Generating PDF...");
     const pdfBuffer = await page.pdf({
@@ -469,20 +615,14 @@ export async function POST(req: NextRequest) {
 
     console.log("✅ PDF generated, size:", pdfBuffer.length);
 
-    // Save to MongoDB
+    // Save PDF to MongoDB
     const client = await clientPromise;
     const db = client.db("MockMiya");
     const collection = db.collection("resumes");
 
     await collection.updateOne(
       { id: resumeId },
-      {
-        $set: {
-          pdf: pdfBuffer,
-          pdfGeneratedAt: new Date(),
-          pdfSize: pdfBuffer.length,
-        },
-      },
+      { $set: { pdf: pdfBuffer, pdfGeneratedAt: new Date(), pdfSize: pdfBuffer.length } },
       { upsert: true }
     );
 
@@ -501,13 +641,6 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   } finally {
-    if (browser) {
-      try {
-        await browser.close();
-        console.log("🔒 Browser closed");
-      } catch (closeError) {
-        console.error("Error closing browser:", closeError);
-      }
-    }
+    if (browser) await browser.close().catch(console.error);
   }
 }
