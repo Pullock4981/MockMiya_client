@@ -151,7 +151,7 @@ const AdminPanel = () => {
     const total = Math.max(0, Math.floor(stats.performanceMetrics.monthlyRequests));
     const base = Math.floor(total / 12) || 1;
     return Array.from({ length: 12 }).map((_, i) => {
-      const variability = Math.round(base * (0.5 + Math.abs(Math.sin(i + 1))) ); // lightweight variance
+      const variability = Math.round(base * (0.5 + Math.abs(Math.sin(i + 1)))); // lightweight variance
       return { month: new Date(0, i).toLocaleString(undefined, { month: 'short' }), requests: Math.max(0, variability) };
     });
   };
@@ -272,11 +272,18 @@ const AdminPanel = () => {
                   <CustomSkeleton height={96} />
                 ) : (
                   <ResponsiveContainer width="100%" height={96}>
-                    <RadialBarChart innerRadius="70%" outerRadius="100%" data={[{ name: 'uptime', value: stats.systemHealth.uptimePercent, fill: '#10B981' }]} startAngle={180} endAngle={-180}>
+                    <RadialBarChart
+                      innerRadius="70%"
+                      outerRadius="100%"
+                      data={[{ name: 'uptime', value: stats.systemHealth.uptimePercent, fill: '#10B981' }]}
+                      startAngle={180}
+                      endAngle={-180}
+                    >
                       <RadialBar background dataKey="value" cornerRadius={12} />
-                      <Legend />
                     </RadialBarChart>
                   </ResponsiveContainer>
+
+
                 )}
               </div>
               <div className="pl-4">
@@ -285,7 +292,7 @@ const AdminPanel = () => {
                 ) : (
                   <>
                     <p className="text-3xl font-bold">{stats.systemHealth.uptimePercent}%</p>
-                    <p className="text-xs text-muted-foreground">{stats.systemHealth.status}</p>
+                    <p className="text-xs text-muted-foreground mt-4">{stats.systemHealth.status}</p>
                   </>
                 )}
               </div>
@@ -354,7 +361,7 @@ const AdminPanel = () => {
                       <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                       <YAxis />
                       <Tooltip />
-                      <Bar dataKey="value" fill="#10B981" radius={[6,6,0,0]} barSize={16} />
+                      <Bar dataKey="value" fill="#10B981" radius={[6, 6, 0, 0]} barSize={16} />
                     </BarChart>
                   </ResponsiveContainer>
 
@@ -398,7 +405,7 @@ const AdminPanel = () => {
                   ].map((item, i) => (
                     <div key={i} className="flex items-center justify-between text-sm">
                       <span>{item.label}</span>
-                      <Badge className={["Healthy", "Connected", "Running", "Available", "Processing"].includes(item.status) ? "bg-green-primary" : "bg-yellow-400"}>
+                      <Badge className={["Healthy", "Connected", "Running", "Available", "Processing"].includes(item.status) ? "bg-green-600" : "bg-yellow-400"}>
                         {item.status}
                       </Badge>
                     </div>
@@ -410,7 +417,7 @@ const AdminPanel = () => {
 
           {/* Recent Activities */}
           <Card className="card-glass h-100 overflow-y-auto">
-            <CardHeader className="sticky -top-4 bg-card py-4">
+            <CardHeader className="sticky -top-6 bg-card py-2">
               <CardTitle>Recent Activities</CardTitle>
               <CardDescription>Latest admin actions</CardDescription>
             </CardHeader>

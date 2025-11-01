@@ -17,10 +17,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import PrivateRoute from "@/app/Routes/PrivateRoute";
 import { useAuth } from "@/context/AuthContext/AuthContext";
+import { Textarea } from "@/components/ui/textarea";
 
 
 interface AnalysisResult {
@@ -113,10 +113,11 @@ const JobAnalyzer = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex gap-4">
-              <Input
-                placeholder="Paste job posting URL or description..."
+            <div className="flex flex-col gap-4 items-center justify-between">
+              <Textarea
+                placeholder="Paste job description..."
                 value={jobText}
+                className="overflow-y-auto h-36"
                 onChange={(e) => setJobText(e.target.value)}
               />
               <Button className="btn-hero" onClick={handleAnalyze} disabled={loading}>
@@ -127,53 +128,6 @@ const JobAnalyzer = () => {
             </div>
           </CardContent>
         </Card>
-
-        {/* Analysis Result from DB */}
-        {/* {analysis && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="card-glass">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <TrendingUp className="h-5 w-5 mr-2" /> Match Score
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center space-y-4">
-                  <div className="text-4xl font-bold text-green-primary">
-                    {analysis.matchScore || 0}%
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {analysis.matchScore > 70 ? "Strong match" : "Needs improvement"}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="card-glass">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <AlertCircle className="h-5 w-5 mr-2" /> Key Skills
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {analysis.skillsHave?.map((s: string, i: number) => (
-                    <div key={i} className="flex justify-between">
-                      <span>{s}</span>
-                      <Badge className="bg-green-primary">✓ Have</Badge>
-                    </div>
-                  ))}
-                  {analysis.skillsMissing?.map((s: string, i: number) => (
-                    <div key={i} className="flex justify-between">
-                      <span>{s}</span>
-                      <Badge variant="destructive">✗ Missing</Badge>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )} */}
 
                 {/* Analysis Results */}
         {analysis && (
@@ -232,7 +186,7 @@ const JobAnalyzer = () => {
                   {analysis.skillsHave?.map((skill: string, idx: number) => (
                     <div key={idx} className="flex items-center justify-between">
                       <span className="text-sm">{skill}</span>
-                      <Badge variant="default" className="bg-green-primary">
+                      <Badge variant="secondary" className="bg-green-primary">
                         ✓ Have
                       </Badge>
                     </div>

@@ -14,6 +14,17 @@ interface FormData {
   experience: string;
 }
 
+// Define custom error types
+interface ApiError extends Error {
+  status?: number;
+  details?: string;
+}
+
+interface ErrorWithName extends Error {
+  name: string;
+  message: string;
+}
+
 export default function HomePage() {
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -152,7 +163,12 @@ export default function HomePage() {
         }));
         
         console.error("❌ API Error Response:", errorData);
-        throw new Error(errorData.details || errorData.error || `Request failed with status ${response.status}`);
+        const apiError: ApiError = new Error(
+          errorData.details || errorData.error || `Request failed with status ${response.status}`
+        );
+        apiError.status = response.status;
+        apiError.details = errorData.details;
+        throw apiError;
       }
 
       const data = await response.json();
@@ -177,28 +193,34 @@ export default function HomePage() {
         `Your ${words}-word professional cover letter is ready.`
       );
 
-    } catch (error: any) {
-      console.error("❌ Cover letter generation failed:", {
-        name: error?.name,
-        message: error?.message
-      });
+    } catch (error: unknown) {
+      console.error("❌ Cover letter generation failed:", error);
 
       closeLoadingAlert();
 
       let userMessage = "Failed to generate cover letter. Please try again.";
       
-      if (error.name === 'AbortError') {
-        userMessage = "Request timed out. Please check your connection and try again.";
-      } else if (error.message.includes("Model unavailable")) {
-        userMessage = "AI service is temporarily unavailable. Please try again in a few minutes.";
-      } else if (error.message.includes("Service limit reached")) {
-        userMessage = "We've reached our service limit for now. Please try again later.";
-      } else if (error.message.includes("Access denied")) {
-        userMessage = "Service configuration issue. Please contact support if this continues.";
-      } else if (error.message.includes("Network error") || error.message.includes("Failed to fetch")) {
-        userMessage = "Network connection issue. Please check your internet and try again.";
-      } else if (error.message.includes("Empty response")) {
-        userMessage = "The AI didn't generate any content. Please try again with different details.";
+      // Type-safe error handling
+      if (error instanceof Error) {
+        const errorWithName = error as ErrorWithName;
+        
+        if (errorWithName.name === 'AbortError') {
+          userMessage = "Request timed out. Please check your connection and try again.";
+        } else if (errorWithName.message.includes("Model unavailable")) {
+          userMessage = "AI service is temporarily unavailable. Please try again in a few minutes.";
+        } else if (errorWithName.message.includes("Service limit reached")) {
+          userMessage = "We've reached our service limit for now. Please try again later.";
+        } else if (errorWithName.message.includes("Access denied")) {
+          userMessage = "Service configuration issue. Please contact support if this continues.";
+        } else if (errorWithName.message.includes("Network error") || errorWithName.message.includes("Failed to fetch")) {
+          userMessage = "Network connection issue. Please check your internet and try again.";
+        } else if (errorWithName.message.includes("Empty response")) {
+          userMessage = "The AI didn't generate any content. Please try again with different details.";
+        }
+      } else {
+        // Handle non-Error objects
+        console.error("Unknown error type:", error);
+        userMessage = "An unexpected error occurred. Please try again.";
       }
 
       showErrorAlert("Generation Failed", userMessage);
@@ -301,9 +323,9 @@ export default function HomePage() {
 
   return (
     <PrivateRoute>
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 py-8 px-4 sm:px-6 lg:px-8">
+      <main className="min-h-screen px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 sm:p-8">
+          <div className="bg-card rounded-2xl shadow-xl p-6 sm:p-8">
             {/* Header */}
             <div className="text-center mb-8">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-2xl mb-4">
@@ -404,7 +426,7 @@ export default function HomePage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-12 font-semibold bg-primary rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <div className="flex items-center justify-center gap-2">

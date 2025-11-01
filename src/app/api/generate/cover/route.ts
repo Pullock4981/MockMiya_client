@@ -9,6 +9,18 @@ interface RequestBody {
   experience: string;
 }
 
+// Define error types
+interface GoogleAIError extends Error {
+  status?: number;
+  code?: string;
+}
+
+interface ApiError extends Error {
+  status?: number;
+  details?: string;
+  code?: string;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body: RequestBody = await req.json();
@@ -93,57 +105,78 @@ Generate a compelling cover letter that will help the applicant stand out:`;
         length: text.length 
       });
 
-    } catch (apiError: any) {
-      console.error("❌ Google AI API error:", {
-        message: apiError.message,
-        status: apiError.status,
-        code: apiError.code
-      });
+    } catch (apiError: unknown) {
+      console.error("❌ Google AI API error:", apiError);
 
-      // Handle specific Google AI errors
-      if (apiError.message?.includes("404") || apiError.message?.includes("not found")) {
-        return NextResponse.json({ 
-          error: "Model unavailable",
-          details: "The AI model is currently unavailable. Please try a different model or try again later."
-        }, { status: 503 });
+      let errorMessage = "AI service error";
+      let errorDetails = "The AI service encountered an error. Please try again.";
+      let statusCode = 500;
+
+      // Type-safe error handling for Google AI API errors
+      if (apiError instanceof Error) {
+        const error = apiError as GoogleAIError;
+        
+        if (error.message?.includes("404") || error.message?.includes("not found")) {
+          errorMessage = "Model unavailable";
+          errorDetails = "The AI model is currently unavailable. Please try a different model or try again later.";
+          statusCode = 503;
+        } else if (error.message?.includes("quota") || error.message?.includes("rate limit")) {
+          errorMessage = "Service limit reached";
+          errorDetails = "API quota exceeded. Please try again later.";
+          statusCode = 429;
+        } else if (error.message?.includes("permission") || error.message?.includes("403")) {
+          errorMessage = "Access denied";
+          errorDetails = "API access denied. Please check your API configuration.";
+          statusCode = 403;
+        } else if (error.message?.includes("network") || error.message?.includes("fetch")) {
+          errorMessage = "Network error";
+          errorDetails = "Unable to connect to the AI service. Please check your internet connection.";
+          statusCode = 503;
+        }
+
+        console.error("🔍 Google AI API error details:", {
+          message: error.message,
+          status: error.status,
+          code: error.code
+        });
+      } else {
+        console.error("🔍 Unknown Google AI API error type:", typeof apiError);
       }
 
-      if (apiError.message?.includes("quota") || apiError.message?.includes("rate limit")) {
-        return NextResponse.json({ 
-          error: "Service limit reached",
-          details: "API quota exceeded. Please try again later."
-        }, { status: 429 });
-      }
-
-      if (apiError.message?.includes("permission") || apiError.message?.includes("403")) {
-        return NextResponse.json({ 
-          error: "Access denied",
-          details: "API access denied. Please check your API configuration."
-        }, { status: 403 });
-      }
-
-      throw apiError; // Re-throw to be caught by outer catch
+      return NextResponse.json({ 
+        error: errorMessage,
+        details: errorDetails
+      }, { status: statusCode });
     }
 
-  } catch (err: any) {
-    console.error("❌ API Route Error:", {
-      name: err?.name,
-      message: err?.message,
-      stack: err?.stack?.split('\n')[0] // Only first line of stack for brevity
-    });
+  } catch (err: unknown) {
+    console.error("❌ API Route Error:", err);
 
     let errorMessage = "Service temporarily unavailable";
     let errorDetails = "We're experiencing technical difficulties. Please try again in a few moments.";
     let statusCode = 500;
 
-    if (err instanceof SyntaxError) {
-      errorMessage = "Invalid request data";
-      errorDetails = "The request data is not properly formatted.";
-      statusCode = 400;
-    } else if (err.message?.includes("fetch") || err.name === "TypeError") {
-      errorMessage = "Network error";
-      errorDetails = "Unable to connect to the AI service. Please check your internet connection.";
-      statusCode = 503;
+    // Type-safe error handling for outer catch block
+    if (err instanceof Error) {
+      const error = err as ApiError;
+      
+      if (err instanceof SyntaxError) {
+        errorMessage = "Invalid request data";
+        errorDetails = "The request data is not properly formatted.";
+        statusCode = 400;
+      } else if (error.message?.includes("fetch") || err.name === "TypeError") {
+        errorMessage = "Network error";
+        errorDetails = "Unable to connect to the AI service. Please check your internet connection.";
+        statusCode = 503;
+      }
+
+      console.error("🔍 API Route error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack?.split('\n')[0] // Only first line of stack for brevity
+      });
+    } else {
+      console.error("🔍 Unknown API Route error type:", typeof err);
     }
 
     return NextResponse.json({ 

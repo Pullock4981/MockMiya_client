@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "description": "AI-powered Resume Builder & Interview Simulator built with Next.js, React 19, and Google GenAI.",
-  "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start",
-    "lint": "eslint"
-  },
+"scripts": {
+  "dev": "next dev --turbopack",
+  "build": "next build --turbopack",
+  "start": "next start",
+  "lint": "eslint",
+  "postinstall": "node scripts/install-chromium.js"
+},
   "dependencies": {
     "@google/genai": "^1.20.0",
     "@google/generative-ai": "^0.24.1",
@@ -27,9 +28,11 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.6",
+    "@radix-ui/react-tabs": "^1.1.13",
+    "@sparticuz/chromium": "^141.0.0",
+    "@sparticuz/chromium-min": "^119.0.0",
     "@stripe/react-stripe-js": "^5.3.0",
     "@stripe/stripe-js": "^8.2.0",
-    "@types/react-speech-recognition": "^3.9.6",
     "axios": "^1.12.2",
     "base64-js": "^1.5.1",
     "bcryptjs": "^3.0.2",
@@ -60,6 +63,7 @@
     "pdf2json": "^4.0.0",
     "pdfjs-dist": "^5.4.296",
     "puppeteer": "^24.3.0",
+    "puppeteer-core": "^24.27.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.65.0",

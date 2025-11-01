@@ -17,7 +17,7 @@ import { exportResumeHandler } from "@/utils/exportResume";
 import { ResumeNavbar } from "@/components/resumePreview/ResumeNavbar";
 import { ResumeForm } from "@/components/forms/ResumeForms/ResumeForm";
 import { useAuth } from "@/context/AuthContext/AuthContext";
-import { useResumeThumbnail } from "@/hooks/useResumeThumbnail";
+import { useResumeThumbnailClient } from "@/hooks/useResumeThumbnail";
 
 const ResumePageById = () => {
   const params = useParams();
@@ -28,7 +28,7 @@ const ResumePageById = () => {
   const { user } = useAuth();
   const userEmail = user?.email ?? null;
 
-  const { generateThumbnail, generating: thumbnailGenerating } = useResumeThumbnail();
+  const { generateThumbnail, generating: thumbnailGenerating } = useResumeThumbnailClient();
 
   const [initialData, setInitialData] = useState<ResumeData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -157,15 +157,6 @@ const ResumePageById = () => {
                 className="flex items-center gap-2"
               >
                 <Download className="h-4 w-4" /> Export PDF
-              </Button>
-
-              <Button
-                variant="default"
-                size="sm"
-                onClick={handleSaveThumbnail}
-                disabled={thumbnailGenerating}
-              >
-                {thumbnailGenerating ? "Generating Thumbnail..." : "Save Thumbnail"}
               </Button>
             </div>
           </div>
