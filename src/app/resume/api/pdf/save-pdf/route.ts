@@ -818,11 +818,11 @@
 
 
 
-
 // src/app/resume/api/pdf/save-pdf/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import clientPromise from "@/context/MongoDB/mongodb";
-import { existsSync } from "fs";
+import fs from "fs";
+import path from "path";
 import type { Browser, Page, LaunchOptions } from "puppeteer-core";
 
 export const runtime = "nodejs";
@@ -842,28 +842,28 @@ export async function POST(req: NextRequest) {
 
     console.log("🚀 Starting PDF generation...");
 
-    let launchOptions: LaunchOptions = {
-      headless: true,
-      args: [],
-      defaultViewport: { width: 1200, height: 800 },
-    };
-
+    let launchOptions: LaunchOptions = { headless: true, args: [], defaultViewport: { width: 1200, height: 800 } };
     let puppeteerModule: typeof import("puppeteer-core");
     let exePath: string | undefined;
 
     if (process.env.NODE_ENV === "production") {
-      // 🟢 Production (Vercel)
+      // 🟢 Production (Vercel serverless)
       const chromiumImport = await import("@sparticuz/chromium-min");
       const chromium = chromiumImport.default;
       puppeteerModule = await import("puppeteer-core");
 
-      exePath = await chromium.executablePath();
+      const tmpPath = "/tmp/chromium";
+      exePath = tmpPath;
 
-      if (!exePath || !existsSync(exePath)) {
-        console.warn(
-          "⚠️ Chromium binary not found in /var/task — falling back to /tmp/chromium"
-        );
-        exePath = "/tmp/chromium"; // fallback for serverless runtime
+      // Copy Chromium binary to /tmp if missing
+      if (!fs.existsSync(tmpPath)) {
+        const buildBin = await chromium.executablePath(); // binary at build-time
+        if (!fs.existsSync(buildBin)) {
+          console.error("❌ Chromium binary missing at build-time");
+          return NextResponse.json({ success: false, message: "Chromium binary missing" }, { status: 500 });
+        }
+        fs.cpSync(buildBin, tmpPath, { recursive: true });
+        console.log("✅ Copied Chromium to /tmp/chromium for runtime");
       }
 
       launchOptions = {
@@ -878,24 +878,24 @@ export async function POST(req: NextRequest) {
       };
 
       console.log("🧠 Using serverless Chromium at:", exePath);
+
     } else {
       // 🟢 Local development
       puppeteerModule = await import("puppeteer-core");
 
       if (process.platform === "win32") {
         exePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
-        if (!existsSync(exePath))
-          exePath = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";
+        if (!fs.existsSync(exePath)) exePath = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";
       } else if (process.platform === "darwin") {
         exePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
       } else {
         exePath = "/usr/bin/google-chrome-stable";
-        if (!existsSync(exePath)) exePath = "/usr/bin/chromium-browser";
+        if (!fs.existsSync(exePath)) exePath = "/usr/bin/chromium-browser";
       }
 
-      if (!existsSync(exePath)) {
+      if (!fs.existsSync(exePath)) {
         const envPath = process.env.CHROME_PATH;
-        if (envPath && existsSync(envPath)) exePath = envPath;
+        if (envPath && fs.existsSync(envPath)) exePath = envPath;
         else
           return NextResponse.json(
             { success: false, message: "Local Chrome not found. Set CHROME_PATH env variable." },
@@ -919,7 +919,7 @@ export async function POST(req: NextRequest) {
       console.log("🧩 Using local Chrome at:", exePath);
     }
 
-    console.log("🧠 Final chromium executable path:", exePath);
+    console.log("🧠 Final Chromium executable path:", exePath);
 
     // Launch Puppeteer
     browser = (await puppeteerModule.launch(launchOptions)) as Browser;
@@ -966,11 +966,7 @@ export async function POST(req: NextRequest) {
   } catch (err: unknown) {
     console.error("❌ PDF generation error:", err);
     return NextResponse.json(
-      {
-        success: false,
-        message: "Failed to generate PDF",
-        detail: err instanceof Error ? err.message : String(err),
-      },
+      { success: false, message: "Failed to generate PDF", detail: err instanceof Error ? err.message : String(err) },
       { status: 500 }
     );
   } finally {
